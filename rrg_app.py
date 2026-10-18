@@ -428,6 +428,8 @@ def quad_style(col):
 UP = ("Improving", "Leading")
 UP_FG, DOWN_FG = QUAD_FG["Leading"], QUAD_FG["Lagging"]
 WEEK_DOWN = "#e8893a"   # orange: weekly-down strip on the Strategy chart
+WEEK_STRIP = {"Leading": "#2e7d4f", "Improving": "#8fd19e",   # dark / light green
+              "Weakening": WEEK_DOWN, "Lagging": WEEK_DOWN}
 
 
 def phases(df):
@@ -973,15 +975,18 @@ def strategy_figure(daily, asof, book, value, bh_value, start, capital):
     fig = make_subplots(rows=3, cols=1, shared_xaxes=True, row_heights=[0.5, 0.06, 0.44],
                         vertical_spacing=0.05,
                         subplot_titles=("PVR INOX close — green bands = money in the stock",
-                                        "Weekly RRG on each day — green = Improving / Leading (up), "
-                                        "orange = Weakening / Lagging (down)",
+                                        "Weekly RRG on each day — dark green = Leading, "
+                                        "light green = Improving, orange = Weakening / Lagging",
                                         "Your %s over time — strategy vs buy & hold" % inr(capital)))
     # weekly strip: the weekly position as it was known that day (what the buy rule checks)
     wk = asof[(asof.index >= seg.index[0]) & (asof.index <= seg.index[-1])]
-    for p in phases(wk):
-        x1 = p["next"] if p["next"] is not None else wk.index[-1] + pd.Timedelta(days=1)
-        fig.add_shape(type="rect", xref="x2", yref="y2 domain", x0=p["start"], x1=x1, y0=0, y1=1,
-                      fillcolor=UP_FG if p["up"] else WEEK_DOWN, opacity=0.85, line_width=0)
+    # one block per run of the same quadrant; the two down quadrants share orange
+    run_id = (wk["Quadrant"] != wk["Quadrant"].shift()).cumsum()
+    runs = [(g.index[0], g["Quadrant"].iloc[0]) for _, g in wk.groupby(run_id)]
+    for i, (x0, q) in enumerate(runs):
+        x1 = runs[i + 1][0] if i + 1 < len(runs) else wk.index[-1] + pd.Timedelta(days=1)
+        fig.add_shape(type="rect", xref="x2", yref="y2 domain", x0=x0, x1=x1, y0=0, y1=1,
+                      fillcolor=WEEK_STRIP[q], opacity=0.9, line_width=0)
     fig.add_trace(go.Scatter(
         x=wk.index, y=[0.5] * len(wk), mode="markers", marker=dict(size=8, opacity=0),
         showlegend=False, customdata=wk[["Quadrant", "RS_Ratio", "RS_Momentum"]].to_numpy(),
