@@ -573,25 +573,33 @@ SINCE_2024 = "Since Jan 2024"
 # ---- sidebar ----------------------------------------------------------------
 with st.sidebar:
     st.header("Settings")
-    tf = st.radio("Timeframe", ["Daily", "Weekly", "Both"], horizontal=True,
-                  help="Both: the daily and weekly RRG side by side, moved by one slider.")
-    cfg = TF["Daily" if tf == "Both" else tf]
+    tf = st.radio("Timeframe", ["Daily", "Weekly", "Both", "Strategy"], horizontal=True,
+                  help="Both: the daily and weekly RRG side by side, moved by one slider. "
+                       "Strategy: buy/sell signals and every past trade.")
+    cfg = TF["Daily" if tf in ("Both", "Strategy") else tf]
     if st.button("Refresh data now", width="stretch"):
         get_closes.clear()
-    window = st.select_slider("Slider covers", options=[SINCE_2024] + cfg["windows"],
-                              value=SINCE_2024, key="window_" + tf,
-                              format_func=lambda v: v if v == SINCE_2024
-                              else "last %d %s" % (v, cfg["units"]))
-    if tf == "Both":
-        tail_n = st.slider("Daily trail (sessions)", 5, 60, TF["Daily"]["tail"], key="tail_bd")
-        tail_w = st.slider("Weekly trail (weeks)", 5, 60, TF["Weekly"]["tail"], key="tail_bw")
+    if tf == "Strategy":
+        bt_from = st.date_input("Backtest from", value=CYCLES_FROM.date(),
+                                min_value=datetime(2010, 1, 1).date(), key="bt_from")
+        cost = st.number_input("Cost per buy / sell (%)", min_value=0.0, max_value=2.0,
+                               value=0.0, step=0.05, format="%.2f",
+                               help="Brokerage + taxes, charged on each side of every trade.")
     else:
-        tail_n = st.slider("Trail length (%s)" % cfg["units"], 5, 60, cfg["tail"],
-                           key="tail_" + tf)
-    fixed_axes = st.toggle("Fixed axes while sliding", value=False,
-                           help="Off: each date is framed like the static chart. "
-                                "On: one scale for the whole slider, so movement is "
-                                "comparable between dates.")
+        window = st.select_slider("Slider covers", options=[SINCE_2024] + cfg["windows"],
+                                  value=SINCE_2024, key="window_" + tf,
+                                  format_func=lambda v: v if v == SINCE_2024
+                                  else "last %d %s" % (v, cfg["units"]))
+        if tf == "Both":
+            tail_n = st.slider("Daily trail (sessions)", 5, 60, TF["Daily"]["tail"], key="tail_bd")
+            tail_w = st.slider("Weekly trail (weeks)", 5, 60, TF["Weekly"]["tail"], key="tail_bw")
+        else:
+            tail_n = st.slider("Trail length (%s)" % cfg["units"], 5, 60, cfg["tail"],
+                               key="tail_" + tf)
+        fixed_axes = st.toggle("Fixed axes while sliding", value=False,
+                               help="Off: each date is framed like the static chart. "
+                                    "On: one scale for the whole slider, so movement is "
+                                    "comparable between dates.")
     auto = st.toggle("Auto-refresh during market hours", value=True,
                      help="Re-downloads every 5 minutes while NSE is open "
                           "(Mon-Fri 09:15-15:30 IST).")
@@ -831,9 +839,227 @@ def both_page():
     formula_note("daily periods are sessions, weekly periods are weeks")
 
 
+# ---- strategy: weekly up + daily turns up -> buy; daily turns down -> sell --
+def pct(v):
+    """Signed percent, without a misleading "-0.0%" for tiny moves."""
+    return "%+.1f%%" % v if abs(v) >= 0.05 else "0.0%"
+
+
+def backtest(daily, asof, start, cost_pct):
+    """Runs the rules day by day from `start`, using only what was known that day.
+
+    Buy  : the daily RRG moves from Weakening/Lagging into Improving/Leading, and the
+           weekly RRG (as it stood that day, week so far) is Improving/Leading.
+    Sell : the daily RRG moves from Improving/Leading into Weakening/Lagging.
+    Fills at that day's close; cost_pct is charged on the buy and on the sell."""
+    q = daily["Quadrant"]
+    up = q.isin(UP)
+    prev_q = q.shift(1)
+    prev_up = prev_q.isin(UP)
+    w_q = asof["Quadrant"].reindex(daily.index)
+    w_up = w_q.isin(UP)
+    close = daily["Close"]
+    c = cost_pct / 100.0
+
+    trades, skipped, pos = [], [], None
+    for d in daily.index[daily.index >= start]:
+        if pos is None and up[d] and not prev_up[d] and pd.notna(prev_q[d]):
+            if w_up[d]:
+                pos = dict(buy=d, buy_px=close[d], weekly=w_q[d], frm=prev_q[d], into=q[d])
+            else:
+                skipped.append(dict(date=d, weekly=w_q[d], frm=prev_q[d], into=q[d]))
+        elif pos is not None and not up[d] and prev_up[d]:
+            trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=q[d], open=False))
+            pos = None
+    if pos is not None:
+        trades.append(dict(pos, sell=None, sell_px=close.iloc[-1], exit_into=None, open=True))
+
+    for t in trades:
+        t["ret"] = 100 * ((t["sell_px"] * (1 - c)) / (t["buy_px"] * (1 + c)) - 1)
+        end = t["sell"] if t["sell"] is not None else daily.index[-1]
+        t["held"] = int(((daily.index > t["buy"]) & (daily.index <= end)).sum())
+
+    # value of 100 invested: follows the stock only while a trade is open
+    seg = close[close.index >= start]
+    ret = seg.pct_change().fillna(0.0)
+    held = pd.Series(False, index=seg.index)
+    for t in trades:
+        end = t["sell"] if t["sell"] is not None else seg.index[-1]
+        held[(seg.index > t["buy"]) & (seg.index <= end)] = True
+    factor = 1 + ret.where(held, 0.0)
+    for t in trades:
+        factor[t["buy"]] *= 1 / (1 + c)
+        if t["sell"] is not None:
+            factor[t["sell"]] *= 1 - c
+    equity = 100 * factor.cumprod()
+    hold = 100 * seg / seg.iloc[0]
+    return trades, skipped, equity, hold, held
+
+
+def strategy_figure(daily, trades, equity, hold, start):
+    seg = daily[daily.index >= start]
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, row_heights=[0.62, 0.38],
+                        vertical_spacing=0.06,
+                        subplot_titles=("PVR INOX close — green bands = in a trade",
+                                        "Value of ₹100 — strategy vs buying and holding"))
+    for t in trades:
+        end = t["sell"] if t["sell"] is not None else seg.index[-1]
+        # plain shape: add_vrect does not draw on these date subplots
+        fig.add_shape(type="rect", xref="x", yref="y domain", x0=t["buy"], x1=end, y0=0, y1=1,
+                      fillcolor=QUAD_FG["Leading"], opacity=0.14, line_width=0, layer="below")
+    fig.add_trace(go.Scatter(x=seg.index, y=seg["Close"], name="Close", line=dict(color=INK_2, width=1.4),
+                             hovertemplate="%{x|%a %d %b %Y}<br>₹%{y:.2f}<extra></extra>"), row=1, col=1)
+    fig.add_trace(go.Scatter(
+        x=[t["buy"] for t in trades], y=[t["buy_px"] for t in trades], mode="markers", name="Buy",
+        marker=dict(symbol="triangle-up", size=13, color=QUAD_FG["Leading"],
+                    line=dict(color=SURFACE, width=1)),
+        hovertext=["<b>BUY #%d</b> %s<br>₹%.2f<br>weekly %s, daily %s → %s"
+                   % (i + 1, t["buy"].strftime("%a %d %b %Y"), t["buy_px"], t["weekly"], t["frm"], t["into"])
+                   for i, t in enumerate(trades)], hoverinfo="text"), row=1, col=1)
+    sells = [(i, t) for i, t in enumerate(trades) if t["sell"] is not None]
+    fig.add_trace(go.Scatter(
+        x=[t["sell"] for _, t in sells], y=[t["sell_px"] for _, t in sells], mode="markers", name="Sell",
+        marker=dict(symbol="triangle-down", size=13, color=QUAD_FG["Lagging"],
+                    line=dict(color=SURFACE, width=1)),
+        hovertext=["<b>SELL #%d</b> %s<br>₹%.2f<br>daily → %s<br>trade %+.1f%%"
+                   % (i + 1, t["sell"].strftime("%a %d %b %Y"), t["sell_px"], t["exit_into"], t["ret"])
+                   for i, t in sells], hoverinfo="text"), row=1, col=1)
+    fig.add_trace(go.Scatter(x=equity.index, y=equity, name="Strategy", line=dict(color=SERIES, width=2),
+                             hovertemplate="%{x|%d %b %Y}<br>Strategy ₹%{y:.1f}<extra></extra>"), row=2, col=1)
+    fig.add_trace(go.Scatter(x=hold.index, y=hold, name="Buy & hold", line=dict(color=INK_3, width=1.5, dash="dot"),
+                             hovertemplate="%{x|%d %b %Y}<br>Buy & hold ₹%{y:.1f}<extra></extra>"), row=2, col=1)
+    fig.add_hline(y=100, line_color=GRID, line_width=1, row=2, col=1)
+    fig.update_layout(height=640, margin=dict(l=65, r=20, t=75, b=10), hovermode="closest",
+                      plot_bgcolor=SURFACE, paper_bgcolor=SURFACE, font=dict(color=INK_2),
+                      legend=dict(orientation="h", y=0.995, yanchor="top", yref="container",
+                                  x=0))
+    fig.update_annotations(font=dict(size=13, color=INK_1), x=0, xanchor="left")
+    fig.update_xaxes(gridcolor=GRID, dtick="M3", tickformat="%b %Y")
+    fig.update_yaxes(gridcolor=GRID)
+    return fig
+
+
+def status_box(color, title, lines):
+    st.markdown(
+        "<div style='border-left:6px solid %s;background:%s;padding:14px 18px;border-radius:6px'>"
+        "<div style='font-size:1.45rem;font-weight:700;color:%s'>%s</div>"
+        "<div style='color:%s;margin-top:4px;line-height:1.6'>%s</div></div>"
+        % (color, SURFACE if color == INK_3 else color + "14", color, title, INK_1, "<br>".join(lines)),
+        unsafe_allow_html=True)
+
+
+def strategy_page():
+    daily, source, fetched = get_rrg("Daily")
+    closes, _, _ = get_closes()
+    asof = weekly_asof(closes)
+    now = datetime.now(IST)
+    prov = latest_is_provisional(daily, "Daily", now)
+    start = max(pd.Timestamp(bt_from), daily.index[1], asof.index[0])
+
+    header("strategy", source, fetched, now,
+           "today's signal is provisional until the 15:30 close" if prov else "signals are final")
+    st.caption("**Buy** when the daily RRG moves from Weakening/Lagging into Improving/Leading "
+               "while the weekly RRG is in Improving/Leading.  **Sell** when the daily RRG moves "
+               "from Improving/Leading into Weakening/Lagging.  Trades at that day's close.")
+
+    trades, skipped, equity, hold, held = backtest(daily, asof, start, cost)
+    last_day = daily.index[-1]
+    dq, wq = daily["Quadrant"].iloc[-1], asof["Quadrant"].iloc[-1]
+    ok = lambda q: "✅" if q in UP else "❌"
+    state_lines = ["Weekly now: %s <b style='color:%s'>%s</b>  ·  Daily now: %s <b style='color:%s'>%s</b>"
+                   % (ok(wq), QUAD_FG[wq], wq, ok(dq), QUAD_FG[dq], dq)]
+    open_t = trades[-1] if trades and trades[-1]["open"] else None
+    sold_today = trades and trades[-1]["sell"] == last_day
+
+    if open_t and open_t["buy"] == last_day:
+        status_box(QUAD_FG["Leading"], "▲ BUY signal today — %s" % last_day.strftime("%a %d %b %Y"),
+                   ["Daily moved %s → %s with weekly in %s. Buy at about ₹%.2f."
+                    % (open_t["frm"], open_t["into"], open_t["weekly"], open_t["buy_px"])] + state_lines)
+    elif open_t:
+        status_box(QUAD_FG["Leading"], "HOLD — in a trade since %s" % open_t["buy"].strftime("%a %d %b %Y"),
+                   ["Bought at ₹%.2f, now ₹%.2f (%s, %d sessions)."
+                    % (open_t["buy_px"], open_t["sell_px"], pct(open_t["ret"]), open_t["held"]),
+                    "Sell when the daily moves into Weakening or Lagging (daily RS-Momentum %.2f, "
+                    "sell below 100)." % daily["RS_Momentum"].iloc[-1]] + state_lines)
+    elif sold_today:
+        t = trades[-1]
+        status_box(QUAD_FG["Lagging"], "▼ SELL signal today — %s" % last_day.strftime("%a %d %b %Y"),
+                   ["Daily moved into %s. Sell at about ₹%.2f (trade %+.1f%%)."
+                    % (t["exit_into"], t["sell_px"], t["ret"])] + state_lines)
+    else:
+        need = []
+        if wq not in UP:
+            need.append("the weekly to be in Improving or Leading")
+        need.append("the daily to move from Weakening/Lagging into Improving/Leading"
+                    if dq not in UP else
+                    "the daily to drop into Weakening/Lagging and then turn back up "
+                    "(it is already up, so today is not a fresh entry)")
+        status_box(INK_3, "WAIT — no position",
+                   ["Next buy needs " + " and ".join(need) + "."] + state_lines)
+
+    closed = [t for t in trades if not t["open"]]
+    wins = [t for t in closed if t["ret"] > 0]
+    strat, bh = equity.iloc[-1] - 100, hold.iloc[-1] - 100
+    st.write("")
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Strategy return", "%+.1f%%" % strat, "%+.1f%% vs buy & hold" % (strat - bh))
+    c2.metric("Buy & hold return", "%+.1f%%" % bh, "since %s" % start.strftime("%d %b %Y"),
+              delta_color="off")
+    c3.metric("Trades", "%d closed%s" % (len(closed), " + 1 open" if open_t else ""),
+              "%d wins · %.0f%% win rate" % (len(wins), 100 * len(wins) / len(closed)) if closed else "",
+              delta_color="off")
+    c4.metric("Time in the market", "%.0f%%" % (100 * held.mean()),
+              "avg trade %+.1f%% · %.0f sessions" % (
+                  sum(t["ret"] for t in closed) / len(closed), sum(t["held"] for t in closed) / len(closed))
+              if closed else "", delta_color="off")
+
+    st.plotly_chart(strategy_figure(daily, trades, equity, hold, start), width="stretch", theme=None,
+                    config={"displaylogo": False})
+
+    st.subheader("Every trade, oldest first")
+    if trades:
+        table = pd.DataFrame([{
+            "#": i + 1,
+            "Buy date": t["buy"].strftime("%a %d %b %Y"),
+            "Buy ₹": "%.2f" % t["buy_px"],
+            "Weekly at buy": t["weekly"],
+            "Daily moved": "%s → %s" % (t["frm"], t["into"]),
+            "Sell date": t["sell"].strftime("%a %d %b %Y") if t["sell"] is not None else "open",
+            "Sell ₹": ("%.2f" % t["sell_px"]) + ("" if t["sell"] is not None else " (now)"),
+            "Daily exit into": t["exit_into"] or "—",
+            "Held": "%d sessions" % t["held"],
+            "Return": pct(t["ret"]),
+        } for i, t in enumerate(trades)])
+
+        def ret_style(col):
+            return ["color: %s; font-weight: bold" % (UP_FG if v.startswith("+") else
+                                                      DOWN_FG if v.startswith("-") else INK_2)
+                    for v in col]
+        st.dataframe(table.style.apply(quad_style, subset=["Weekly at buy", "Daily exit into"])
+                     .apply(ret_style, subset=["Return"]),
+                     hide_index=True, width="stretch", height=38 + 35 * len(table))
+        st.download_button("Download trades as CSV", table.to_csv(index=False),
+                           file_name="pvrinox_strategy_trades.csv", mime="text/csv")
+    else:
+        st.info("No trades since %s." % start.strftime("%d %b %Y"))
+
+    with st.expander("Daily turned up but the weekly was down — no buy (%d times)" % len(skipped)):
+        if skipped:
+            st.dataframe(pd.DataFrame([{"Date": s["date"].strftime("%a %d %b %Y"),
+                                        "Daily moved": "%s → %s" % (s["frm"], s["into"]),
+                                        "Weekly that day": s["weekly"]} for s in skipped])
+                         .style.apply(quad_style, subset=["Weekly that day"]),
+                         hide_index=True, width="stretch")
+
+    formula_note("weekly position on each day is the week so far (no look-ahead)  ·  "
+                 "cost per side %.2f%%  ·  past results do not guarantee future returns" % cost)
+
+
 @st.fragment(run_every=refresh_every)
 def page():
-    if tf == "Both":
+    if tf == "Strategy":
+        strategy_page()
+    elif tf == "Both":
         both_page()
     else:
         single_page()
