@@ -427,6 +427,7 @@ def quad_style(col):
 # ---- cycles: up = Improving/Leading, down = Weakening/Lagging ---------------
 UP = ("Improving", "Leading")
 UP_FG, DOWN_FG = QUAD_FG["Leading"], QUAD_FG["Lagging"]
+WEEK_DOWN = "#e8893a"   # orange: weekly-down strip on the Strategy chart
 
 
 def phases(df):
@@ -973,14 +974,14 @@ def strategy_figure(daily, asof, book, value, bh_value, start, capital):
                         vertical_spacing=0.05,
                         subplot_titles=("PVR INOX close — green bands = money in the stock",
                                         "Weekly RRG on each day — green = Improving / Leading (up), "
-                                        "red = Weakening / Lagging (down)",
+                                        "orange = Weakening / Lagging (down)",
                                         "Your %s over time — strategy vs buy & hold" % inr(capital)))
     # weekly strip: the weekly position as it was known that day (what the buy rule checks)
     wk = asof[(asof.index >= seg.index[0]) & (asof.index <= seg.index[-1])]
     for p in phases(wk):
         x1 = p["next"] if p["next"] is not None else wk.index[-1] + pd.Timedelta(days=1)
         fig.add_shape(type="rect", xref="x2", yref="y2 domain", x0=p["start"], x1=x1, y0=0, y1=1,
-                      fillcolor=UP_FG if p["up"] else DOWN_FG, opacity=0.85, line_width=0)
+                      fillcolor=UP_FG if p["up"] else WEEK_DOWN, opacity=0.85, line_width=0)
     fig.add_trace(go.Scatter(
         x=wk.index, y=[0.5] * len(wk), mode="markers", marker=dict(size=8, opacity=0),
         showlegend=False, customdata=wk[["Quadrant", "RS_Ratio", "RS_Momentum"]].to_numpy(),
