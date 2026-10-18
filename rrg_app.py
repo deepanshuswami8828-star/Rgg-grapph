@@ -967,12 +967,27 @@ def simulate(daily, trades, start, capital, cost_pct):
     return book, cash, value, bh_value, bh_shares
 
 
-def strategy_figure(daily, book, value, bh_value, start, capital):
+def strategy_figure(daily, asof, book, value, bh_value, start, capital):
     seg = daily[daily.index >= start]
-    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, row_heights=[0.55, 0.45],
-                        vertical_spacing=0.07,
+    fig = make_subplots(rows=3, cols=1, shared_xaxes=True, row_heights=[0.5, 0.06, 0.44],
+                        vertical_spacing=0.05,
                         subplot_titles=("PVR INOX close — green bands = money in the stock",
+                                        "Weekly RRG on each day — green = Improving / Leading (up), "
+                                        "red = Weakening / Lagging (down)",
                                         "Your %s over time — strategy vs buy & hold" % inr(capital)))
+    # weekly strip: the weekly position as it was known that day (what the buy rule checks)
+    wk = asof[(asof.index >= seg.index[0]) & (asof.index <= seg.index[-1])]
+    for p in phases(wk):
+        x1 = p["next"] if p["next"] is not None else wk.index[-1] + pd.Timedelta(days=1)
+        fig.add_shape(type="rect", xref="x2", yref="y2 domain", x0=p["start"], x1=x1, y0=0, y1=1,
+                      fillcolor=UP_FG if p["up"] else DOWN_FG, opacity=0.85, line_width=0)
+    fig.add_trace(go.Scatter(
+        x=wk.index, y=[0.5] * len(wk), mode="markers", marker=dict(size=8, opacity=0),
+        showlegend=False, customdata=wk[["Quadrant", "RS_Ratio", "RS_Momentum"]].to_numpy(),
+        hovertemplate="%{x|%a %d %b %Y}<br>Weekly: <b>%{customdata[0]}</b><br>"
+                      "RS-Ratio %{customdata[1]:.2f} · RS-Mom. %{customdata[2]:.2f}<extra></extra>"),
+        row=2, col=1)
+    fig.update_yaxes(visible=False, range=[0, 1], row=2, col=1)
     for b in book:
         end = b["sell"] if b["sell"] is not None else seg.index[-1]
         # plain shape: add_vrect does not draw on these date subplots
@@ -1001,22 +1016,22 @@ def strategy_figure(daily, book, value, bh_value, start, capital):
     fig.add_trace(go.Scatter(x=value.index, y=value, name="Strategy",
                              line=dict(color=SERIES, width=2.2),
                              hovertemplate="%{x|%d %b %Y}<br>Strategy ₹%{y:,.0f}<extra></extra>"),
-                  row=2, col=1)
+                  row=3, col=1)
     fig.add_trace(go.Scatter(x=bh_value.index, y=bh_value, name="Buy & hold",
                              line=dict(color=INK_3, width=1.5, dash="dot"),
                              hovertemplate="%{x|%d %b %Y}<br>Buy & hold ₹%{y:,.0f}<extra></extra>"),
-                  row=2, col=1)
-    fig.add_hline(y=capital, line_color=INK_3, line_width=1, line_dash="dash", row=2, col=1,
+                  row=3, col=1)
+    fig.add_hline(y=capital, line_color=INK_3, line_width=1, line_dash="dash", row=3, col=1,
                   annotation_text="money put in", annotation_position="bottom left",
                   annotation_font=dict(size=11, color=INK_3))
-    fig.update_layout(height=680, margin=dict(l=75, r=20, t=75, b=10), hovermode="closest",
+    fig.update_layout(height=760, margin=dict(l=75, r=20, t=75, b=10), hovermode="closest",
                       plot_bgcolor=SURFACE, paper_bgcolor=SURFACE, font=dict(color=INK_2),
                       legend=dict(orientation="h", y=0.995, yanchor="top", yref="container", x=0))
     fig.update_annotations(selector=dict(xref="paper"), font=dict(size=13, color=INK_1),
                            x=0, xanchor="left")
     fig.update_xaxes(gridcolor=GRID, dtick="M3", tickformat="%b %Y")
     fig.update_yaxes(gridcolor=GRID, tickprefix="₹", row=1, col=1)
-    fig.update_yaxes(gridcolor=GRID, tickprefix="₹", tickformat=",.0f", row=2, col=1)
+    fig.update_yaxes(gridcolor=GRID, tickprefix="₹", tickformat=",.0f", row=3, col=1)
     return fig
 
 
@@ -1118,7 +1133,7 @@ def strategy_page():
         status_box(INK_3, "WAIT — all %s is in cash" % inr(final_cash),
                    ["Next buy needs " + " and ".join(need) + "."] + state)
 
-    st.plotly_chart(strategy_figure(daily, book, value, bh_value, start, capital),
+    st.plotly_chart(strategy_figure(daily, asof, book, value, bh_value, start, capital),
                     width="stretch", theme=None, config={"displaylogo": False})
 
     # ---- 3. every trade in rupees ---------------------------------------------
