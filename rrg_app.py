@@ -75,19 +75,24 @@ def market_open(now):
 # ---- data -------------------------------------------------------------------
 @st.cache_data(ttl=300, show_spinner="Downloading closes...")
 def get_closes():
-    try:
-        import yfinance as yf
-        raw = yf.download([STOCK_TICKER, BENCH_TICKER], period="max", interval="1d",
-                          auto_adjust=True, progress=False)
-        closes = raw["Close"][[STOCK_TICKER, BENCH_TICKER]].dropna()
-        if len(closes) < 1000:
-            raise ValueError("insufficient rows returned")
-        closes.columns = [STOCK, BENCH]
-        source = "Yahoo Finance (auto-adjusted closes, full history)"
-    except Exception:
-        closes, source = load_closes()
-        source += " - offline fallback, live download failed"
-    return closes, source, datetime.now(IST)
+    # Yahoo sometimes refuses a request (rate limits are common from cloud servers),
+    # so try a few times before falling back to the CSVs shipped with the app
+    for attempt in range(3):
+        try:
+            import yfinance as yf
+            raw = yf.download([STOCK_TICKER, BENCH_TICKER], period="max", interval="1d",
+                              auto_adjust=True, progress=False)
+            closes = raw["Close"][[STOCK_TICKER, BENCH_TICKER]].dropna()
+            if len(closes) < 1000:
+                raise ValueError("insufficient rows returned")
+            closes.columns = [STOCK, BENCH]
+            return closes, "Yahoo Finance (auto-adjusted closes, full history)", datetime.now(IST)
+        except Exception:
+            if attempt < 2:
+                import time as _time
+                _time.sleep(3 * (attempt + 1))
+    closes, source = load_closes()
+    return closes, source + " - offline fallback, live download failed", datetime.now(IST)
 
 
 def get_rrg(tf):
@@ -648,6 +653,10 @@ def header(title, source, fetched, now, status_text):
     status = ("🟢 NSE open" if market_open(now) else "⚪ NSE closed") + " — " + status_text
     st.caption("%s  ·  fetched %s IST  ·  %s"
                % (status, fetched.strftime("%d %b %Y %H:%M"), source))
+    if "fallback" in source:
+        st.warning("Live prices could not be downloaded from Yahoo Finance right now, so this "
+                   "page shows the saved prices (they end on 13 Aug 2026). It retries "
+                   "automatically within 5 minutes, or press **Refresh data now**.")
 
 
 def formula_note(extra):
