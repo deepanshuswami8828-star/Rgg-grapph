@@ -1,0 +1,164 @@
+{
+  "version_id": "v20261022_203905",
+  "updated_at": "2026-10-22T20:39:05.939498+05:30",
+  "status": "SUCCESS",
+  "provider": "Yahoo Finance (yfinance)",
+  "tickers": {
+    "PVRINOX.NS": {
+      "first_date": "2006-01-04",
+      "last_date": "2026-10-22",
+      "rows": 5127,
+      "sha256": "6b6fb4b8bad9b7dcb95670e0470d85d293c8177a2d457fb5e7fc682079b7549f",
+      "fetched_at": "2026-10-22T20:39:05.939498+05:30",
+      "status": "VALID",
+      "benchmark_version": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "BEL.NS": {
+      "first_date": "2002-07-01",
+      "last_date": "2026-10-22",
+      "rows": 6031,
+      "sha256": "2c1560b01650012fe2c1cdf7ffc429c6802c8d8baf7089b57ca2cd8334c92409",
+      "fetched_at": "2026-10-22T20:39:05.939498+05:30",
+      "status": "VALID",
+      "benchmark_version": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
+      "warnings": [
+        "Flagged move of +3200.0% on 2005-07-28",
+        "Flagged move of -97.1% on 2005-07-29"
+      ],
+      "flagged_moves": [
+        {
+          "date": "2005-07-28",
+          "pct_change": 3200.0,
+          "close": 178.42
+        },
+        {
+          "date": "2005-07-29",
+          "pct_change": -97.06,
+          "close": 5.24
+        }
+      ]
+    },
+    "SUZLON.NS": {
+      "first_date": "2005-10-19",
+      "last_date": "2026-10-22",
+      "rows": 5179,
+      "sha256": "85fb86fcb319761e299f34f7164f479d07d41f61116d2ff4cec4fc42eb19848e",
+      "fetched_at": "2026-10-22T20:39:05.939498+05:30",
+      "status": "VALID",
+      "benchmark_version": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
+      "warnings": [
+        "Flagged move of -40.3% on 2008-10-24",
+        "Flagged move of -34.0% on 2013-02-28",
+        "Flagged move of +29.2% on 2019-02-22",
+        "Flagged move of +25.2% on 2019-03-05"
+      ],
+      "flagged_moves": [
+        {
+          "date": "2008-10-24",
+          "pct_change": -40.31,
+          "close": 42.7
+        },
+        {
+          "date": "2013-02-28",
+          "pct_change": -34.02,
+          "close": 14.69
+        },
+        {
+          "date": "2019-02-22",
+          "pct_change": 29.21,
+          "close": 5.28
+        },
+        {
+          "date": "2019-03-05",
+          "pct_change": 25.21,
+          "close": 6.84
+        }
+      ]
+    },
+    "WAAREEENER.NS": {
+      "first_date": "2024-10-28",
+      "last_date": "2026-10-22",
+      "rows": 491,
+      "sha256": "27cb0f6f2bb094205683659d95a7906276468e4759bf0bb00af2653f337dea89",
+      "fetched_at": "2026-10-22T20:39:05.939498+05:30",
+      "status": "VALID",
+      "benchmark_version": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "BHARTIARTL.NS": {
+      "first_date": "2002-07-01",
+      "last_date": "2026-10-22",
+      "rows": 6031,
+      "sha256": "c652b71d956c7f1fd31fb54127b2750694b6a04ea637eda76d9a8430b1ef3599",
+      "fetched_at": "2026-10-22T20:39:05.939498+05:30",
+      "status": "VALID",
+      "benchmark_version": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
+      "warnings": [
+        "Flagged move of +25.4% on 2009-05-18"
+      ],
+      "flagged_moves": [
+        {
+          "date": "2009-05-18",
+          "pct_change": 25.42,
+          "close": 410.39
+        }
+      ]
+    },
+    "RELIANCE.NS": {
+      "first_date": "1996-01-01",
+      "last_date": "2026-10-22",
+      "rows": 7726,
+      "sha256": "6d081151d05e7f5001191349015c29a0de2b491684e431f57a5c3befea0e6379",
+      "fetched_at": "2026-10-22T20:39:05.939498+05:30",
+      "status": "VALID",
+      "benchmark_version": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
+      "warnings": [
+        "Flagged move of +91.1% on 1997-10-27",
+        "Flagged move of -48.4% on 1997-11-05",
+        "Flagged move of +337.5% on 2005-07-28",
+        "Flagged move of -77.0% on 2005-07-29"
+      ],
+      "flagged_moves": [
+        {
+          "date": "1997-10-27",
+          "pct_change": 91.14,
+          "close": 18.37
+        },
+        {
+          "date": "1997-11-05",
+          "pct_change": -48.43,
+          "close": 8.87
+        },
+        {
+          "date": "2005-07-28",
+          "pct_change": 337.48,
+          "close": 187.09
+        },
+        {
+          "date": "2005-07-29",
+          "pct_change": -76.99,
+          "close": 43.04
+        }
+      ]
+    },
+    "^NSEI": {
+      "first_date": "2007-09-17",
+      "last_date": "2026-10-22",
+      "rows": 4683,
+      "sha256": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
+      "fetched_at": "2026-10-22T20:39:05.939498+05:30",
+      "status": "VALID",
+      "benchmark_version": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
+      "warnings": [],
+      "flagged_moves": []
+    }
+  },
+  "last_attempt": {
+    "time": "2026-10-22T20:39:05.939498+05:30",
+    "result": "SUCCESS",
+    "message": "Successfully published 6 stocks and ^NSEI"
+  }
+}

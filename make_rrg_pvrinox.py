@@ -94,23 +94,25 @@ def quadrant(rs_ratio, rs_momentum):
 def load_closes():
     """Daily closes for the stock and the benchmark, aligned. -> (frame, source)."""
     try:
-        import yfinance as yf
-        raw = yf.download([STOCK_TICKER, BENCH_TICKER], period=PERIOD, interval="1d",
-                          auto_adjust=True, progress=False)
-        closes = raw["Close"][[STOCK_TICKER, BENCH_TICKER]].dropna()
-        if len(closes) < RS_LONG + TAIL_DAYS:
-            raise ValueError("insufficient rows returned")
-        closes.columns = [STOCK, BENCH]
-        return closes.ffill(), "Yahoo Finance (auto-adjusted daily closes)"
-    except Exception as exc:
-        print("  live download unavailable (%s); using local CSVs" % exc)
+        import data_pipeline as dp
+        pvr_clean = dp.load_clean_data("PVRINOX.NS")
+        bench_clean = dp.load_clean_data(BENCH_TICKER)
+        if pvr_clean is not None and bench_clean is not None:
+            aligned = dp.align_stock_with_benchmark(pvr_clean, bench_clean, STOCK, BENCH)
+            if len(aligned) >= RS_LONG + TAIL_DAYS:
+                return aligned, "Verified local clean data"
+    except Exception:
+        pass
 
     stock = pd.read_csv(os.path.join(ROOT, "pvrinox_ticker_2022-04-01_to_2026-08-13.csv"),
-                        parse_dates=["Date"], index_col="Date")["Adj Close"]
+                        parse_dates=["Date"], index_col="Date")
+    col = "Adj Close" if "Adj Close" in stock.columns else "Close"
+    stock_s = stock[col]
     bench = pd.read_csv(os.path.join(ROOT, "nifty50_dataset_2024-04-01_to_2026-08-13.csv"),
                         parse_dates=["Date"], index_col="Date")["Close"]
-    closes = pd.concat([stock.rename(STOCK), bench.rename(BENCH)], axis=1).dropna()
-    return closes.ffill(), "local CSVs in this repo"
+    # Strict inner join, no ffill, no bfill, no interpolation
+    closes = pd.concat([stock_s.rename(STOCK), bench.rename(BENCH)], axis=1, join="inner").dropna()
+    return closes, "local CSVs in this repo"
 
 
 # ---- plot -------------------------------------------------------------------

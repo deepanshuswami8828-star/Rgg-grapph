@@ -1,5 +1,6 @@
 __pycache__/
 *.pyc
 # this-PC-only sharing tools (cloudflared.exe is 55 MB)
-tools/
+tools/cloudflared.exe
+tools/share_link.ps1
 Share Link.bat
