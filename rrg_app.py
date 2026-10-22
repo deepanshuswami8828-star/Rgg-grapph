@@ -945,10 +945,12 @@ def backtest(daily, asof, start, cost_pct):
             else:
                 skipped.append(dict(date=d, weekly=w_q[d], frm=prev_q[d], into=q[d]))
         elif pos is not None and not up[d] and prev_up[d]:
-            trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=q[d], open=False))
+            trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=q[d], open=False,
+                               exit_reason=f"Daily Drop to {q[d]}"))
             pos = None
     if pos is not None:
-        trades.append(dict(pos, sell=None, sell_px=close.iloc[-1], exit_into=None, open=True))
+        trades.append(dict(pos, sell=None, sell_px=close.iloc[-1], exit_into=None, open=True,
+                           exit_reason="Open Position"))
 
     for t in trades:
         t["ret"] = 100 * ((t["sell_px"] * (1 - c)) / (t["buy_px"] * (1 + c)) - 1)
@@ -1182,7 +1184,7 @@ def status_box(color, title, lines, big=None):
         unsafe_allow_html=True)
 
 
-def strategy_page(stock_ticker: str):
+def strategy_page(stock_ticker: str, default_strategy_id: int = 3):
     stock_info = cfg.STOCKS.get(stock_ticker, {"name": stock_ticker, "sector": ""})
     stock_name = stock_info["name"]
 
@@ -1213,15 +1215,53 @@ def strategy_page(stock_ticker: str):
     ])
 
     with tab_single:
+        # Synchronize sidebar selection with tab selection
+        if "sidebar_strat_select" in st.session_state and st.session_state.get("_applied_sidebar_strat") != st.session_state["sidebar_strat_select"]:
+            st.session_state[f"strat_selector_{stock_ticker}"] = st.session_state["sidebar_strat_select"]
+            st.session_state["_applied_sidebar_strat"] = st.session_state["sidebar_strat_select"]
+
+        current_strat = st.session_state.get(f"strat_selector_{stock_ticker}", default_strategy_id)
+        default_idx = list(strat.STRATEGY_REGISTRY.keys()).index(current_strat) if current_strat in strat.STRATEGY_REGISTRY else 2
+
         selected_s_id = st.selectbox(
-            "Select Strategy to Analyze",
+            "🎯 Select Strategy to Analyze (Choose from all 12 Strategies)",
             options=list(strat.STRATEGY_REGISTRY.keys()),
             format_func=lambda i: f"Strategy {i}: {strat.STRATEGY_REGISTRY[i]['name']} ({strat.STRATEGY_REGISTRY[i]['tag']})",
-            index=2,
-            key=f"strat_selector_{stock_ticker}"
+            index=default_idx,
+            key=f"strat_selector_{stock_ticker}",
+            help="Choose which of the 12 RRG strategies to analyze for this stock."
         )
         meta = strat.STRATEGY_REGISTRY[selected_s_id]
-        st.caption(f"**Strategy {selected_s_id} — {meta['name']}**: {meta['full_desc']} · Charges of {cost:.2f}% per side.")
+
+        # Prominent Strategy Explanation Card
+        st.markdown(
+            f"""
+            <div style='background:{SURFACE};border:1px solid {GRID};border-left:5px solid {QUAD_FG["Leading"]};padding:14px 18px;border-radius:8px;margin-top:6px;margin-bottom:14px'>
+                <div style='display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px'>
+                    <span style='font-size:1.25rem;font-weight:700;color:{INK_1}'>Strategy {selected_s_id}: {meta['name']}</span>
+                    <span style='background:#e8f5e9;color:#2e7d32;padding:3px 10px;border-radius:12px;font-size:0.82rem;font-weight:600;border:1px solid #c8e6c9'>{meta['tag']}</span>
+                </div>
+                <div style='margin-top:6px;color:{INK_2};font-size:0.95rem;line-height:1.5'>
+                    <b>Kiya karti hai (Concept):</b> {meta['full_desc']} · Charges of {cost:.2f}% per side.
+                </div>
+                <div style='margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px'>
+                    <div style='background:#f1f8e9;padding:10px 14px;border-radius:6px;border:1px solid #c8e6c9'>
+                        <b style='color:#2e7d32;font-size:0.95rem'>🟢 Kharidne ka Niyam (Entry Rule):</b>
+                        <div style='font-size:0.9rem;color:{INK_1};margin-top:4px;line-height:1.4'>{meta.get('entry_rule', '')}</div>
+                    </div>
+                    <div style='background:#fbe9e7;padding:10px 14px;border-radius:6px;border:1px solid #ffccbc'>
+                        <b style='color:#c62828;font-size:0.95rem'>🔴 Bechne ka Niyam (Exit Rule):</b>
+                        <div style='font-size:0.9rem;color:{INK_1};margin-top:4px;line-height:1.4'>{meta.get('exit_rule', '')}</div>
+                    </div>
+                </div>
+                <div style='margin-top:10px;padding:8px 12px;background:#f8f9fa;border-radius:6px;font-size:0.88rem;color:{INK_2};line-height:1.5'>
+                    🎯 <b>Kab sabse accha kaam karegi:</b> {meta.get('best_market', '')}<br>
+                    ⚠️ <b>Khatra / Savdhani:</b> {meta.get('risk_watch', '')}
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
         if selected_s_id == 3:
             trades, skipped, _, _, held = backtest(daily, asof, start, cost)
@@ -1265,6 +1305,35 @@ def strategy_page(stock_ticker: str):
         c4.metric("Money in the stock", f"{100 * tot_held_days / max(1, len(daily[daily.index >= start])):.0f}% of days",
                   f"best {inr(max((b['pnl'] for b in closed), default=0), sign=True)} · worst {inr(min((b['pnl'] for b in closed), default=0), sign=True)}" if closed else "", delta_color="off")
 
+        # Comprehensive P&L Attribution & Market Analysis Section (Why Profit / Loss Happened)
+        pnl_info = strat.explain_pnl(book, capital, final, cost, stock_name, meta["name"])
+        pnl_bg = "#f1f8e9" if pnl_info["is_profit"] else "#fff3e0"
+        pnl_border = "#81c784" if pnl_info["is_profit"] else "#ffb74d"
+        pnl_header_color = UP_FG if pnl_info["is_profit"] else DOWN_FG
+
+        with st.expander(f"🔍 **Why Profit / Loss Happened (Kyo Profit ya Loss Hua?) — {pnl_info['headline']}**", expanded=True):
+            st.markdown(
+                f"""
+                <div style='background:{pnl_bg};border-left:5px solid {pnl_header_color};border:1px solid {pnl_border};padding:12px 16px;border-radius:6px;margin-bottom:12px'>
+                    <div style='font-size:1.1rem;font-weight:700;color:{pnl_header_color}'>{pnl_info['headline']}</div>
+                    <div style='font-size:0.95rem;color:{INK_1};margin-top:4px'><b>English:</b> {pnl_info['summary_en']}</div>
+                    <div style='font-size:0.95rem;color:{INK_2};margin-top:4px'><b>Hindi:</b> {pnl_info['summary_hi']}</div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            # 4 Key Financial Attribution Drivers
+            k1, k2, k3, k4 = st.columns(4)
+            k1.metric("Gross Profit from Wins", inr(pnl_info["gross_profit"]), f"{pnl_info['winning_trades']} wins (avg {pct(pnl_info['avg_win_pct'])})", delta_color="normal")
+            k2.metric("Gross Loss from Losers", f"-{inr(pnl_info['gross_loss'])}", f"{pnl_info['losing_trades']} losses (avg {pct(pnl_info['avg_loss_pct'])})", delta_color="inverse")
+            k3.metric("Profit Factor", f"{pnl_info['profit_factor']:.2f}x", "Gross Win / Gross Loss", delta_color="off")
+            k4.metric("Total Brokerage & Fees", inr(pnl_info["total_charges"]), f"{cost:.2f}% per order", delta_color="off")
+
+            st.markdown(f"**Key Drivers & Market Behavior (Asal Wajah):**")
+            for b_en, b_hi in zip(pnl_info["bullets_en"], pnl_info["bullets_hi"]):
+                st.markdown(f"• **{b_en}**<br>&nbsp;&nbsp;↳ *Hindi:* {b_hi}", unsafe_allow_html=True)
+
         dq, wq = daily["Quadrant"].iloc[-1], asof["Quadrant"].iloc[-1]
         ok_sym = lambda q: "✅" if q in UP else "❌"
         state = [f"Weekly now: {ok_sym(wq)} <b style='color:{QUAD_FG[wq]}'>{wq}</b>  ·  Daily now: {ok_sym(dq)} <b style='color:{QUAD_FG[dq]}'>{dq}</b>"]
@@ -1301,6 +1370,7 @@ def strategy_page(stock_ticker: str):
                 "You got": inr(b["got"]) + ("" if b["sell"] is not None else " (if sold)"),
                 "Profit / loss": inr(b["pnl"], sign=True),
                 "%": pct(b["pnl_pct"]),
+                "Outcome / Reason (Kyo Profit ya Loss)": strat.trade_outcome_reason(b, cost),
                 "Charges": inr(b["charges"]),
                 "Exit Reason": b.get("exit_reason", ""),
                 "Money after": inr(b["cash_after"]),
@@ -1322,6 +1392,7 @@ def strategy_page(stock_ticker: str):
                 "sell_price": round(b["sell_px"], 2), "got": round(b["got"], 2),
                 "profit_loss": round(b["pnl"], 2), "charges": round(b["charges"], 2),
                 "exit_reason": b.get("exit_reason", ""),
+                "outcome_reason": strat.trade_outcome_reason(b, cost),
                 "money_after": round(b["cash_after"], 2),
             } for b in book])
             st.download_button("Download trades as CSV", full.to_csv(index=False),
@@ -1486,6 +1557,16 @@ with st.sidebar:
 
     if page_choice == "Strategy":
         with st.form("strategy_inputs"):
+            strategy_choice = st.selectbox(
+                "🎯 Select Strategy (1 to 12)",
+                options=list(strat.STRATEGY_REGISTRY.keys()),
+                format_func=lambda i: f"Strategy {i}: {strat.STRATEGY_REGISTRY[i]['name']}",
+                index=2,
+                key="sidebar_strat_select",
+                help="Choose which of the 12 RRG strategies to backtest and simulate."
+            )
+            s_brief = strat.STRATEGY_REGISTRY[strategy_choice]["short_desc"]
+            st.caption(f"💡 *{s_brief}*")
             capital = st.number_input("Amount to invest (₹)", min_value=1000, max_value=10**9,
                                       value=10000, step=1000, format="%d")
             bt_from = st.date_input("Start date", value=CYCLES_FROM.date(),
@@ -1513,7 +1594,7 @@ with st.sidebar:
 render_status_panel(selected_stock)
 
 if page_choice == "Strategy":
-    strategy_page(selected_stock)
+    strategy_page(selected_stock, default_strategy_id=strategy_choice)
 elif page_choice == "All stocks":
     all_stocks_page(all_tf)
 elif page_choice == "Both":

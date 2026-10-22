@@ -184,3 +184,47 @@ def test_all_6_stocks_run_12_strategies(prepared_data):
             daily, asof, start, capital=10000.0, cost_pct=0.12, stocks_rrg=stocks_rrg, bench_clean=bench_clean
         )
         assert len(summary_df) == 12, f"Failed on stock {ticker} ({name})"
+
+
+def test_strategy_registry_explanation_fields():
+    """Verify all 12 strategies have clear entry, exit, market condition, and risk rules."""
+    for s_id in range(1, 13):
+        meta = strat.STRATEGY_REGISTRY[s_id]
+        assert "entry_rule" in meta and len(meta["entry_rule"]) > 10
+        assert "exit_rule" in meta and len(meta["exit_rule"]) > 10
+        assert "best_market" in meta and len(meta["best_market"]) > 10
+        assert "risk_watch" in meta and len(meta["risk_watch"]) > 10
+
+
+def test_explain_pnl_and_trade_outcome_reason(prepared_data):
+    """Verify explain_pnl attribution logic and trade outcome reasoning."""
+    _, bench_clean, stocks_rrg = prepared_data
+    pvr_data = stocks_rrg["PVRINOX.NS"]
+    daily = pvr_data["daily"]
+    asof = strat.weekly_asof(pvr_data["aligned"], "PVR INOX")
+    start = pd.Timestamp("2024-01-01")
+    capital = 10000.0
+    cost = 0.12
+
+    # Run Strategy 3
+    book, cash, val, bh_val, bh_sh, _ = strat.run_strategy(
+        3, daily, asof, start, capital, cost, stocks_rrg, bench_clean
+    )
+    final_val = float(val.iloc[-1])
+    pnl_info = strat.explain_pnl(book, capital, final_val, cost, "PVR INOX", "Daily + Weekly Confirmation")
+
+    assert "is_profit" in pnl_info
+    assert "headline" in pnl_info and len(pnl_info["headline"]) > 0
+    assert "summary_en" in pnl_info and len(pnl_info["summary_en"]) > 0
+    assert "summary_hi" in pnl_info and len(pnl_info["summary_hi"]) > 0
+    assert "profit_factor" in pnl_info
+    assert "win_rate" in pnl_info
+    assert len(pnl_info["bullets_en"]) > 0
+    assert len(pnl_info["bullets_hi"]) > 0
+    assert len(pnl_info["bullets_en"]) == len(pnl_info["bullets_hi"])
+
+    # Test trade outcome reasoning on every book item
+    for b in book:
+        reason_str = strat.trade_outcome_reason(b, cost)
+        assert isinstance(reason_str, str) and len(reason_str) > 0
+

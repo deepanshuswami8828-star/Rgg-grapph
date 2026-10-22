@@ -32,6 +32,10 @@ STRATEGY_REGISTRY = {
         "tag": "Single Timeframe",
         "short_desc": "Buy on Daily entering Improving/Leading; Sell on Weakening/Lagging (no weekly filter).",
         "full_desc": "Pure single-timeframe RRG rotation. Buys whenever the daily quadrant rotates clockwise from Lagging/Weakening into Improving or Leading. Sells as soon as daily drops into Weakening or Lagging. High trade frequency.",
+        "entry_rule": "Buy when Daily RRG rotates clockwise into Improving or Leading quadrant.",
+        "exit_rule": "Sell immediately when Daily RRG falls into Weakening or Lagging quadrant.",
+        "best_market": "High-volatility swing markets where short-term sector rotation cycles occur frequently.",
+        "risk_watch": "High trade frequency with no higher-timeframe filter; susceptible to whipsaws in sideways choppy markets.",
     },
     2: {
         "id": 2,
@@ -39,6 +43,10 @@ STRATEGY_REGISTRY = {
         "tag": "Profit Target",
         "short_desc": "Buy on Improving-to-Leading; Exit on profit target (+8%), trailing stop (5%), or Weakening.",
         "full_desc": "Enters exclusively on high-momentum rotation into the Leading quadrant. Protects capital by locking in profits when target (+8%) is reached, cutting losses with a 5% trailing stop from peak close, or exiting if the quadrant drops into Weakening.",
+        "entry_rule": "Buy only when Daily rotates directly into the Leading quadrant (strongest relative strength & momentum).",
+        "exit_rule": "Sell when +8% profit target is reached, or 5% trailing stop from peak close is hit, or quadrant drops to Weakening/Lagging.",
+        "best_market": "Strong momentum breakouts where leading stocks surge quickly.",
+        "risk_watch": "May exit too early during monster 50%+ multi-month trends due to the 8% target.",
     },
     3: {
         "id": 3,
@@ -46,6 +54,10 @@ STRATEGY_REGISTRY = {
         "tag": "Multi-Timeframe",
         "short_desc": "Baseline strategy: Buy on Daily Improving/Leading confirmed by Weekly Improving/Leading.",
         "full_desc": "The primary multi-timeframe baseline strategy. Requires higher-timeframe alignment: buys when Daily moves into Improving or Leading ONLY if the Weekly RRG is also in Improving or Leading. Sells when Daily drops into Weakening or Lagging.",
+        "entry_rule": "Buy when Daily enters Improving/Leading AND Weekly RRG is confirmed in Improving/Leading.",
+        "exit_rule": "Sell when Daily RRG drops into Weakening or Lagging quadrant.",
+        "best_market": "Sustained intermediate-term bull trends with weekly institutional participation.",
+        "risk_watch": "Misses early trend reversals if the weekly timeframe takes several weeks to confirm.",
     },
     4: {
         "id": 4,
@@ -53,6 +65,10 @@ STRATEGY_REGISTRY = {
         "tag": "Early Entry",
         "short_desc": "Catch bottoming rotation: Buy on Lagging-to-Improving with RS-Mom >= 100 and price recovery.",
         "full_desc": "Identifies early bottoms before the market realizes the turn. Buys at the exact transition from Lagging to Improving when RS-Momentum >= 100 and daily price is rising. Exits on momentum failure (< 100) or tight 5% stop-loss.",
+        "entry_rule": "Buy at bottom: Stock crosses from Lagging into Improving with RS-Momentum >= 100 and positive price change.",
+        "exit_rule": "Sell if RS-Momentum falls back below 100 or protective 5% stop-loss is triggered.",
+        "best_market": "Market bottoming phases and oversold sector recoveries.",
+        "risk_watch": "Catching falling knives if the bottoming rotation fails and stock plunges back into deep Lagging.",
     },
     5: {
         "id": 5,
@@ -60,6 +76,10 @@ STRATEGY_REGISTRY = {
         "tag": "Trend Following",
         "short_desc": "Strongest trend filter: Both Daily & Weekly Leading + Price > 50-day SMA.",
         "full_desc": "Maximum confluence strategy. Requires Daily in Leading, Weekly in Leading, AND Close above 50-day SMA. Exits when RS-Momentum drops below 100, price breaks below 50-SMA, or 7% protective stop is hit.",
+        "entry_rule": "Triple confluence buy: Daily is Leading, Weekly is Leading, AND Price is above its 50-day SMA.",
+        "exit_rule": "Sell when RS-Momentum falls below 100, or price closes below 50-day SMA, or 7% stop-loss is triggered.",
+        "best_market": "Powerful secular bull markets with strong sector leadership.",
+        "risk_watch": "Very strict filter generates fewer trades; enters after a significant portion of the move has already occurred.",
     },
     6: {
         "id": 6,
@@ -67,6 +87,10 @@ STRATEGY_REGISTRY = {
         "tag": "Partial Exits",
         "short_desc": "Buy on confirmed RRG; Sell 50% at +8% target, trail remainder to breakeven stop / RRG exit.",
         "full_desc": "Disciplined scaling: Enters on confirmed Daily+Weekly RRG signal. When price reaches +8%, sells half the position to bank gains and moves stop-loss on remaining shares to breakeven. Remaining half runs until RRG exit.",
+        "entry_rule": "Buy full position on Daily Improving/Leading confirmed by Weekly Improving/Leading.",
+        "exit_rule": "Sell 50% at +8% gain and move stop to breakeven. Sell remainder when Daily leaves Leading/Improving or breakeven is hit.",
+        "best_market": "Trend extensions where locking in early gains removes risk while letting runners run.",
+        "risk_watch": "If stock reverses just before +8% target, full position absorbs the reversal.",
     },
     7: {
         "id": 7,
@@ -74,6 +98,10 @@ STRATEGY_REGISTRY = {
         "tag": "Sweet Spot",
         "short_desc": "Classic sweet spot: Enter when RS-Ratio crosses above 100 with RS-Momentum >= 100.",
         "full_desc": "Classic JdK RRG entry. Triggers at the exact session RS-Ratio crosses above 100 while RS-Momentum is >= 100 (crossing vertical axis into Leading). Exits on RS-Momentum falling below 100 or 6% stop-loss.",
+        "entry_rule": "Buy at the exact crossover: RS-Ratio crosses above 100 while RS-Momentum is >= 100 (entering Leading from Improving).",
+        "exit_rule": "Sell when RS-Momentum drops below 100, or drops into Lagging, or 6% stop-loss is hit.",
+        "best_market": "Stocks transitioning from accumulation into strong outperformance.",
+        "risk_watch": "False crossovers where RS-Ratio hugs 100 line and flips back and forth.",
     },
     8: {
         "id": 8,
@@ -81,6 +109,10 @@ STRATEGY_REGISTRY = {
         "tag": "Buy Dip in Trend",
         "short_desc": "Weekly Leading primary trend; buy when temporary Daily pullback into Weakening turns back up.",
         "full_desc": "Trend pullback strategy. When Weekly is firmly in Leading, waits for Daily to pull back into Weakening or Lagging, then buys the moment Daily resumes upward momentum into Improving/Leading. Exits if Weekly leaves Leading or 6% stop-loss.",
+        "entry_rule": "Buy the dip: Weekly is firmly Leading, Daily pulls back to Weakening/Lagging and then rotates back up into Improving/Leading.",
+        "exit_rule": "Sell if Weekly leaves Leading, or Daily falls into Lagging, or 6% stop-loss is triggered.",
+        "best_market": "Trending bull markets where pullbacks offer low-risk, high-reward re-entries.",
+        "risk_watch": "Pullback turns into a deeper trend reversal that drags down the Weekly timeframe.",
     },
     9: {
         "id": 9,
@@ -88,6 +120,10 @@ STRATEGY_REGISTRY = {
         "tag": "Early Exit",
         "short_desc": "Standard entry, but exit immediately when Daily touches Weakening (ahead of Lagging).",
         "full_desc": "Capital preservation focus. Uses confirmed Daily+Weekly entry, but exits on the very first session Daily enters Weakening without waiting for Lagging. Locks in trend gains before deep deceleration occurs.",
+        "entry_rule": "Buy on standard Daily Improving/Leading confirmed by Weekly Improving/Leading.",
+        "exit_rule": "Sell immediately on the first day Daily enters Weakening (locks in gains before momentum turns negative).",
+        "best_market": "Mature bull markets and volatile topping patterns where early exit protects gains.",
+        "risk_watch": "Can exit prematurely on minor momentum dips that quickly resume upward rotation.",
     },
     10: {
         "id": 10,
@@ -95,6 +131,10 @@ STRATEGY_REGISTRY = {
         "tag": "Price Filtered",
         "short_desc": "Confirmed RRG entry + Close > 50-day SMA + 20-day SMA upward sloping.",
         "full_desc": "Hybrid technical strategy. Combines confirmed RRG quadrant status with traditional trend filters: Price must exceed 50-day SMA and 20-day SMA must be sloping upward. Exits on RRG breakdown or Close < 50-SMA.",
+        "entry_rule": "Buy when Daily+Weekly are confirmed in Improving/Leading AND Price > 50-day SMA AND 20-day SMA is rising.",
+        "exit_rule": "Sell when Daily drops into Weakening/Lagging, or Price closes below 50-day SMA, or 7% stop-loss.",
+        "best_market": "Clear moving average trend alignments with institutional volume.",
+        "risk_watch": "Moving average lag can delay entry and exit compared to pure RRG momentum.",
     },
     11: {
         "id": 11,
@@ -102,6 +142,10 @@ STRATEGY_REGISTRY = {
         "tag": "Momentum Oscillator",
         "short_desc": "Pure oscillator: Buy when RS-Momentum crosses above 100; Sell when it crosses below 100.",
         "full_desc": "Fastest reacting strategy. Treats RS-Momentum as a pure zero-line oscillator. Buys whenever RS-Momentum crosses above 100 regardless of quadrant (even in Lagging). Sells whenever RS-Momentum crosses below 100.",
+        "entry_rule": "Buy when RS-Momentum crosses above 100 (rate of change turns positive vs benchmark).",
+        "exit_rule": "Sell when RS-Momentum crosses below 100 (rate of change turns negative vs benchmark).",
+        "best_market": "High-beta swing trading where rapid momentum shifts can be captured quickly.",
+        "risk_watch": "Oscillator whip in range-bound markets; does not filter for overall trend direction (RS-Ratio).",
     },
     12: {
         "id": 12,
@@ -109,6 +153,10 @@ STRATEGY_REGISTRY = {
         "tag": "Multi-Stock Portfolio",
         "short_desc": "Cross-sectional portfolio: Dynamically allocate single ₹10k pool to top 2 stocks across all 6.",
         "full_desc": "Actual multi-stock portfolio simulation. Starting capital is ₹10,000 for the entire portfolio. Every session, all 6 stocks are ranked by composite RRG relative strength. Capital is allocated to the top eligible stocks in Leading/Improving, rotating out of weakening stocks with realistic whole-share accounting.",
+        "entry_rule": "Buy top 2 stocks with highest RRG composite score in Improving/Leading quadrant across all 6 stocks.",
+        "exit_rule": "Sell/Rotate when a held stock drops out of top ranks, enters Lagging/Weakening, or better leader emerges.",
+        "best_market": "All market conditions with dispersion across sectors and stocks.",
+        "risk_watch": "Concentration in top 2 stocks; cash drag if fewer than 2 stocks qualify.",
     },
 }
 
@@ -1087,3 +1135,131 @@ def compare_all_strategies(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Ti
     }
 
     return summary_df, equity_df, drawdown_df, highlights
+
+
+def explain_pnl(book: List[Dict], capital: float, final_val: float, cost_pct: float,
+                stock_name: str, strategy_name: str) -> Dict[str, Any]:
+    """
+    Computes mathematical and market attribution explaining why the strategy
+    produced a profit or a loss. Returns both English and Hindi explanations.
+    """
+    closed = [b for b in book if b.get("sell") is not None]
+    total_trades = len(closed)
+    net_pnl = final_val - capital
+    net_pnl_pct = 100.0 * net_pnl / capital if capital > 0 else 0.0
+
+    winning_trades = [b for b in closed if b.get("pnl", 0.0) > 0]
+    losing_trades = [b for b in closed if b.get("pnl", 0.0) < 0]
+
+    gross_profit = sum(b.get("pnl", 0.0) for b in winning_trades)
+    gross_loss = abs(sum(b.get("pnl", 0.0) for b in losing_trades))
+    total_charges = sum(b.get("charges", 0.0) for b in book)
+
+    win_rate = 100.0 * len(winning_trades) / total_trades if total_trades > 0 else 0.0
+    profit_factor = gross_profit / gross_loss if gross_loss > 0 else (99.9 if gross_profit > 0 else 0.0)
+
+    avg_win_pct = float(np.mean([b["pnl_pct"] for b in winning_trades])) if winning_trades else 0.0
+    avg_loss_pct = float(np.mean([b["pnl_pct"] for b in losing_trades])) if losing_trades else 0.0
+
+    is_profit = net_pnl >= 0
+    bullets_en = []
+    bullets_hi = []
+
+    if total_trades == 0:
+        headline = "No Trades Executed (Capital Preserved in Cash)"
+        summary_en = f"The strategy found no qualifying entry signals for {stock_name} during this backtest window. All ₹{capital:,.0f} remained safely in cash with ₹0 charges paid."
+        summary_hi = f"Is period me {stock_name} ke liye koi entry signal trigger nahi hua. Sara paisa cash me safe raha aur ₹0 charges lage."
+    elif is_profit:
+        headline = f"Strategy Generated Profit: +₹{net_pnl:,.0f} ({net_pnl_pct:+.1f}%)"
+        summary_en = f"{stock_name} generated a net profit of ₹{net_pnl:,.0f} ({net_pnl_pct:+.1f}%) across {total_trades} completed trades, turning ₹{capital:,.0f} into ₹{final_val:,.0f}."
+        summary_hi = f"{stock_name} ne ₹{net_pnl:,.0f} ({net_pnl_pct:+.1f}%) ka profit banaya. ₹{capital:,.0f} ki shuruat badhkar ₹{final_val:,.0f} ho gayi."
+
+        if avg_win_pct > abs(avg_loss_pct):
+            bullets_en.append(f"Strong Win/Loss Asymmetry: Winning trades averaged {avg_win_pct:+.1f}%, far outpacing the average losing trade of {avg_loss_pct:+.1f}%.")
+            bullets_hi.append(f"Munafa bada, nuksan chhota: Jeetne wali trades ka average profit (+{avg_win_pct:.1f}%) haarne wali trades ke loss ({avg_loss_pct:.1f}%) se kafi bada raha.")
+
+        if profit_factor >= 1.2:
+            bullets_en.append(f"High Profit Factor ({profit_factor:.2f}): For every ₹1.00 lost across losing trades, the strategy extracted ₹{profit_factor:.2f} on winning trades.")
+            bullets_hi.append(f"Profit Factor {profit_factor:.2f}: Har ₹1 ke nuksan par strategy ne ₹{profit_factor:.2f} ka gross munafa kamaya.")
+
+        bullets_en.append(f"Leading Quadrant Momentum: {stock_name} enjoyed strong multi-week trending runs while in the Leading quadrant, allowing momentum to compound before exit signals triggered.")
+        bullets_hi.append(f"Leading quadrant me strong trend: Jab stock Leading quadrant me tha, tab achhi tezi aayi jisse strategy ne bada munafa book kiya.")
+
+        bullets_en.append(f"Disciplined Risk Management: Fast exits on quadrant deterioration or stop-loss protected accumulated profits from major bear drawdowns.")
+        bullets_hi.append(f"Samay par exit: Jaise hi quadrant kamzor hua ya stop-loss laga, strategy ne exit karke profit ko surakshit rakha.")
+    else:
+        headline = f"Strategy Incurred Loss: -₹{abs(net_pnl):,.0f} ({net_pnl_pct:+.1f}%)"
+        summary_en = f"{stock_name} experienced a net drawdown of -₹{abs(net_pnl):,.0f} ({net_pnl_pct:+.1f}%) across {total_trades} completed trades, reducing ₹{capital:,.0f} to ₹{final_val:,.0f}."
+        summary_hi = f"{stock_name} me -₹{abs(net_pnl):,.0f} ({net_pnl_pct:+.1f}%) ka nuksan hua. ₹{capital:,.0f} ghatkar ₹{final_val:,.0f} reh gaye."
+
+        if len(losing_trades) > len(winning_trades):
+            bullets_en.append(f"Win Rate Drag: {len(losing_trades)} losing trades outnumbered {len(winning_trades)} winning trades (Win Rate: {win_rate:.0f}%).")
+            bullets_hi.append(f"Loss trades ki sankhya zyada: {len(losing_trades)} trades me loss hua aur sirf {len(winning_trades)} me profit (Win rate: {win_rate:.0f}%).")
+
+        bullets_en.append("Choppy / Whipsaw Rotation: The stock entered Improving/Leading triggering buys, but lacked institutional follow-through volume and quickly collapsed into Weakening/Lagging.")
+        bullets_hi.append("Whipsaw / False Breakout: Stock ne Improving/Leading me aakar khareedne ka signal diya, par tezi tiki nahi aur turant Weakening me gir gaya jisse loss me exit hua.")
+
+        if total_charges > 0.01 * capital:
+            bullets_en.append(f"Transaction Cost Friction: High turnover generated ₹{total_charges:,.0f} in charges ({100 * total_charges / capital:.1f}% of starting capital).")
+            bullets_hi.append(f"Brokerage aur charges ka bojh: Baar-baar buy/sell karne se ₹{total_charges:,.0f} charges lage.")
+
+        bullets_en.append(f"Relative Benchmark Weakness: {stock_name} spent prolonged stretches lagging NIFTY 50, creating difficult conditions for relative-strength momentum strategies.")
+        bullets_hi.append(f"NIFTY ke mukable kamzori: Stock benchmark NIFTY se kamzor chal raha tha, isliye momentum sustain nahi hua.")
+
+    return {
+        "is_profit": is_profit,
+        "net_pnl": net_pnl,
+        "net_pnl_pct": net_pnl_pct,
+        "headline": headline,
+        "summary_en": summary_en,
+        "summary_hi": summary_hi,
+        "gross_profit": gross_profit,
+        "gross_loss": gross_loss,
+        "total_charges": total_charges,
+        "profit_factor": profit_factor,
+        "win_rate": win_rate,
+        "winning_trades": len(winning_trades),
+        "losing_trades": len(losing_trades),
+        "avg_win_pct": avg_win_pct,
+        "avg_loss_pct": avg_loss_pct,
+        "bullets_en": bullets_en,
+        "bullets_hi": bullets_hi,
+    }
+
+
+def trade_outcome_reason(trade: Dict, cost_pct: float = 0.12) -> str:
+    """Explains why an individual trade resulted in profit or loss."""
+    if trade.get("sell") is None:
+        pnl_pct = trade.get("pnl_pct", 0.0)
+        sym = "🟢" if pnl_pct >= 0 else "🔴"
+        return f"⏳ Holding Active ({sym} {pnl_pct:+.1f}% mark-to-market)"
+
+    pnl = trade.get("pnl", 0.0)
+    pnl_pct = trade.get("pnl_pct", 0.0)
+    reason = trade.get("exit_reason", "")
+
+    if pnl > 0:
+        if "Profit Target" in reason:
+            return f"✅ Profit (+{pnl_pct:.1f}%): +8% target achieved; locked in gains"
+        elif "Trailing Stop" in reason:
+            return f"✅ Profit (+{pnl_pct:.1f}%): Trailing stop locked in peak gains"
+        elif "Weakening" in reason or "Lagging" in reason or "Drop" in reason:
+            return f"✅ Profit (+{pnl_pct:.1f}%): Trend ran well; exited as quadrant weakened"
+        elif "RS-Momentum" in reason:
+            return f"✅ Profit (+{pnl_pct:.1f}%): Captured momentum surge; exited as momentum slowed"
+        else:
+            return f"✅ Profit (+{pnl_pct:.1f}%): Successful rotation trade ({reason})"
+    elif pnl < 0:
+        if "Stop Loss" in reason:
+            return f"❌ Loss ({pnl_pct:.1f}%): Stop loss cut loss early before larger decline"
+        elif "Weakening" in reason or "Lagging" in reason or "Drop" in reason:
+            return f"❌ Loss ({pnl_pct:.1f}%): False breakout / whipsaw; quadrant reversed quickly"
+        elif "RS-Momentum" in reason:
+            return f"❌ Loss ({pnl_pct:.1f}%): Momentum faded shortly after entry"
+        elif "SMA" in reason:
+            return f"❌ Loss ({pnl_pct:.1f}%): Technical support broke; exited on 50-SMA filter"
+        else:
+            return f"❌ Loss ({pnl_pct:.1f}%): Trade exited on {reason}"
+    else:
+        return "⚖️ Flat (0.0%): Exited near breakeven"
+
