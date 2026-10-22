@@ -25,6 +25,13 @@
 | **13** | App Restart Timestamp Loading | Restarting app loads manifest timestamps and data status | `python -m pytest tests/test_app_views.py -k test_app_restart_loads_saved_data_and_status -v -p no:cacheprovider` | Passed (Status panel & metrics verified) | **PASS** |
 | **14** | Offline Resilience | Internet off / yfinance error; app loads stored clean data | `python -m pytest tests/test_app_views.py -k test_offline_mode_resilient_when_internet_disconnected -v -p no:cacheprovider` | Passed (0 exceptions, loaded from data/ store) | **PASS** |
 | **15** | Scheduler Task Verification | Query registered task and observe scheduled execution log | `schtasks /Query /TN "RRG_Data_Refresh_1545" /V /FO LIST` | Task Ready, Next Run 23-10-2026 15:45:00, Log verified | **PASS** |
+| **16** | Strategy Registry Completeness | All 12 strategies registered with metadata, descriptions, tags | `python -m pytest tests/test_12_strategies.py -k test_strategy_registry_completeness -v -p no:cacheprovider` | Passed (12 strategies verified) | **PASS** |
+| **17** | All 12 Strategies on PVR INOX | Realistic ₹10k capital, 0.12% fees, whole shares, valid metrics | `python -m pytest tests/test_12_strategies.py -k test_all_12_strategies_run_on_pvrinox -v -p no:cacheprovider` | Passed (12/12 executed, whole shares verified) | **PASS** |
+| **18** | Baseline Strategy 3 Exact Trades | Preserves exact 11 trades and prices from 2024 to 2026 | `python -m pytest tests/test_12_strategies.py -k test_baseline_strategy_3_exact_trades -v -p no:cacheprovider` | Passed (Exact baseline trade match) | **PASS** |
+| **19** | Strategy 6 Scaling & Partial Exits | 50% booked at +8%, trailing stop to breakeven, whole shares | `python -m pytest tests/test_12_strategies.py -k test_strategy_6_partial_profit_booking -v -p no:cacheprovider` | Passed (Partial scaling accounting verified) | **PASS** |
+| **20** | Strategy 12 Single ₹10k Pool | Multi-stock cross-sectional allocation from single ₹10,000 pool | `python -m pytest tests/test_12_strategies.py -k test_portfolio_rotation_strategy_12_single_capital_pool -v -p no:cacheprovider` | Passed (Single pool, positive cash, whole shares) | **PASS** |
+| **21** | 12-Strategy Comparison Dashboard | Overlaid curves, drawdown, scorecard table, winner highlights | `python -m pytest tests/test_12_strategies.py -k test_compare_all_strategies_dashboard_engine -v -p no:cacheprovider` | Passed (Synchronized curves, 4 highlights) | **PASS** |
+| **22** | All 6 Stocks x 12 Strategies | Comparison engine executes across all 6 stocks without error | `python -m pytest tests/test_12_strategies.py -k test_all_6_stocks_run_12_strategies -v -p no:cacheprovider` | Passed (All 6 stocks verified cleanly) | **PASS** |
 
 ---
 

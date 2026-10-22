@@ -1,6 +1,6 @@
 {
-  "version_id": "v20261022_211946",
-  "updated_at": "2026-10-22T21:19:46.067405+05:30",
+  "version_id": "v20261022_225213",
+  "updated_at": "2026-10-22T22:52:13.223117+05:30",
   "status": "SUCCESS",
   "provider": "Yahoo Finance (yfinance)",
   "tickers": {
@@ -9,7 +9,7 @@
       "last_date": "2026-10-22",
       "rows": 5127,
       "sha256": "37b62ed4496709dfeb7ec043b66f85dd8bd5c463845d2e3ba0d4ef0290bb0454",
-      "fetched_at": "2026-10-22T21:19:46.067405+05:30",
+      "fetched_at": "2026-10-22T22:52:13.223117+05:30",
       "status": "VALID",
       "benchmark_version": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
       "warnings": [],
@@ -20,7 +20,7 @@
       "last_date": "2026-10-22",
       "rows": 6031,
       "sha256": "ab78a3e6fdfc939752bc186ce2a17f3df3a8be34160f6853e77c99b1db8a3cc0",
-      "fetched_at": "2026-10-22T21:19:46.067405+05:30",
+      "fetched_at": "2026-10-22T22:52:13.223117+05:30",
       "status": "VALID",
       "benchmark_version": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
       "warnings": [
@@ -45,7 +45,7 @@
       "last_date": "2026-10-22",
       "rows": 5179,
       "sha256": "5c7a3e2c370626e370694e2126bcf3e8e756a9ae5ef5e968a8348c92cbff64df",
-      "fetched_at": "2026-10-22T21:19:46.067405+05:30",
+      "fetched_at": "2026-10-22T22:52:13.223117+05:30",
       "status": "VALID",
       "benchmark_version": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
       "warnings": [
@@ -82,7 +82,7 @@
       "last_date": "2026-10-22",
       "rows": 491,
       "sha256": "27cb0f6f2bb094205683659d95a7906276468e4759bf0bb00af2653f337dea89",
-      "fetched_at": "2026-10-22T21:19:46.067405+05:30",
+      "fetched_at": "2026-10-22T22:52:13.223117+05:30",
       "status": "VALID",
       "benchmark_version": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
       "warnings": [],
@@ -93,7 +93,7 @@
       "last_date": "2026-10-22",
       "rows": 6031,
       "sha256": "5812bd36eb838e53550057588b51945c74243a904390a4d703ebdb688c23a3d3",
-      "fetched_at": "2026-10-22T21:19:46.067405+05:30",
+      "fetched_at": "2026-10-22T22:52:13.223117+05:30",
       "status": "VALID",
       "benchmark_version": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
       "warnings": [
@@ -112,7 +112,7 @@
       "last_date": "2026-10-22",
       "rows": 7726,
       "sha256": "da718a48c48758fb030f4a63b7dc2d01e39e00063008a4d308afd57253ac63fc",
-      "fetched_at": "2026-10-22T21:19:46.067405+05:30",
+      "fetched_at": "2026-10-22T22:52:13.223117+05:30",
       "status": "VALID",
       "benchmark_version": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
       "warnings": [
@@ -149,7 +149,7 @@
       "last_date": "2026-10-22",
       "rows": 4683,
       "sha256": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
-      "fetched_at": "2026-10-22T21:19:46.067405+05:30",
+      "fetched_at": "2026-10-22T22:52:13.223117+05:30",
       "status": "VALID",
       "benchmark_version": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
       "warnings": [],

@@ -109,13 +109,57 @@ Located at the top of the app in an expandable section:
     a clear notice: "Weekly RRG needs more history - <stock> listed on <date>".
   - Daily RRG continues to operate fully. No page crashes.
 
-8. AUTOMATED TESTING
+8. THE 12 RRG TRADING STRATEGIES & COMPARISON DASHBOARD
+---------------------------------------------------------
+The app features 12 comprehensive RRG trading strategies, real historical backtesting
+with default ₹10,000 starting capital, whole-share enforcement, 0.12% charges/taxes
+per side, daily mark-to-market portfolio accounting, and zero lookahead bias:
+
+  1. Basic Quadrant Rotation Strategy:
+     - Single-timeframe rotation (Daily). Buys on entry into Improving/Leading; exits on Weakening/Lagging.
+  2. Leading Profit Booking Strategy:
+     - Enters on Leading. Exits on profit target (+8%), trailing stop (5% from peak), or Weakening.
+  3. Daily + Weekly Confirmation Strategy (Baseline):
+     - The core multi-timeframe strategy. Buys on Daily Improving/Leading only when Weekly is Improving/Leading.
+     - Preserves the exact 11 PVR INOX baseline trades from 24 May 2024 to 12 Oct 2026.
+  4. Early Rotation Catcher (Lagging to Improving):
+     - Early bottoming rotation: Buys on Lagging-to-Improving with RS-Mom >= 100 & price recovery. 5% stop-loss.
+  5. Leading-Only Momentum Strategy:
+     - Trend-following confluence: Daily Leading + Weekly Leading + Close > 50-day SMA.
+  6. Partial Profit Booking Strategy:
+     - Scales out: Sells 50% at +8% profit target; trails remainder to breakeven stop or RRG exit.
+  7. Improving-to-Leading Crossover Strategy:
+     - Classic sweet spot: Buys at the exact vertical boundary crossing (RS-Ratio >= 100 with RS-Mom >= 100).
+  8. Leading Pullback Entry Strategy:
+     - Buy the dip: Weekly Leading primary trend; buys when temporary Daily pullback turns back up.
+  9. Weakening Early Exit Strategy:
+     - Capital preservation: Exits on the very first session Daily enters Weakening without waiting for Lagging.
+  10. Price + RRG Confirmation Strategy:
+     - Triple confluence: Daily+Weekly RRG UP + Close > 50-SMA + 20-day SMA sloping upward.
+  11. RS-Momentum Reversal Strategy:
+     - Pure oscillator: Buys when RS-Momentum crosses above 100; exits when it crosses below 100.
+  12. Portfolio Rotation Strategy (Multi-Stock):
+     - Cross-sectional allocation across all 6 stocks from a single ₹10,000 capital pool.
+     - Ranks all stocks daily by relative strength; dynamically rotates into leaders and out of laggards.
+
+Strategy View Modes:
+  - Single Strategy View: Deep dive into any selected strategy with live signals (BUY/HOLD/SELL/WAIT),
+    key metrics, interactive 3-row charts, and complete trade ledger with CSV export.
+  - Strategy Comparison Dashboard: Overlaid equity curves, drawdown curves, sortable scorecard table,
+    and winner callouts (Highest Return, Lowest Drawdown, Best Risk-Adjusted, Highest Win Rate).
+  - Portfolio Rotation View: Dedicated Strategy 12 multi-stock tracker with current allocations,
+    equity vs NIFTY 50, and full multi-stock transaction log.
+
+9. AUTOMATED TESTING
 --------------------
 Run test suite:
   python -m pytest tests/ -v -p no:cacheprovider
 
-Test coverage:
-  - tests/test_pvrinox_baseline.py        · Baseline regression checks (108.75/101.71, trades)
+Test coverage (23 automated tests):
+  - tests/test_12_strategies.py           · 7 tests: all 12 strategies, ₹10k execution, whole shares,
+                                            PVR INOX baseline, Strategy 6 scaling, Strategy 12 portfolio,
+                                            and multi-stock comparison engine across all 6 stocks.
+  - tests/test_pvrinox_baseline.py        · Baseline regression checks (108.75/101.71, 11 trades)
   - tests/test_independent_rrg.py         · Independent pandas formula verification (1e-6 tol)
   - tests/test_reliance_bonus.py          · Reliance 1:1 bonus split sanity check (no fake crash)
   - tests/test_waaree_history.py          · Waaree listing date and graceful weekly handling
@@ -123,9 +167,10 @@ Test coverage:
   - tests/test_app_views.py               · 30 combinations (6 stocks x 5 pages) via AppTest
   - tests/test_scheduler_integration.py   · CLI runner exit codes and schtasks registration
 
-9. KNOWN LIMITATIONS
---------------------
+10. KNOWN LIMITATIONS
+---------------------
   - Yahoo Finance quotes may occasionally lag exchange trading by 5 to 15 minutes.
   - Historical prices retroactively adjust on corporate actions (dividends/splits);
     the pipeline detects and records these re-adjustments in manifest warnings.
   - Task Scheduler requires user account permissions to register tasks on Windows.
+
