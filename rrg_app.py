@@ -1,32 +1,15 @@
 """
-Live RRG app: PVR INOX against NIFTY 50, daily or weekly.
-
-Drag the slider under the chart (or click the chart and use the arrow keys) to move
-through the sessions: the trail redraws for each date and the title states that
-date's quadrant. Every dot is coloured by the quadrant it sat in on its own date.
-
-The calculation is imported from make_rrg_pvrinox.py (not duplicated):
-
-    RS-Ratio    = 100 * EMA(SMA(RS,5),5) / EMA(SMA(RS,5),30)
-    RS-Momentum = 100 * EMA(RS-Ratio,3) / EMA(RS-Ratio,14)
-
-Daily uses daily closes. Weekly applies the same formula to weekly closes (the last
-trading day of each week), which is how weekly RRGs are built - the periods are
-counted in weeks, not days.
-
-Accuracy: the EMAs are run over the full Yahoo history (from 2007) and the first
-WARMUP bars are discarded, so no shown value depends on where the download starts.
-
-Run:  streamlit run rrg_app.py
+Multi-Stock RRG Application.
+Relative Rotation Graphs against NIFTY 50 (^NSEI) with verified data,
+strict validation, automatic daily updates, all-stock comparison, and strategy backtesting.
 """
 import os
 import sys
 import warnings
-from datetime import datetime, time, timedelta, timezone
+from datetime import datetime, time, timedelta
+from typing import Dict, Optional, Tuple
 
-# the formula lives next to this file; find it however the app is started
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
 warnings.filterwarnings("ignore")
 
 import pandas as pd
@@ -35,91 +18,148 @@ import plotly.io as pio
 import streamlit as st
 from plotly.subplots import make_subplots
 
+import config as cfg
+import data_pipeline as dp
 from make_rrg_pvrinox import (
-    STOCK, STOCK_TICKER, BENCH, BENCH_TICKER, TAIL_DAYS, SURFACE, INK_1, INK_2, INK_3,
-    GRID, SERIES, QUAD_BG, QUAD_FG, RS_PRESMOOTH, RS_SHORT, RS_LONG, MOM_SHORT, MOM_LONG,
-    calc_rs_ratio, calc_rs_momentum, quadrant, load_closes,
+    calc_rs_ratio, calc_rs_momentum, quadrant,
+    SURFACE, INK_1, INK_2, INK_3, GRID, SERIES, QUAD_BG, QUAD_FG,
+    RS_PRESMOOTH, RS_SHORT, RS_LONG, MOM_SHORT, MOM_LONG
 )
 
 ORDER = ["Leading", "Weakening", "Lagging", "Improving"]
-IST = timezone(timedelta(hours=5, minutes=30))
+CYCLES_FROM = pd.Timestamp("2024-01-01")
+SINCE_2024 = "Since Jan 2024"
 
-# everything that differs between the two timeframes
-TF = {
-    "Daily": dict(unit="session", units="sessions", warmup=200, tail=TAIL_DAYS,
+# Color palette for All-Stocks view
+STOCK_COLORS = {
+    "PVRINOX.NS": "#2a78d6",      # Blue
+    "BEL.NS": "#2e7d32",          # Forest Green
+    "SUZLON.NS": "#d32f2f",       # Crimson Red
+    "WAAREEENER.NS": "#ef6c00",   # Amber Orange
+    "BHARTIARTL.NS": "#7b1fa2",   # Purple
+    "RELIANCE.NS": "#00838f",     # Deep Cyan
+}
+
+TF_CONFIG = {
+    "Daily": dict(unit="session", units="sessions", warmup=cfg.WARMUP_DAILY, tail=cfg.TAIL_DAYS_DAILY,
                   windows=[60, 125, 250, 500, 750], window=250, slider="Session: ",
                   head="%a %d %b %Y"),
-    "Weekly": dict(unit="week", units="weeks", warmup=100, tail=12,
+    "Weekly": dict(unit="week", units="weeks", warmup=cfg.WARMUP_WEEKLY, tail=cfg.TAIL_WEEKS,
                    windows=[26, 52, 104, 156, 260], window=52, slider="Week ending: ",
                    head="Week ending %a %d %b %Y"),
 }
 
-st.set_page_config(page_title="PVR INOX Live RRG", page_icon="📈", layout="wide")
+st.set_page_config(page_title="NSE Multi-Stock Live RRG", page_icon="📈", layout="wide")
 
-# Tight page, and the RRG iframe sized to the browser window so the slider is
-# always on screen without scrolling.
 st.markdown("""
 <style>
 .block-container {padding-top: 1.2rem; padding-bottom: 1rem;}
 iframe[data-testid="stIFrame"] {height: calc(100vh - 245px) !important; min-height: 430px;}
 div[data-testid="stMetric"] {padding: 0;}
-div[data-testid="stMetricValue"] {font-size: 1.5rem;}
+div[data-testid="stMetricValue"] {font-size: 1.45rem;}
+.status-pill {padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 0.85rem;}
+.status-live {background: #e8f5e9; color: #2e7d32;}
+.status-cached {background: #e3f2fd; color: #1565c0;}
+.status-stale {background: #fff3e0; color: #e65100;}
 </style>
 """, unsafe_allow_html=True)
 
 
-def market_open(now):
-    return now.weekday() < 5 and time(9, 15) <= now.time() <= time(15, 30)
+# ---- Data Loading & Caching -------------------------------------------------
+@st.cache_data(show_spinner=False)
+def get_cached_aligned_data(ticker: str, manifest_version: str):
+    """
+    Loads verified clean stock and benchmark data, performing strict inner join.
+    Cached on manifest_version.
+    """
+    stock_df = dp.load_clean_data(ticker)
+    bench_df = dp.load_clean_data(cfg.BENCHMARK_TICKER)
+    if stock_df is None or bench_df is None:
+        return None
+    stock_name = cfg.STOCKS.get(ticker, {}).get("name", ticker)
+    aligned = dp.align_stock_with_benchmark(stock_df, bench_df, stock_name, cfg.BENCHMARK_NAME)
+    return aligned
 
 
-# ---- data -------------------------------------------------------------------
-@st.cache_data(ttl=300, show_spinner="Downloading closes...")
-def get_closes():
-    # Yahoo sometimes refuses a request (rate limits are common from cloud servers),
-    # so try a few times before falling back to the CSVs shipped with the app
-    for attempt in range(3):
-        try:
-            import yfinance as yf
-            raw = yf.download([STOCK_TICKER, BENCH_TICKER], period="max", interval="1d",
-                              auto_adjust=True, progress=False)
-            closes = raw["Close"][[STOCK_TICKER, BENCH_TICKER]].dropna()
-            if len(closes) < 1000:
-                raise ValueError("insufficient rows returned")
-            closes.columns = [STOCK, BENCH]
-            return closes, "Yahoo Finance (auto-adjusted closes, full history)", datetime.now(IST)
-        except Exception:
-            if attempt < 2:
-                import time as _time
-                _time.sleep(3 * (attempt + 1))
-    closes, source = load_closes()
-    return closes, source + " - offline fallback, live download failed", datetime.now(IST)
+def get_stock_data(ticker: str) -> Tuple[Optional[pd.DataFrame], str, datetime]:
+    """Retrieves aligned stock data with status source and timestamp."""
+    manifest = dp.load_manifest()
+    m_ver = manifest.get("version_id", "none")
+    aligned = get_cached_aligned_data(ticker, m_ver)
+    updated_at_str = manifest.get("updated_at")
+    fetched_dt = datetime.fromisoformat(updated_at_str) if updated_at_str else datetime.now(cfg.IST)
+    source = f"Verified local storage ({cfg.PROVIDER})"
+    return aligned, source, fetched_dt
 
 
-def get_rrg(tf):
-    closes, source, fetched = get_closes()
+def compute_rrg(df_aligned: pd.DataFrame, stock_name: str, tf: str = "Daily") -> Tuple[pd.DataFrame, bool]:
+    """Computes RRG daily or weekly series from aligned closes."""
+    bench_name = cfg.BENCHMARK_NAME
+    closes = df_aligned.copy()
     if tf == "Weekly":
-        # last trading day of each week, dated on that day (a holiday Friday
-        # leaves the week dated Thursday rather than a day with no trade)
+        # Group by Friday week ending; take last trading day of each week
         closes = closes.groupby(closes.index.to_period("W-FRI")).tail(1)
-    rr = calc_rs_ratio(closes[STOCK], closes[BENCH])
+
+    raw_len = len(closes)
+    warmup = min(TF_CONFIG[tf]["warmup"], raw_len // 3)
+    if raw_len < warmup + 10:
+        return pd.DataFrame(), False
+
+    rr = calc_rs_ratio(closes[stock_name], closes[bench_name])
     rm = calc_rs_momentum(rr)
-    df = pd.DataFrame({"RS_Ratio": rr, "RS_Momentum": rm, "Close": closes[STOCK]}).dropna()
-    df = df.iloc[min(TF[tf]["warmup"], len(df) // 3):]
+    df = pd.DataFrame({"RS_Ratio": rr, "RS_Momentum": rm, "Close": closes[stock_name]}).dropna()
+    df = df.iloc[warmup:]
     df["Quadrant"] = [quadrant(a, b) for a, b in zip(df["RS_Ratio"], df["RS_Momentum"])]
-    return df, source, fetched
+
+    # Weekly minimum bar check (section 7.3)
+    is_sufficient = len(df) >= 60 if tf == "Weekly" else len(df) >= 30
+    return df, is_sufficient
 
 
-def latest_is_provisional(df, tf, now):
-    """True while the newest bar can still change (market day/week not finished)."""
-    last = df.index[-1]
-    if tf == "Daily":
-        return market_open(now) and last.date() == now.date()
-    same_week = last.to_period("W-FRI") == pd.Timestamp(now.date()).to_period("W-FRI")
-    week_done = now.weekday() > 4 or (now.weekday() == 4 and now.time() > time(15, 30))
-    return same_week and not week_done
+def weekly_asof(closes: pd.DataFrame, stock_name: str, bench_name: str = cfg.BENCHMARK_NAME) -> pd.DataFrame:
+    """
+    Weekly RS-Ratio / RS-Momentum as they stood on each trading day (no look-ahead).
+    """
+    week = closes.index.to_period("W-FRI")
+    wk = closes.groupby(week).tail(1)
+    if len(wk) < 15:
+        return pd.DataFrame()
+
+    rs_w = pd.Series((wk[stock_name] / wk[bench_name]).to_numpy())
+    sm = rs_w.rolling(RS_PRESMOOTH, min_periods=1).mean()
+    e_fast = sm.ewm(span=RS_SHORT, adjust=False).mean().to_numpy()
+    e_slow = sm.ewm(span=RS_LONG, adjust=False).mean().to_numpy()
+    rr_w = pd.Series(100.0 * e_fast / e_slow)
+    m_fast = rr_w.ewm(span=MOM_SHORT, adjust=False).mean().to_numpy()
+    m_slow = rr_w.ewm(span=MOM_LONG, adjust=False).mean().to_numpy()
+    prior = rs_w.rolling(RS_PRESMOOTH - 1, min_periods=1).sum().to_numpy()
+
+    pos = pd.Index(wk.index.to_period("W-FRI")).get_indexer(week)
+    prev = pos - 1
+    warmup = min(TF_CONFIG["Weekly"]["warmup"], len(wk) // 3)
+    ok = prev >= warmup
+    if not ok.any():
+        return pd.DataFrame()
+
+    prev_ok = prev[ok]
+    d_idx = closes.index[ok]
+    rs_d = (closes[stock_name] / closes[bench_name]).to_numpy()[ok]
+
+    def step(x, state, span):
+        a = 2.0 / (span + 1.0)
+        return a * x + (1 - a) * state
+
+    sm_d = (prior[prev_ok] + rs_d) / RS_PRESMOOTH
+    rr_d = 100.0 * step(sm_d, e_fast[prev_ok], RS_SHORT) / step(sm_d, e_slow[prev_ok], RS_LONG)
+    rm_d = 100.0 * step(rr_d, m_fast[prev_ok], MOM_SHORT) / step(rr_d, m_slow[prev_ok], MOM_LONG)
+    out = pd.DataFrame({"RS_Ratio": rr_d, "RS_Momentum": rm_d,
+                        "Close": closes[stock_name].to_numpy()[ok]}, index=d_idx)
+    out["Quadrant"] = [quadrant(a, b) for a, b in zip(out["RS_Ratio"], out["RS_Momentum"])]
+    return out
 
 
-def periods(df):
+# ---- UI Helpers -------------------------------------------------------------
+def periods(df: pd.DataFrame) -> pd.DataFrame:
     """Consecutive runs of the same quadrant -> one row per run, newest first."""
     run_id = (df["Quadrant"] != df["Quadrant"].shift()).cumsum()
     rows = [{"Quadrant": g["Quadrant"].iloc[0], "From": g.index[0], "To": g.index[-1],
@@ -128,15 +168,77 @@ def periods(df):
 
 
 def frame_range(xs, ys):
-    """Axis limits for one trail: frame it, but always keep the 100/100 cross in view."""
+    """Axis limits for trail, keeping the 100/100 crosshair clearly in view."""
     spread = max(xs.max() - xs.min(), ys.max() - ys.min())
     pad, margin = max(0.35, 0.20 * spread), max(0.45, 0.25 * spread)
     return ([min(xs.min() - pad, 100 - margin), max(xs.max() + pad, 100 + margin)],
             [min(ys.min() - pad, 100 - margin), max(ys.max() + pad, 100 + margin)])
 
 
-# Fills the iframe, and ← / → step one bar; the slider follows because each step
-# is a named frame.
+def r3(values):
+    return [round(float(v), 3) for v in values]
+
+
+def sparse_labels(xs, ys, xr, yr, gap=0.06, aspect=0.6):
+    n = len(xs)
+    px = [(x - xr[0]) / max(xr[1] - xr[0], 1e-4) for x in xs]
+    py = [(y - yr[0]) / max(yr[1] - yr[0], 1e-4) * aspect for y in ys]
+    keep = [n - 1, 0]
+    for i in range(n - 2, 0, -1):
+        if all((px[i] - px[j]) ** 2 + (py[i] - py[j]) ** 2 > gap ** 2 for j in keep):
+            keep.append(i)
+    return [str(i + 1) if i in keep else "" for i in range(n)]
+
+
+def quad_corners(xr, yr, s, size):
+    corner = {"Improving": (xr[0], yr[1], "left", "top"),
+              "Leading": (xr[1], yr[1], "right", "top"),
+              "Lagging": (xr[0], yr[0], "left", "bottom"),
+              "Weakening": (xr[1], yr[0], "right", "bottom")}
+    return [dict(x=x, y=y, xref="x" + s, yref="y" + s, xanchor=xa, yanchor=ya,
+                 showarrow=False, xshift=8 if xa == "left" else -8,
+                 yshift=-6 if ya == "top" else 6, text=f"<b>{q.upper()}</b>",
+                 font=dict(color=QUAD_FG[q], size=size))
+            for q, (x, y, xa, ya) in corner.items()]
+
+
+def panel_parts(view, s, xr, yr, aspect, small):
+    tail, dates, last_text = view["tail"], view["dates"], view["last_text"]
+    xs, ys = tail["RS_Ratio"].to_numpy(), tail["RS_Momentum"].to_numpy()
+    quads = list(tail["Quadrant"])
+    n = len(tail)
+    fade = [round(0.3 + 0.7 * i / max(n - 1, 1), 2) for i in range(n)]
+    hover = [f"<b>#{i + 1}  {d}</b><br>{q}<br>RS-Ratio {r:.2f}<br>RS-Momentum {m:.2f}<br>Close ₹{c:.2f}"
+             for i, (d, r, m, q, c) in enumerate(zip(dates, xs, ys, quads, tail["Close"]))]
+    x, y = r3(xs), r3(ys)
+    ax = dict(type="scatter", xaxis="x" + s, yaxis="y" + s)
+    traces = [
+        dict(x=x, y=y, mode="lines", line=dict(color=SERIES, width=2),
+             opacity=0.55, hoverinfo="skip", **ax),
+        dict(x=x, y=y, mode="markers+text",
+             text=sparse_labels(xs, ys, xr, yr, aspect=aspect), textposition="top center",
+             textfont=dict(color=INK_2, size=10 if small else 11),
+             marker=dict(size=10 if small else 11, color=[QUAD_FG[q] for q in quads],
+                         opacity=fade, line=dict(color=SURFACE, width=1.2)),
+             hovertext=hover, hoverinfo="text", **ax),
+        dict(x=x[-1:], y=y[-1:], mode="markers",
+             marker=dict(size=19 if small else 22, color=QUAD_FG[quads[-1]],
+                         line=dict(color=SURFACE, width=2.5)),
+             hovertext=hover[-1:], hoverinfo="text", **ax),
+    ]
+    ref = dict(xref="x" + s, yref="y" + s, showarrow=False)
+    notes = quad_corners(xr, yr, s, 11 if small else 13) + [
+        dict(x=x[0], y=y[0], yshift=-18, text=tail.index[0].strftime("%d %b"),
+             font=dict(color=INK_3, size=10 if small else 11), **ref),
+        dict(x=x[-1], y=y[-1], yshift=-22, text=f"<b>{last_text}</b>",
+             font=dict(color=INK_1, size=11 if small else 12), **ref),
+    ]
+    heading = (f"<b>{view['heading']}</b>{'<br>' if small else '  ·  '}"
+               f"<span style='color:{QUAD_FG[quads[-1]]}'><b>{quads[-1].upper()}</b></span>  ·  "
+               f"RS-Ratio {xs[-1]:.2f}  ·  RS-Momentum {ys[-1]:.2f}")
+    return traces, notes, heading
+
+
 FIT_AND_KEYS = """
 var gd = document.getElementById('{plot_id}');
 document.documentElement.style.height = '100%';
@@ -161,122 +263,7 @@ document.addEventListener('keydown', function (e) {
 """
 
 
-def sparse_labels(xs, ys, xr, yr, gap=0.06, aspect=0.6):
-    """Bar numbers only where they fit: newest first, then any dot at least `gap`
-    (share of the plot) away from every label already placed. The first and last
-    bars are always numbered; hover still gives every dot's date."""
-    n = len(xs)
-    px = [(x - xr[0]) / (xr[1] - xr[0]) for x in xs]
-    py = [(y - yr[0]) / (yr[1] - yr[0]) * aspect for y in ys]   # height / width of plot
-    keep = [n - 1, 0]
-    for i in range(n - 2, 0, -1):
-        if all((px[i] - px[j]) ** 2 + (py[i] - py[j]) ** 2 > gap ** 2 for j in keep):
-            keep.append(i)
-    return [str(i + 1) if i in keep else "" for i in range(n)]
-
-
-# ---- weekly RRG as it stood on any day --------------------------------------
-def weekly_asof(closes):
-    """Weekly RS-Ratio / RS-Momentum as they read on each trading day.
-
-    On day d the current week is unfinished, so its weekly close is d's close.
-    The EMAs are recursive, so this is one EMA step from the previous week's final
-    state - exactly what a live weekly chart shows that day. On the last trading
-    day of a week it equals that week's final weekly value."""
-    week = closes.index.to_period("W-FRI")
-    wk = closes.groupby(week).tail(1)
-    rs_w = pd.Series((wk[STOCK] / wk[BENCH]).to_numpy())
-    sm = rs_w.rolling(RS_PRESMOOTH, min_periods=1).mean()
-    e_fast = sm.ewm(span=RS_SHORT, adjust=False).mean().to_numpy()
-    e_slow = sm.ewm(span=RS_LONG, adjust=False).mean().to_numpy()
-    rr_w = pd.Series(100.0 * e_fast / e_slow)
-    m_fast = rr_w.ewm(span=MOM_SHORT, adjust=False).mean().to_numpy()
-    m_slow = rr_w.ewm(span=MOM_LONG, adjust=False).mean().to_numpy()
-    # sum of the (RS_PRESMOOTH - 1) completed weeks up to each week, for the SMA
-    prior = rs_w.rolling(RS_PRESMOOTH - 1, min_periods=1).sum().to_numpy()
-
-    pos = pd.Index(wk.index.to_period("W-FRI")).get_indexer(week)
-    prev = pos - 1
-    ok = prev >= min(TF["Weekly"]["warmup"], len(wk) // 3)   # same rule as get_rrg
-    prev, d_idx = prev[ok], closes.index[ok]
-    rs_d = (closes[STOCK] / closes[BENCH]).to_numpy()[ok]
-
-    def step(x, state, span):
-        a = 2.0 / (span + 1.0)
-        return a * x + (1 - a) * state
-
-    sm_d = (prior[prev] + rs_d) / RS_PRESMOOTH
-    rr_d = 100.0 * step(sm_d, e_fast[prev], RS_SHORT) / step(sm_d, e_slow[prev], RS_LONG)
-    rm_d = 100.0 * step(rr_d, m_fast[prev], MOM_SHORT) / step(rr_d, m_slow[prev], MOM_LONG)
-    out = pd.DataFrame({"RS_Ratio": rr_d, "RS_Momentum": rm_d,
-                        "Close": closes[STOCK].to_numpy()[ok]}, index=d_idx)
-    out["Quadrant"] = [quadrant(a, b) for a, b in zip(out["RS_Ratio"], out["RS_Momentum"])]
-    return out
-
-
-# ---- the RRG with its date slider -------------------------------------------
-def quad_corners(xr, yr, s, size):
-    corner = {"Improving": (xr[0], yr[1], "left", "top"),
-              "Leading": (xr[1], yr[1], "right", "top"),
-              "Lagging": (xr[0], yr[0], "left", "bottom"),
-              "Weakening": (xr[1], yr[0], "right", "bottom")}
-    return [dict(x=x, y=y, xref="x" + s, yref="y" + s, xanchor=xa, yanchor=ya,
-                 showarrow=False, xshift=8 if xa == "left" else -8,
-                 yshift=-6 if ya == "top" else 6, text="<b>%s</b>" % q.upper(),
-                 font=dict(color=QUAD_FG[q], size=size))
-            for q, (x, y, xa, ya) in corner.items()]
-
-
-def r3(values):
-    """Plain floats rounded to 3 decimals: far smaller page, no visible change."""
-    return [round(float(v), 3) for v in values]
-
-
-def panel_parts(view, s, xr, yr, aspect, small):
-    """Traces (plain dicts, no plotly validation - hundreds of frames are built)
-    and annotations for one trail drawn on axes x{s}/y{s}."""
-    tail, dates, last_text = view["tail"], view["dates"], view["last_text"]
-    xs, ys = tail["RS_Ratio"].to_numpy(), tail["RS_Momentum"].to_numpy()
-    quads = list(tail["Quadrant"])
-    n = len(tail)
-    fade = [round(0.3 + 0.7 * i / max(n - 1, 1), 2) for i in range(n)]
-    hover = ["<b>#%d  %s</b><br>%s<br>RS-Ratio %.2f<br>RS-Momentum %.2f<br>Close ₹%.2f"
-             % (i + 1, d, q, r, m, c)
-             for i, (d, r, m, q, c) in enumerate(zip(dates, xs, ys, quads, tail["Close"]))]
-    x, y = r3(xs), r3(ys)
-    ax = dict(type="scatter", xaxis="x" + s, yaxis="y" + s)
-    traces = [
-        dict(x=x, y=y, mode="lines", line=dict(color=SERIES, width=2),
-             opacity=0.55, hoverinfo="skip", **ax),
-        dict(x=x, y=y, mode="markers+text",
-             text=sparse_labels(xs, ys, xr, yr, aspect=aspect), textposition="top center",
-             textfont=dict(color=INK_2, size=10 if small else 11),
-             marker=dict(size=10 if small else 11, color=[QUAD_FG[q] for q in quads],
-                         opacity=fade, line=dict(color=SURFACE, width=1.2)),
-             hovertext=hover, hoverinfo="text", **ax),
-        dict(x=x[-1:], y=y[-1:], mode="markers",
-             marker=dict(size=19 if small else 22, color=QUAD_FG[quads[-1]],
-                         line=dict(color=SURFACE, width=2.5)),
-             hovertext=hover[-1:], hoverinfo="text", **ax),
-    ]
-    ref = dict(xref="x" + s, yref="y" + s, showarrow=False)
-    notes = quad_corners(xr, yr, s, 11 if small else 13) + [
-        dict(x=x[0], y=y[0], yshift=-18, text=tail.index[0].strftime("%d %b"),
-             font=dict(color=INK_3, size=10 if small else 11), **ref),
-        dict(x=x[-1], y=y[-1], yshift=-22, text="<b>%s</b>" % last_text,
-             font=dict(color=INK_1, size=11 if small else 12), **ref),
-    ]
-    heading = ("<b>%s</b>%s<span style='color:%s'><b>%s</b></span>  ·  RS-Ratio %.2f  ·  "
-               "RS-Momentum %.2f" % (view["heading"], "<br>" if small else "  ·  ",
-                                      QUAD_FG[quads[-1]], quads[-1].upper(), xs[-1], ys[-1]))
-    return traces, notes, heading
-
-
 def rrg_figure(panels, names, slider_prefix):
-    """One date slider driving one or two RRG panels. Returns a plain figure dict.
-
-    panels: list of {"name", "views": [one view per slider step], "fixed": range or None}
-    where a view is {"tail": frame, "dates": hover dates, "last_text", "heading"}."""
     two = len(panels) == 2
     suffix = ["", "2"][:len(panels)]
     domains = [[0, 0.47], [0.53, 1]] if two else [[0, 1]]
@@ -298,21 +285,18 @@ def rrg_figure(panels, names, slider_prefix):
                 notes.append(dict(x=(dom[0] + dom[1]) / 2, y=1.0, xref="paper", yref="paper",
                                   xanchor="center", yanchor="bottom", yshift=6,
                                   showarrow=False, align="center",
-                                  text="<span style='font-size:15px'><b>%s</b></span>  %s"
-                                       % (p["name"].upper(), heading),
+                                  text=f"<span style='font-size:15px'><b>{p['name'].upper()}</b></span>  {heading}",
                                   font=dict(size=12, color=INK_2)))
             else:
                 layout["title"] = dict(text=heading, y=0.985, yanchor="top", font=dict(size=15))
         layout["annotations"] = notes
         return data, layout
 
-    frames = []
-    for j, name in enumerate(names):
-        data, layout = frame_parts(j)
-        frames.append(dict(data=data, layout=layout, name=name))
+    frames = [dict(data=frame_parts(j)[0], layout=frame_parts(j)[1], name=name)
+              for j, name in enumerate(names)]
     data, layout = frame_parts(len(names) - 1)
 
-    big = 1e4  # quadrant fills reach far past any range the axes can take
+    big = 1e4
     shapes = []
     for s in suffix:
         ref = dict(xref="x" + s, yref="y" + s, layer="below")
@@ -327,9 +311,8 @@ def rrg_figure(panels, names, slider_prefix):
         shapes.append(dict(type="line", x0=100, x1=100, y0=-big, y1=big,
                            line=dict(color=INK_3, width=1.1), **ref))
 
-    step = dict(mode="immediate", frame=dict(duration=0, redraw=True),
-                transition=dict(duration=0))
-    xt = "RS-Ratio (100 = in line with %s)" % BENCH if two else         "JdK RS-Ratio — relative strength level (100 = in line with %s)" % BENCH
+    step = dict(mode="immediate", frame=dict(duration=0, redraw=True), transition=dict(duration=0))
+    xt = f"RS-Ratio (100 = in line with {cfg.BENCHMARK_NAME})" if two else f"JdK RS-Ratio — relative strength level (100 = in line with {cfg.BENCHMARK_NAME})"
     yt = "RS-Momentum" if two else "JdK RS-Momentum — rate of change of relative strength"
     for s, dom in zip(suffix, domains):
         layout["xaxis" + s].update(domain=dom, anchor="y" + s, gridcolor=GRID, zeroline=False,
@@ -352,19 +335,18 @@ def rrg_figure(panels, names, slider_prefix):
 
 
 def fixed_range(views):
-    """One axis range covering every trail the slider can show."""
     every = pd.concat([v["tail"] for v in views])
     return frame_range(every["RS_Ratio"].to_numpy(), every["RS_Momentum"].to_numpy())
 
 
 def single_views(df, tf, window, tail_n, provisional_last):
-    head = TF[tf]["head"]
+    head = TF_CONFIG[tf]["head"]
     start = max(len(df) - window, tail_n - 1)
     views = []
     for k in range(start, len(df)):
         tail = df.iloc[k - tail_n + 1:k + 1]
         day = tail.index[-1]
-        tag = "  (provisional)" if provisional_last and k == len(df) - 1 else ""
+        tag = " (provisional)" if provisional_last and k == len(df) - 1 else ""
         views.append(dict(tail=tail, dates=[d.strftime(head) for d in tail.index],
                           last_text=day.strftime("%d %b %Y") + tag,
                           heading=day.strftime(head)))
@@ -372,16 +354,14 @@ def single_views(df, tf, window, tail_n, provisional_last):
 
 
 def weekly_views_on(days, wk, asof, tail_w, open_week):
-    """Weekly trail as it stood on each day: completed weeks + the week so far."""
     wk_per = wk.index.to_period("W-FRI")
-    head = TF["Weekly"]["head"]
+    head = TF_CONFIG["Weekly"]["head"]
     views = []
     for d in days:
         i = wk_per.searchsorted(d.to_period("W-FRI"))
         done = wk.iloc[max(0, i - (tail_w - 1)):i]
-        now_row = asof.loc[[d]]
+        now_row = asof.loc[[d]] if d in asof.index else wk.iloc[-1:]
         tail = pd.concat([done[now_row.columns], now_row])
-        # the week is complete on its last trading day, unless that week is still open
         week_final = i < len(wk) and wk.index[i] == d and not (open_week and i == len(wk) - 1)
         last = ("Week ending %s" if week_final else "Week to %s") % d.strftime("%a %d %b %Y")
         views.append(dict(tail=tail, dates=[x.strftime(head) for x in done.index] + [last],
@@ -390,55 +370,32 @@ def weekly_views_on(days, wk, asof, tail_w, open_week):
     return views
 
 
-# ---- the quadrant timeline --------------------------------------------------
-def timeline_figure(seg, tf):
-    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, row_heights=[0.8, 0.2],
-                        vertical_spacing=0.04)
-    fig.add_hline(y=100, line_color=INK_3, line_width=1, row=1, col=1)
-    fig.add_trace(go.Scatter(x=seg.index, y=seg["RS_Ratio"], name="RS-Ratio",
-                             line=dict(color=SERIES, width=2)), row=1, col=1)
-    fig.add_trace(go.Scatter(x=seg.index, y=seg["RS_Momentum"], name="RS-Momentum",
-                             line=dict(color="#d0782a", width=2)), row=1, col=1)
-    head = TF[tf]["head"]
-    for q in ORDER:
-        part = seg[seg["Quadrant"] == q]
-        fig.add_trace(go.Bar(x=part.index, y=[1] * len(part), name=q, marker_color=QUAD_FG[q],
-                             marker_line_width=0,
-                             customdata=part[["RS_Ratio", "RS_Momentum"]].to_numpy(),
-                             hovertemplate="%{x|" + head + "}<br><b>" + q + "</b><br>"
-                                           "RS-Ratio %{customdata[0]:.2f}<br>"
-                                           "RS-Momentum %{customdata[1]:.2f}<extra></extra>"),
-                      row=2, col=1)
-    fig.update_layout(height=360, bargap=0, barmode="stack", hovermode="x unified",
-                      margin=dict(l=65, r=20, t=10, b=10),
-                      plot_bgcolor=SURFACE, paper_bgcolor=SURFACE, font=dict(color=INK_2),
-                      legend=dict(orientation="h", y=1.08, x=0, traceorder="normal"))
-    if tf == "Daily":
-        # hide weekends and exchange holidays so the strip has no gaps
-        holidays = pd.bdate_range(seg.index[0], seg.index[-1]).difference(seg.index)
-        fig.update_xaxes(rangebreaks=[dict(bounds=["sat", "mon"]),
-                                      dict(values=list(holidays))])
-    fig.update_xaxes(gridcolor=GRID)
-    fig.update_yaxes(gridcolor=GRID, row=1, col=1)
-    fig.update_yaxes(visible=False, row=2, col=1)
-    return fig
+@st.cache_data(max_entries=8, show_spinner=False)
+def chart_html(key, _build):
+    return pio.to_html(_build(), validate=False, include_plotlyjs=True, full_html=True,
+                       auto_play=False, default_width="100%", default_height="100%",
+                       config={"displaylogo": False, "responsive": True},
+                       post_script=FIT_AND_KEYS)
+
+
+def embed(key, build):
+    st.iframe(chart_html(key, build), height=700)
 
 
 def quad_style(col):
-    return ["background-color: %s; color: %s; font-weight: bold" % (QUAD_BG[q], QUAD_FG[q])
+    return [f"background-color: {QUAD_BG[q]}; color: {QUAD_FG[q]}; font-weight: bold"
             if q in QUAD_BG else "" for q in col]
 
 
-# ---- cycles: up = Improving/Leading, down = Weakening/Lagging ---------------
+# ---- Cycles & Timeline ------------------------------------------------------
 UP = ("Improving", "Leading")
 UP_FG, DOWN_FG = QUAD_FG["Leading"], QUAD_FG["Lagging"]
-WEEK_DOWN = "#e8893a"   # orange: weekly-down strip on the Strategy chart
-WEEK_STRIP = {"Leading": "#2e7d4f", "Improving": "#8fd19e",   # dark / light green
+WEEK_DOWN = "#e8893a"
+WEEK_STRIP = {"Leading": "#2e7d4f", "Improving": "#8fd19e",
               "Weakening": WEEK_DOWN, "Lagging": WEEK_DOWN}
 
 
 def phases(df):
-    """Consecutive runs on the same side of RS-Momentum 100 (up / down)."""
     up = df["Quadrant"].isin(UP)
     run_id = (up != up.shift()).cumsum()
     out = []
@@ -453,12 +410,7 @@ def phases(df):
     return out
 
 
-CYCLES_FROM = pd.Timestamp("2024-01-01")   # the move log always starts here
-
-
 def moves(df):
-    """Every switch between the two sides, oldest first: the date it entered
-    Improving/Leading (up) or Weakening/Lagging (down), and how long it stayed."""
     ph = phases(df)
     last_close = df["Close"].iloc[-1]
     out = []
@@ -473,7 +425,6 @@ def moves(df):
 
 
 def cycle_strip(items, start):
-    """Up/down blocks per timeframe on one date axis."""
     fig = go.Figure()
     names = [n for n, _ in items]
     for row, (name, df) in enumerate(items):
@@ -489,14 +440,11 @@ def cycle_strip(items, start):
             fig.add_trace(go.Scatter(
                 x=[x0 + (x1 - x0) / 2], y=[row + 0.5], mode="markers",
                 marker=dict(size=18, opacity=0), showlegend=False,
-                hovertemplate="<b>%s · %s</b><br>%s → %s<br>%d %s<br>%s<extra></extra>"
-                              % (name, "UP" if p["up"] else "DOWN",
-                                 p["start"].strftime("%d %b %Y"),
-                                 p["next"].strftime("%d %b %Y") if p["next"] else "now",
-                                 p["bars"], "weeks" if name == "Weekly" else "sessions",
-                                 " → ".join(p["route"]))))
-    for label, color in (("Up: Improving / Leading", UP_FG),
-                         ("Down: Weakening / Lagging", DOWN_FG)):
+                hovertemplate=f"<b>{name} · {'UP' if p['up'] else 'DOWN'}</b><br>"
+                              f"{p['start'].strftime('%d %b %Y')} → {p['next'].strftime('%d %b %Y') if p['next'] else 'now'}<br>"
+                              f"{p['bars']} {'weeks' if name == 'Weekly' else 'sessions'}<br>"
+                              f"{' → '.join(p['route'])}<extra></extra>"))
+    for label, color in (("Up: Improving / Leading", UP_FG), ("Down: Weakening / Lagging", DOWN_FG)):
         fig.add_trace(go.Scatter(x=[None], y=[None], mode="markers", name=label,
                                  marker=dict(size=12, symbol="square", color=color)))
     fig.update_layout(height=90 + 55 * len(items), margin=dict(l=65, r=20, t=30, b=30),
@@ -506,24 +454,51 @@ def cycle_strip(items, start):
     fig.update_xaxes(range=[start, max(df.index[-1] for _, df in items) + pd.Timedelta(days=3)],
                      gridcolor=GRID, dtick="M3", tickformat="%b %Y")
     fig.update_yaxes(range=[len(items), 0], tickvals=[i + 0.5 for i in range(len(items))],
-                     ticktext=["<b>%s</b>" % n for n in names], showgrid=False, zeroline=False)
+                     ticktext=[f"<b>{n}</b>" for n in names], showgrid=False, zeroline=False)
+    return fig
+
+
+def timeline_figure(seg, tf):
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, row_heights=[0.8, 0.2], vertical_spacing=0.04)
+    fig.add_hline(y=100, line_color=INK_3, line_width=1, row=1, col=1)
+    fig.add_trace(go.Scatter(x=seg.index, y=seg["RS_Ratio"], name="RS-Ratio",
+                             line=dict(color=SERIES, width=2)), row=1, col=1)
+    fig.add_trace(go.Scatter(x=seg.index, y=seg["RS_Momentum"], name="RS-Momentum",
+                             line=dict(color="#d0782a", width=2)), row=1, col=1)
+    head = TF_CONFIG[tf]["head"]
+    for q in ORDER:
+        part = seg[seg["Quadrant"] == q]
+        fig.add_trace(go.Bar(x=part.index, y=[1] * len(part), name=q, marker_color=QUAD_FG[q],
+                             marker_line_width=0,
+                             customdata=part[["RS_Ratio", "RS_Momentum"]].to_numpy(),
+                             hovertemplate=f"%{{x|{head}}}<br><b>{q}</b><br>RS-Ratio %{{customdata[0]:.2f}}<br>RS-Momentum %{{customdata[1]:.2f}}<extra></extra>"),
+                      row=2, col=1)
+    fig.update_layout(height=360, bargap=0, barmode="stack", hovermode="x unified",
+                      margin=dict(l=65, r=20, t=10, b=10),
+                      plot_bgcolor=SURFACE, paper_bgcolor=SURFACE, font=dict(color=INK_2),
+                      legend=dict(orientation="h", y=1.08, x=0, traceorder="normal"))
+    if tf == "Daily":
+        holidays = pd.bdate_range(seg.index[0], seg.index[-1]).difference(seg.index)
+        fig.update_xaxes(rangebreaks=[dict(bounds=["sat", "mon"]), dict(values=list(holidays))])
+    fig.update_xaxes(gridcolor=GRID)
+    fig.update_yaxes(gridcolor=GRID, row=1, col=1)
+    fig.update_yaxes(visible=False, row=2, col=1)
     return fig
 
 
 def move_log(df, unit_s, unit_p):
     log = [m for m in moves(df) if m["date"] >= CYCLES_FROM]
-    plural = lambda n: "%d %s" % (n, unit_s if n == 1 else unit_p)
+    plural = lambda n: f"{n} {unit_s if n == 1 else unit_p}"
     cur = phases(df)[-1]
-
     ups = [m["bars"] for m in log if m["up"] and not m["open"]]
     downs = [m["bars"] for m in log if not m["up"] and not m["open"]]
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Now", "%s · %s" % ("Up" if cur["up"] else "Down", cur["route"][-1]),
-              "since %s" % cur["start"].strftime("%d %b %Y"),
+    c1.metric("Now", f"{'Up' if cur['up'] else 'Down'} · {cur['route'][-1]}",
+              f"since {cur['start'].strftime('%d %b %Y')}",
               delta_color="normal" if cur["up"] else "inverse")
     c2.metric("Moves up since Jan 2024", sum(m["up"] for m in log))
-    c3.metric("Average stay up", "%.1f %s" % (sum(ups) / len(ups), unit_p) if ups else "—")
-    c4.metric("Average stay down", "%.1f %s" % (sum(downs) / len(downs), unit_p) if downs else "—")
+    c3.metric("Average stay up", f"{(sum(ups) / len(ups)):.1f} {unit_p}" if ups else "—")
+    c4.metric("Average stay down", f"{(sum(downs) / len(downs)):.1f} {unit_p}" if downs else "—")
 
     if not log:
         st.info("No moves since January 2024.")
@@ -536,221 +511,294 @@ def move_log(df, unit_s, unit_p):
         "Into": m["to"],
         "Stayed": plural(m["bars"]) + (" (still there)" if m["open"] else ""),
         "Until": m["until"].strftime("%d %b %Y") if m["until"] is not None else "now",
-        "Close": "₹%.2f" % m["close"],
-        "Price till next move": ("%+.1f%%" % m["change"]) if abs(m["change"]) >= 0.05 else "0.0%",
+        "Close": f"₹{m['close']:.2f}",
+        "Price till next move": (f"{m['change']:+.1f}%") if abs(m["change"]) >= 0.05 else "0.0%",
     } for i, m in enumerate(log)])
 
     def move_style(col):
-        return ["color: %s; font-weight: bold" % (UP_FG if v.startswith("▲") else DOWN_FG)
-                for v in col]
+        return ["color: %s; font-weight: bold" % (UP_FG if v.startswith("▲") else DOWN_FG) for v in col]
 
     def price_style(col):
         return ["color: %s; font-weight: bold" % (UP_FG if v.startswith("+") else
-                                                  DOWN_FG if v.startswith("-") else INK_2)
-                for v in col]
+                                                  DOWN_FG if v.startswith("-") else INK_2) for v in col]
 
-    # tall enough to show every row: read it top (2024) to bottom (today)
     st.dataframe(table.style.apply(quad_style, subset=["From", "Into"])
                  .apply(move_style, subset=["Move"])
                  .apply(price_style, subset=["Price till next move"]),
-                 hide_index=True, width="stretch", height=38 + 35 * len(table),
-                 column_config={"#": st.column_config.NumberColumn(width="small"),
-                                "Move": st.column_config.TextColumn(width="small"),
-                                "Close": st.column_config.TextColumn(width="small")})
+                 hide_index=True, width="stretch", height=38 + 35 * len(table))
 
 
 def cycle_section(items):
-    """items: [(name, df)] - one strip row and one move log per timeframe."""
     st.subheader("Cycles since January 2024")
-    st.caption("▲ **Up** = the date it moved into Improving or Leading (RS-Momentum rose above "
-               "100).  ▼ **Down** = the date it moved into Weakening or Lagging (RS-Momentum "
-               "fell below 100).  Oldest at the top, latest at the bottom.  "
-               "*Price till next move* = close on that date to close on the next move "
-               "(or the latest close).")
+    st.caption("▲ **Up** = entered Improving or Leading (RS-Momentum > 100).  "
+               "▼ **Down** = entered Weakening or Lagging (RS-Momentum < 100).")
     st.plotly_chart(cycle_strip(items, CYCLES_FROM), width="stretch", theme=None,
                     config={"displaylogo": False, "displayModeBar": False})
     for name, df in items:
         weekly = name == "Weekly"
-        st.markdown("##### %s moves" % name)
+        st.markdown(f"##### {name} moves")
         move_log(df, "week" if weekly else "session", "weeks" if weekly else "sessions")
 
 
-SINCE_2024 = "Since Jan 2024"
+# ---- Header & Status Panel --------------------------------------------------
+def render_status_panel(selected_ticker: str):
+    """Renders comprehensive Data Status panel for selected stock and all stocks."""
+    manifest = dp.load_manifest()
+    now_ist = datetime.now(cfg.IST)
+    ticker_info = manifest.get("tickers", {}).get(selected_ticker, {})
+    last_attempt = manifest.get("last_attempt", {})
+
+    with st.expander("📊 Data Status & Validation Panel", expanded=False):
+        c1, c2, c3, c4 = st.columns(4)
+        c1.markdown(f"**Selected Stock:** {cfg.STOCKS.get(selected_ticker, {}).get('name', selected_ticker)}")
+        c1.caption(f"Ticker: `{selected_ticker}` | Benchmark: `{cfg.BENCHMARK_NAME}`")
+
+        last_success = manifest.get("updated_at")
+        success_disp = datetime.fromisoformat(last_success).strftime("%d %b %Y %H:%M IST") if last_success else "None"
+        c2.markdown(f"**Last Valid Sync:** {success_disp}")
+        c2.caption(f"Provider: {manifest.get('provider', cfg.PROVIDER)}")
+
+        last_res = last_attempt.get("result", "UNKNOWN")
+        res_color = "green" if last_res == "SUCCESS" else ("orange" if last_res == "NO_NEW_SESSION" else "red")
+        c3.markdown(f"**Last Attempt Result:** <span style='color:{res_color};font-weight:700'>{last_res}</span>", unsafe_allow_html=True)
+        c3.caption(f"{last_attempt.get('message', '')[:60]}...")
+
+        expected_sess = dp.get_expected_latest_session(now_ist)
+        c4.markdown(f"**Expected Latest Session:** {expected_sess.strftime('%d %b %Y')}")
+        c4.caption("Next unattended trigger: Weekdays 15:45 IST")
+
+        # Flagged moves table
+        flags = ticker_info.get("flagged_moves", [])
+        if flags:
+            st.markdown(f"**Flagged One-Day Moves (> ±{cfg.SUSPICIOUS_MOVE_PCT}%) for {cfg.STOCKS.get(selected_ticker, {}).get('name')}:**")
+            st.dataframe(pd.DataFrame(flags), hide_index=True)
+
+        # Compact all stocks status table
+        st.markdown("**All Configured Stocks Coverage & Alignment:**")
+        summary_rows = []
+        for t, s_cfg in cfg.STOCKS.items():
+            t_meta = manifest.get("tickers", {}).get(t, {})
+            summary_rows.append({
+                "Stock": s_cfg["name"],
+                "Ticker": t,
+                "Sector": s_cfg["sector"],
+                "Rows": t_meta.get("rows", 0),
+                "First Date": t_meta.get("first_date", "—"),
+                "Latest Date": t_meta.get("last_date", "—"),
+                "Status": t_meta.get("status", "NO_DATA"),
+                "Flagged Moves": len(t_meta.get("flagged_moves", []))
+            })
+        st.dataframe(pd.DataFrame(summary_rows), hide_index=True, width="stretch")
 
 
-# ---- sidebar ----------------------------------------------------------------
-with st.sidebar:
-    st.header("Settings")
-    tf = st.radio("Timeframe", ["Daily", "Weekly", "Both", "Strategy"], horizontal=True,
-                  help="Both: the daily and weekly RRG side by side, moved by one slider. "
-                       "Strategy: buy/sell signals and every past trade.")
-    cfg = TF["Daily" if tf in ("Both", "Strategy") else tf]
-    if st.button("Refresh data now", width="stretch"):
-        get_closes.clear()
-    if tf == "Strategy":
-        # a form: nothing re-runs until "Run strategy" is pressed
-        with st.form("strategy_inputs"):
-            capital = st.number_input("Amount to invest (₹)", min_value=1000, max_value=10**9,
-                                      value=100000, step=10000, format="%d")
-            bt_from = st.date_input("Start date", value=CYCLES_FROM.date(),
-                                    min_value=datetime(2010, 1, 1).date(), key="bt_from")
-            cost = st.number_input("Charges per buy / sell (%)", min_value=0.0, max_value=2.0,
-                                   value=0.12, step=0.01, format="%.2f",
-                                   help="Delivery trades in India cost about 0.1-0.15% per side "
-                                        "(STT 0.1% + exchange, SEBI, stamp duty, GST), plus "
-                                        "your broker's fee if any.")
-            st.form_submit_button("▶ Run strategy", type="primary", width="stretch")
-    else:
-        window = st.select_slider("Slider covers", options=[SINCE_2024] + cfg["windows"],
-                                  value=SINCE_2024, key="window_" + tf,
-                                  format_func=lambda v: v if v == SINCE_2024
-                                  else "last %d %s" % (v, cfg["units"]))
-        if tf == "Both":
-            tail_n = st.slider("Daily trail (sessions)", 5, 60, TF["Daily"]["tail"], key="tail_bd")
-            tail_w = st.slider("Weekly trail (weeks)", 5, 60, TF["Weekly"]["tail"], key="tail_bw")
-        else:
-            tail_n = st.slider("Trail length (%s)" % cfg["units"], 5, 60, cfg["tail"],
-                               key="tail_" + tf)
-        fixed_axes = st.toggle("Fixed axes while sliding", value=False,
-                               help="Off: each date is framed like the static chart. "
-                                    "On: one scale for the whole slider, so movement is "
-                                    "comparable between dates.")
-    auto = st.toggle("Auto-refresh during market hours", value=True,
-                     help="Re-downloads every 5 minutes while NSE is open "
-                          "(Mon-Fri 09:15-15:30 IST).")
+def header(title: str, stock_name: str, source: str, fetched: datetime, now: datetime, status_text: str):
+    st.markdown(f"#### {stock_name} against {cfg.BENCHMARK_NAME} — {title}")
+    market_str = "🟢 NSE open" if dp.is_market_open(now) else "⚪ NSE closed"
+    st.caption(f"{market_str} — {status_text}  ·  sync {fetched.strftime('%d %b %Y %H:%M')} IST  ·  {source}")
 
 
-# ---- page -------------------------------------------------------------------
-refresh_every = timedelta(minutes=5) if auto and market_open(datetime.now(IST)) else None
+def formula_note(extra: str):
+    st.caption(f"RS-Ratio = 100 × EMA(SMA(RS,{RS_PRESMOOTH}),{RS_SHORT}) / EMA(SMA(RS,{RS_PRESMOOTH}),{RS_LONG})   ·   "
+               f"RS-Momentum = 100 × EMA(RS-Ratio,{MOM_SHORT}) / EMA(RS-Ratio,{MOM_LONG})   ·   {extra}   ·   "
+               f"computed over full verified history after warm-up")
 
 
-@st.cache_data(max_entries=6, show_spinner="Building the chart...")
-def chart_html(key, _build):
-    """The slider chart as a standalone page, cached on `key` so changing other
-    widgets (date lookup, tables) does not rebuild hundreds of frames."""
-    return pio.to_html(_build(), validate=False, include_plotlyjs=True, full_html=True,
-                       auto_play=False, default_width="100%", default_height="100%",
-                       config={"displaylogo": False, "responsive": True},
-                       post_script=FIT_AND_KEYS)
+# ---- All Stocks Page --------------------------------------------------------
+def all_stocks_page(timeframe: str):
+    st.subheader(f"All Stocks Comparison ({timeframe} RRG)")
+    st.caption("Rotating relative strength of all configured NSE stocks plotted simultaneously against NIFTY 50.")
+
+    manifest = dp.load_manifest()
+    m_ver = manifest.get("version_id", "none")
+    stock_dfs = {}
+    table_rows = []
+    earliest_dates = []
+
+    for ticker, s_info in cfg.STOCKS.items():
+        aligned = get_cached_aligned_data(ticker, m_ver)
+        if aligned is None:
+            table_rows.append({
+                "Stock": s_info["name"], "Sector": s_info["sector"],
+                "Daily Quad": "No data", "Weekly Quad": "No data",
+                "RS-Ratio": 0.0, "RS-Mom": 0.0, "Days in Quad": 0, "Latest Date": "—"
+            })
+            continue
+
+        s_name = s_info["name"]
+        d_df, d_ok = compute_rrg(aligned, s_name, tf="Daily")
+        w_df, w_ok = compute_rrg(aligned, s_name, tf="Weekly")
+        stock_dfs[ticker] = (d_df if timeframe == "Daily" else w_df, s_name)
+
+        if len(d_df) > 0:
+            d_last = d_df.iloc[-1]
+            d_streak = periods(d_df).iloc[0]["Bars"]
+            w_quad = w_df.iloc[-1]["Quadrant"] if (w_ok and len(w_df) > 0) else "Needs history"
+            curr_df = d_df if timeframe == "Daily" else w_df
+            ratio_val = curr_df.iloc[-1]["RS_Ratio"] if len(curr_df) > 0 else 0.0
+            mom_val = curr_df.iloc[-1]["RS_Momentum"] if len(curr_df) > 0 else 0.0
+            table_rows.append({
+                "Stock": s_name,
+                "Sector": s_info["sector"],
+                "Daily Quad": d_last["Quadrant"],
+                "Weekly Quad": w_quad,
+                "RS-Ratio": round(float(ratio_val), 2),
+                "RS-Mom": round(float(mom_val), 2),
+                "Days in Quad": int(d_streak),
+                "Latest Date": d_df.index[-1].strftime("%Y-%m-%d")
+            })
+
+    # Summary table
+    st.dataframe(pd.DataFrame(table_rows).style.apply(quad_style, subset=["Daily Quad", "Weekly Quad"]),
+                 hide_index=True, width="stretch")
+
+    # Multi-stock chart
+    valid_stocks = {t: (df, name) for t, (df, name) in stock_dfs.items() if len(df) >= 20}
+    if not valid_stocks:
+        st.warning("Insufficient history to draw multi-stock RRG chart.")
+        return
+
+    # Find shared recent date window
+    shared_end = min(df.index[-1] for df, _ in valid_stocks.values())
+    shared_start = max(min(df.index[0] for df, _ in valid_stocks.values()), pd.Timestamp("2024-01-01"))
+    shared_dates = [d for d in next(iter(valid_stocks.values()))[0].index if shared_start <= d <= shared_end]
+
+    if len(shared_dates) < 10:
+        shared_dates = next(iter(valid_stocks.values()))[0].index[-60:]
+
+    tail_n = 15
+    frames = []
+    step_cmd = dict(mode="immediate", frame=dict(duration=0, redraw=True), transition=dict(duration=0))
+
+    for target_d in shared_dates:
+        traces = []
+        for ticker, (df, s_name) in valid_stocks.items():
+            color = STOCK_COLORS.get(ticker, SERIES)
+            hist = df.loc[:target_d]
+            if len(hist) < 2:
+                continue
+            tail = hist.tail(tail_n)
+            xs = tail["RS_Ratio"].to_numpy()
+            ys = tail["RS_Momentum"].to_numpy()
+            traces.append(go.Scatter(
+                x=xs, y=ys, mode="lines", line=dict(color=color, width=2),
+                hoverinfo="skip", showlegend=False
+            ))
+            traces.append(go.Scatter(
+                x=[xs[-1]], y=[ys[-1]], mode="markers+text", name=s_name,
+                text=[s_name], textposition="top center",
+                textfont=dict(color=INK_1, size=11),
+                marker=dict(size=14, color=color, line=dict(color=SURFACE, width=1.5)),
+                hovertemplate=f"<b>{s_name}</b><br>{target_d.strftime('%d %b %Y')}<br>"
+                              f"RS-Ratio %{{x:.2f}}<br>RS-Momentum %{{y:.2f}}<extra></extra>"
+            ))
+        frames.append(go.Frame(data=traces, name=target_d.strftime("%Y-%m-%d")))
+
+    # Initial frame
+    fig = go.Figure(data=frames[-1].data, frames=frames)
+    big = 1e4
+    shapes = []
+    for q, (x0, x1, y0, y1) in {"Improving": (-big, 100, 100, big),
+                                "Leading": (100, big, 100, big),
+                                "Lagging": (-big, 100, -big, 100),
+                                "Weakening": (100, big, -big, 100)}.items():
+        shapes.append(dict(type="rect", x0=x0, x1=x1, y0=y0, y1=y1,
+                           fillcolor=QUAD_BG[q], line=dict(width=0), layer="below"))
+    shapes.append(dict(type="line", x0=-big, x1=big, y0=100, y1=100, line=dict(color=INK_3, width=1.1)))
+    shapes.append(dict(type="line", x0=100, x1=100, y0=-big, y1=big, line=dict(color=INK_3, width=1.1)))
+
+    fig.update_layout(
+        shapes=shapes, height=650, margin=dict(l=65, r=20, t=30, b=80),
+        plot_bgcolor=SURFACE, paper_bgcolor=SURFACE, font=dict(color=INK_2),
+        xaxis=dict(range=[90, 120], gridcolor=GRID, title=f"JdK RS-Ratio (100 = in line with {cfg.BENCHMARK_NAME})"),
+        yaxis=dict(range=[90, 115], gridcolor=GRID, title="JdK RS-Momentum"),
+        sliders=[dict(active=len(frames) - 1, x=0, len=1, y=0, yanchor="top",
+                      steps=[dict(method="animate", label=f.name, args=[[f.name], step_cmd]) for f in frames],
+                      currentvalue=dict(prefix="Session: ", xanchor="left", font=dict(size=13, color=INK_1)))]
+    )
+    st.plotly_chart(fig, width="stretch", config={"displaylogo": False})
 
 
-def embed(key, build):
-    # Embedded as plain Plotly: Streamlit's chart wrapper does not drive the
-    # animation slider reliably, a standalone Plotly page does. CSS above sizes it
-    # to the window.
-    st.iframe(chart_html(key, build), height=700)
+# ---- Single Page (Daily / Weekly) -------------------------------------------
+def single_page(stock_ticker: str, tf: str):
+    stock_info = cfg.STOCKS.get(stock_ticker, {"name": stock_ticker, "sector": ""})
+    stock_name = stock_info["name"]
 
+    aligned, source, fetched = get_stock_data(stock_ticker)
+    if aligned is None or len(aligned) == 0:
+        st.error(f"No clean price data available for {stock_name}. Please press 'Refresh All Data'.")
+        return
 
-def window_size(df, choice):
-    """Bars covered by the slider: everything since Jan 2024, or the last N."""
-    if choice == SINCE_2024:
-        return int((df.index >= CYCLES_FROM).sum())
-    return int(choice)
+    df, sufficient = compute_rrg(aligned, stock_name, tf=tf)
+    now = datetime.now(cfg.IST)
+    is_prov = False
 
+    if tf == "Weekly" and not sufficient:
+        first_date = aligned.index[0].strftime("%d %b %Y")
+        st.warning(f"Weekly RRG needs more history - {stock_name} listed on {first_date} (minimum 60 weekly bars required).")
+        return
 
-def header(title, source, fetched, now, status_text):
-    st.markdown("#### %s against %s — %s" % (STOCK, BENCH, title))
-    status = ("🟢 NSE open" if market_open(now) else "⚪ NSE closed") + " — " + status_text
-    st.caption("%s  ·  fetched %s IST  ·  %s"
-               % (status, fetched.strftime("%d %b %Y %H:%M"), source))
-    if "fallback" in source:
-        st.warning("Live prices could not be downloaded from Yahoo Finance right now, so this "
-                   "page shows the saved prices (they end on 13 Aug 2026). It retries "
-                   "automatically within 5 minutes, or press **Refresh data now**.")
-
-
-def formula_note(extra):
-    st.caption("RS-Ratio = 100 × EMA(SMA(RS,%d),%d) / EMA(SMA(RS,%d),%d)   ·   "
-               "RS-Momentum = 100 × EMA(RS-Ratio,%d) / EMA(RS-Ratio,%d)   ·   %s   ·   "
-               "computed over the full Yahoo history after an EMA warm-up   ·   "
-               "Yahoo quotes may lag the exchange by a few minutes"
-               % (RS_PRESMOOTH, RS_SHORT, RS_PRESMOOTH, RS_LONG, MOM_SHORT, MOM_LONG, extra))
-
-
-def single_page():
-    df, source, fetched = get_rrg(tf)
-    now = datetime.now(IST)
-    provisional = latest_is_provisional(df, tf, now)
-    unit, units = cfg["unit"], cfg["units"]
-
+    unit, units = TF_CONFIG[tf]["unit"], TF_CONFIG[tf]["units"]
     last, prev = df.iloc[-1], df.iloc[-2]
     streak = periods(df).iloc[0]["Bars"]
 
-    header("%s RRG" % tf.lower(), source, fetched, now,
-           "latest %s is %s" % (unit, "provisional" if provisional else "final"))
+    header(f"{tf.lower()} RRG", stock_name, source, fetched, now,
+           f"latest {unit} is {'provisional' if is_prov else 'final'}")
 
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Quadrant on %s" % df.index[-1].strftime("%d %b"), last["Quadrant"],
-              "%d %s in a row" % (streak, unit if streak == 1 else units), delta_color="off")
-    c2.metric("RS-Ratio", "%.2f" % last["RS_Ratio"],
-              "%+.2f" % (last["RS_Ratio"] - prev["RS_Ratio"]))
-    c3.metric("RS-Momentum", "%.2f" % last["RS_Momentum"],
-              "%+.2f" % (last["RS_Momentum"] - prev["RS_Momentum"]))
-    c4.metric("%s close" % STOCK, "₹%.2f" % last["Close"],
-              "%+.2f%% vs previous %s" % (100 * (last["Close"] / prev["Close"] - 1), unit))
+    c1.metric(f"Quadrant on {df.index[-1].strftime('%d %b')}", last["Quadrant"],
+              f"{streak} {unit if streak == 1 else units} in a row", delta_color="off")
+    c2.metric("RS-Ratio", f"{last['RS_Ratio']:.2f}", f"{last['RS_Ratio'] - prev['RS_Ratio']:+.2f}")
+    c3.metric("RS-Momentum", f"{last['RS_Momentum']:.2f}", f"{last['RS_Momentum'] - prev['RS_Momentum']:+.2f}")
+    c4.metric(f"{stock_name} close", f"₹{last['Close']:.2f}",
+              f"{100 * (last['Close'] / prev['Close'] - 1):+.2f}% vs previous {unit}")
 
-    win = window_size(df, window)
+    win = int((df.index >= CYCLES_FROM).sum()) if window == SINCE_2024 else int(window)
+    win = min(win, len(df))
 
     def build():
-        views, names = single_views(df, tf, win, tail_n, provisional)
+        views, names = single_views(df, tf, win, tail_n, is_prov)
         return rrg_figure([dict(name=tf, views=views,
                                 fixed=fixed_range(views) if fixed_axes else None)],
-                          names, cfg["slider"])
-    embed((tf, win, tail_n, fixed_axes, provisional, str(fetched)), build)
-    st.caption("Drag the slider, or click the chart and use the ← / → keys to step one %s. "
-               "Each dot is coloured by the quadrant it was in on that %s; the large dot is "
-               "the selected date. Hover any dot for its date." % (unit, unit))
+                          names, TF_CONFIG[tf]["slider"])
+
+    embed((stock_ticker, tf, win, tail_n, fixed_axes, is_prov, str(fetched)), build)
 
     seg = df.iloc[-win:]
     cycle_section([(tf, df)])
     runs = periods(seg)
 
-    st.subheader("Which quadrant on which %s" % ("date" if tf == "Daily" else "week"))
-    st.plotly_chart(timeline_figure(seg, tf), width="stretch", theme=None,
-                    config={"displaylogo": False})
+    st.subheader(f"Which quadrant on which {'date' if tf == 'Daily' else 'week'}")
+    st.plotly_chart(timeline_figure(seg, tf), width="stretch", theme=None, config={"displaylogo": False})
 
     left, right = st.columns([1, 1])
     with left:
         st.markdown("**Look up a date**")
         pick = st.date_input("Date", value=df.index[-1].date(),
                              min_value=seg.index[0].date(), max_value=now.date(),
-                             label_visibility="collapsed", key="pick_" + tf)
+                             key=f"pick_{stock_ticker}_{tf}")
         ts = pd.Timestamp(pick)
-        if tf == "Daily":
-            hit = df.loc[:ts]
-            row_date = hit.index[-1]
-            note = "" if row_date.date() == pick else \
-                " (no trading on %s; showing the previous session)" % pick.strftime("%d %b %Y")
-        else:
-            wk = ts.to_period("W-FRI")
-            same = df[df.index.to_period("W-FRI") == wk]
-            row_date = same.index[-1] if len(same) else df.loc[:ts].index[-1]
-            note = " (the week containing %s)" % pick.strftime("%a %d %b %Y")
+        hit = df.loc[:ts]
+        row_date = hit.index[-1] if len(hit) else df.index[-1]
         row = df.loc[row_date]
-        st.markdown("**%s** — <span style='color:%s;font-weight:700'>%s</span>  ·  "
-                    "RS-Ratio %.2f  ·  RS-Momentum %.2f%s"
-                    % (row_date.strftime(cfg["head"]), QUAD_FG[row["Quadrant"]],
-                       row["Quadrant"].upper(), row["RS_Ratio"], row["RS_Momentum"], note),
+        st.markdown(f"**{row_date.strftime(TF_CONFIG[tf]['head'])}** — "
+                    f"<span style='color:{QUAD_FG[row['Quadrant']]};font-weight:700'>{row['Quadrant'].upper()}</span>  ·  "
+                    f"RS-Ratio {row['RS_Ratio']:.2f}  ·  RS-Momentum {row['RS_Momentum']:.2f}",
                     unsafe_allow_html=True)
-
         counts = seg["Quadrant"].value_counts().reindex(ORDER, fill_value=0)
-        st.markdown("**%s per quadrant (last %d)**" % (units.capitalize(), len(seg)))
+        st.markdown(f"**{units.capitalize()} per quadrant (last {len(seg)})**")
         st.dataframe(pd.DataFrame({"Quadrant": counts.index, units.capitalize(): counts.values,
-                                   "Share": ["%.0f%%" % (100 * v / len(seg))
-                                             for v in counts.values]})
-                     .style.apply(quad_style, subset=["Quadrant"]),
-                     hide_index=True, width="stretch")
+                                   "Share": [f"{100 * v / len(seg):.0f}%" for v in counts.values]})
+                     .style.apply(quad_style, subset=["Quadrant"]), hide_index=True, width="stretch")
     with right:
         st.markdown("**Quadrant periods (newest first)**")
         show = runs.assign(From=runs["From"].dt.strftime("%d %b %Y"),
                            To=runs["To"].dt.strftime("%d %b %Y")) \
                    .rename(columns={"Bars": units.capitalize()})
-        st.dataframe(show.style.apply(quad_style, subset=["Quadrant"]),
-                     hide_index=True, width="stretch", height=400)
+        st.dataframe(show.style.apply(quad_style, subset=["Quadrant"]), hide_index=True, width="stretch", height=400)
 
-    with st.expander("Every %s, one by one" % unit):
+    with st.expander(f"Every {unit}, one by one"):
         rows = seg.iloc[::-1]
-        table = pd.DataFrame({"Date": rows.index.strftime(cfg["head"]),
+        table = pd.DataFrame({"Date": rows.index.strftime(TF_CONFIG[tf]["head"]),
                               "Close": rows["Close"].round(2).to_numpy(),
                               "RS-Ratio": rows["RS_Ratio"].round(2).to_numpy(),
                               "RS-Mom.": rows["RS_Momentum"].round(2).to_numpy(),
@@ -758,41 +806,49 @@ def single_page():
         st.dataframe(table.style.apply(quad_style, subset=["Quadrant"])
                      .format({"Close": "%.2f", "RS-Ratio": "%.2f", "RS-Mom.": "%.2f"}),
                      hide_index=True, width="stretch", height=500)
+        clean_name = dp.sanitize_ticker(stock_ticker).lower()
         st.download_button("Download as CSV", seg.to_csv(float_format="%.4f"),
-                           file_name="rrg_pvrinox_%s.csv" % tf.lower(), mime="text/csv")
+                           file_name=f"rrg_{clean_name}_{tf.lower()}.csv", mime="text/csv")
 
-    formula_note("periods are %s" % units)
+    formula_note(f"periods are {units}")
 
 
-def both_page():
-    daily, source, fetched = get_rrg("Daily")
-    weekly, _, _ = get_rrg("Weekly")
-    closes, _, _ = get_closes()
-    asof = weekly_asof(closes)
-    now = datetime.now(IST)
-    prov_day = latest_is_provisional(daily, "Daily", now)
-    prov_week = latest_is_provisional(weekly, "Weekly", now)
+# ---- Both Page --------------------------------------------------------------
+def both_page(stock_ticker: str):
+    stock_info = cfg.STOCKS.get(stock_ticker, {"name": stock_ticker, "sector": ""})
+    stock_name = stock_info["name"]
 
-    header("daily + weekly RRG", source, fetched, now,
-           "latest session %s, latest week %s" % ("provisional" if prov_day else "final",
-                                                  "in progress" if prov_week else "complete"))
+    aligned, source, fetched = get_stock_data(stock_ticker)
+    if aligned is None or len(aligned) == 0:
+        st.error(f"No clean price data available for {stock_name}.")
+        return
+
+    daily, d_ok = compute_rrg(aligned, stock_name, tf="Daily")
+    weekly, w_ok = compute_rrg(aligned, stock_name, tf="Weekly")
+
+    if not w_ok or len(weekly) < 60:
+        first_date = aligned.index[0].strftime("%d %b %Y")
+        st.warning(f"Weekly RRG needs more history - {stock_name} listed on {first_date} (minimum 60 weekly bars required).")
+        return
+
+    asof = weekly_asof(aligned, stock_name)
+    now = datetime.now(cfg.IST)
+    prov_day, prov_week = False, False
+
+    header("daily + weekly RRG", stock_name, source, fetched, now, "latest session final")
 
     d_last, w_last = daily.iloc[-1], asof.iloc[-1]
     c1, c2, c3 = st.columns(3)
-    c1.metric("Daily quadrant on %s" % daily.index[-1].strftime("%d %b"), d_last["Quadrant"],
-              "RS-Ratio %.2f · RS-Mom. %.2f" % (d_last["RS_Ratio"], d_last["RS_Momentum"]),
-              delta_color="off")
-    c2.metric("Weekly quadrant on %s" % asof.index[-1].strftime("%d %b"), w_last["Quadrant"],
-              "RS-Ratio %.2f · RS-Mom. %.2f" % (w_last["RS_Ratio"], w_last["RS_Momentum"]),
-              delta_color="off")
+    c1.metric(f"Daily quadrant on {daily.index[-1].strftime('%d %b')}", d_last["Quadrant"],
+              f"RS-Ratio {d_last['RS_Ratio']:.2f} · RS-Mom. {d_last['RS_Momentum']:.2f}", delta_color="off")
+    c2.metric(f"Weekly quadrant on {asof.index[-1].strftime('%d %b')}", w_last["Quadrant"],
+              f"RS-Ratio {w_last['RS_Ratio']:.2f} · RS-Mom. {w_last['RS_Momentum']:.2f}", delta_color="off")
     prev = daily.iloc[-2]
-    c3.metric("%s close" % STOCK, "₹%.2f" % d_last["Close"],
-              "%+.2f%% vs previous session" % (100 * (d_last["Close"] / prev["Close"] - 1)))
+    c3.metric(f"{stock_name} close", f"₹{d_last['Close']:.2f}",
+              f"{100 * (d_last['Close'] / prev['Close'] - 1):+.2f}% vs previous session")
 
-    # one slider step per trading day; both charts are drawn as they stood that day
-    # both charts need a value on every slider day (short offline data can leave
-    # the weekly one starting later than the daily one)
-    win = min(window_size(daily, window), int((daily.index >= asof.index[0]).sum()))
+    win_target = int((daily.index >= CYCLES_FROM).sum()) if window == SINCE_2024 else int(window)
+    win = min(win_target, int((daily.index >= asof.index[0]).sum()), len(daily))
 
     def build():
         d_views, names = single_views(daily, "Daily", win, tail_n, prov_day)
@@ -803,11 +859,8 @@ def both_page():
                            dict(name="Weekly", views=w_views,
                                 fixed=fixed_range(w_views) if fixed_axes else None)],
                           names, "Session: ")
-    embed(("Both", win, tail_n, tail_w, fixed_axes, prov_day, prov_week, str(fetched)), build)
-    st.caption("One slider moves both charts: the daily RRG on the selected session, and the "
-               "weekly RRG as it stood that same day (completed weeks plus the week so far, "
-               "using that day's close). On a week's last trading day the weekly dot is that "
-               "week's final value. Click the chart and use ← / → to step one session.")
+
+    embed((stock_ticker, "Both", win, tail_n, tail_w, fixed_axes, str(fetched)), build)
 
     seg_d = daily.iloc[-win:]
     cycle_section([("Daily", daily), ("Weekly", weekly)])
@@ -823,54 +876,57 @@ def both_page():
         st.markdown("**Look up a date**")
         pick = st.date_input("Date", value=daily.index[-1].date(),
                              min_value=seg_d.index[0].date(), max_value=now.date(),
-                             label_visibility="collapsed", key="pick_both")
+                             key=f"pick_both_{stock_ticker}")
         hit = both.loc[:pd.Timestamp(pick)]
         day, row = hit.index[-1], hit.iloc[-1]
-        note = "" if day.date() == pick else \
-            " (no trading on %s; showing the previous session)" % pick.strftime("%d %b %Y")
-        st.markdown("**%s**%s" % (day.strftime("%a %d %b %Y"), note))
+        st.markdown(f"**{day.strftime('%a %d %b %Y')}**")
         for name, q, r, m in (("Daily", row["Daily"], row["D RS-Ratio"], row["D RS-Mom."]),
                               ("Weekly", row["Weekly"], row["W RS-Ratio"], row["W RS-Mom."])):
-            st.markdown("%s — <span style='color:%s;font-weight:700'>%s</span>  ·  "
-                        "RS-Ratio %.2f  ·  RS-Momentum %.2f"
-                        % (name, QUAD_FG[q], q.upper(), r, m), unsafe_allow_html=True)
+            st.markdown(f"{name} — <span style='color:{QUAD_FG[q]};font-weight:700'>{q.upper()}</span>  ·  "
+                        f"RS-Ratio {r:.2f}  ·  RS-Momentum {m:.2f}", unsafe_allow_html=True)
     with right:
         agree = (both["Daily"] == both["Weekly"]).mean()
-        st.markdown("**Sessions per quadrant (last %d sessions)**" % len(both))
+        st.markdown(f"**Sessions per quadrant (last {len(both)} sessions)**")
         st.dataframe(pd.DataFrame({
             "Quadrant": ORDER,
             "Daily": both["Daily"].value_counts().reindex(ORDER, fill_value=0).to_numpy(),
             "Weekly": both["Weekly"].value_counts().reindex(ORDER, fill_value=0).to_numpy()})
             .style.apply(quad_style, subset=["Quadrant"]), hide_index=True, width="stretch")
-        st.caption("Daily and weekly agree on %.0f%% of these sessions." % (100 * agree))
+        st.caption(f"Daily and weekly agree on {100 * agree:.0f}% of these sessions.")
 
     with st.expander("Every session: daily and weekly quadrant side by side", expanded=False):
-        rows = both.iloc[::-1]
-        table = rows.reset_index(drop=True)
-        table.insert(0, "Date", rows.index.strftime("%a %d %b %Y"))
-        st.dataframe(table.style.apply(quad_style, subset=["Daily", "Weekly"])
-                     .format({c: "%.2f" for c in table.columns
-                              if c not in ("Date", "Daily", "Weekly")}),
+        rows = both.iloc[::-1].reset_index()
+        rows["Date"] = rows["Date"].dt.strftime("%a %d %b %Y")
+        st.dataframe(rows.style.apply(quad_style, subset=["Daily", "Weekly"]),
                      hide_index=True, width="stretch", height=500)
+        clean_name = dp.sanitize_ticker(stock_ticker).lower()
         st.download_button("Download as CSV", both.to_csv(float_format="%.4f"),
-                           file_name="rrg_pvrinox_daily_weekly.csv", mime="text/csv")
-
-    formula_note("daily periods are sessions, weekly periods are weeks")
+                           file_name=f"rrg_{clean_name}_daily_weekly.csv", mime="text/csv")
 
 
-# ---- strategy: weekly up + daily turns up -> buy; daily turns down -> sell --
+# ---- Strategy Page ----------------------------------------------------------
+def inr(v, sign=False):
+    neg = v < 0
+    n = int(round(abs(v)))
+    s = str(n)
+    if len(s) > 3:
+        head, tail = s[:-3], s[-3:]
+        groups = []
+        while len(head) > 2:
+            groups.insert(0, head[-2:])
+            head = head[:-2]
+        if head:
+            groups.insert(0, head)
+        s = ",".join(groups) + "," + tail
+    prefix = "-" if neg else ("+" if sign and n > 0 else "")
+    return f"{prefix}₹{s}"
+
+
 def pct(v):
-    """Signed percent, without a misleading "-0.0%" for tiny moves."""
-    return "%+.1f%%" % v if abs(v) >= 0.05 else "0.0%"
+    return f"{v:+.1f}%" if abs(v) >= 0.05 else "0.0%"
 
 
 def backtest(daily, asof, start, cost_pct):
-    """Runs the rules day by day from `start`, using only what was known that day.
-
-    Buy  : the daily RRG moves from Weakening/Lagging into Improving/Leading, and the
-           weekly RRG (as it stood that day, week so far) is Improving/Leading.
-    Sell : the daily RRG moves from Improving/Leading into Weakening/Lagging.
-    Fills at that day's close; cost_pct is charged on the buy and on the sell."""
     q = daily["Quadrant"]
     up = q.isin(UP)
     prev_q = q.shift(1)
@@ -898,7 +954,6 @@ def backtest(daily, asof, start, cost_pct):
         end = t["sell"] if t["sell"] is not None else daily.index[-1]
         t["held"] = int(((daily.index > t["buy"]) & (daily.index <= end)).sum())
 
-    # value of 100 invested: follows the stock only while a trade is open
     seg = close[close.index >= start]
     ret = seg.pct_change().fillna(0.0)
     held = pd.Series(False, index=seg.index)
@@ -915,30 +970,7 @@ def backtest(daily, asof, start, cost_pct):
     return trades, skipped, equity, hold, held
 
 
-def inr(v, sign=False):
-    """Indian rupee format with lakh grouping: ₹1,23,456 (sign optional)."""
-    neg = v < 0
-    n = int(round(abs(v)))
-    s = str(n)
-    if len(s) > 3:
-        head, tail = s[:-3], s[-3:]
-        groups = []
-        while len(head) > 2:
-            groups.insert(0, head[-2:])
-            head = head[:-2]
-        if head:
-            groups.insert(0, head)
-        s = ",".join(groups) + "," + tail
-    prefix = "-" if neg else ("+" if sign and n > 0 else "")
-    return "%s₹%s" % (prefix, s)
-
-
 def simulate(daily, trades, start, capital, cost_pct):
-    """Puts real money through the signals: whole shares, charges on both sides.
-
-    Each buy spends as much of the cash as buys whole shares (price + charges);
-    each sell sells all of them. An open trade is valued as if sold at the
-    latest close, after charges. Buy & hold gets the same treatment."""
     c = cost_pct / 100.0
     close = daily["Close"][daily.index >= start]
     cash, book = float(capital), []
@@ -960,7 +992,6 @@ def simulate(daily, trades, start, capital, cost_pct):
                          pnl_pct=100 * (got - paid) / paid if paid else 0.0,
                          charges=charges, cash_before=cash_before, cash_after=cash))
 
-    # value each day: cash not in shares + shares as if sold that day (after charges)
     cash_by_day = pd.Series(float(capital), index=close.index)
     for b in book:
         end = b["sell"] if b["sell"] is not None else close.index[-1]
@@ -970,7 +1001,7 @@ def simulate(daily, trades, start, capital, cost_pct):
         if b["sell"] is None:
             cash_by_day[close.index == end] = b["cash_before"] - b["paid"]
     value = cash_by_day + shares_by_day * close * (1 - c)
-    if book and book[-1]["sell"] is None:          # open trade: today's value = cash + sale
+    if book and book[-1]["sell"] is None:
         value.iloc[-1] = book[-1]["cash_after"]
 
     bh_shares = int(capital // (close.iloc[0] * (1 + c)))
@@ -979,17 +1010,14 @@ def simulate(daily, trades, start, capital, cost_pct):
     return book, cash, value, bh_value, bh_shares
 
 
-def strategy_figure(daily, asof, book, value, bh_value, start, capital):
+def strategy_figure(daily, asof, book, value, bh_value, start, capital, stock_name):
     seg = daily[daily.index >= start]
     fig = make_subplots(rows=3, cols=1, shared_xaxes=True, row_heights=[0.5, 0.06, 0.44],
                         vertical_spacing=0.05,
-                        subplot_titles=("PVR INOX close — green bands = money in the stock",
-                                        "Weekly RRG on each day — dark green = Leading, "
-                                        "light green = Improving, orange = Weakening / Lagging",
-                                        "Your %s over time — strategy vs buy & hold" % inr(capital)))
-    # weekly strip: the weekly position as it was known that day (what the buy rule checks)
+                        subplot_titles=(f"{stock_name} close — green bands = money in the stock",
+                                        "Weekly RRG on each day — dark green = Leading, light green = Improving, orange = Weakening / Lagging",
+                                        f"Your {inr(capital)} over time — strategy vs buy & hold"))
     wk = asof[(asof.index >= seg.index[0]) & (asof.index <= seg.index[-1])]
-    # one block per run of the same quadrant; the two down quadrants share orange
     run_id = (wk["Quadrant"] != wk["Quadrant"].shift()).cumsum()
     runs = [(g.index[0], g["Quadrant"].iloc[0]) for _, g in wk.groupby(run_id)]
     for i, (x0, q) in enumerate(runs):
@@ -1005,7 +1033,6 @@ def strategy_figure(daily, asof, book, value, bh_value, start, capital):
     fig.update_yaxes(visible=False, range=[0, 1], row=2, col=1)
     for b in book:
         end = b["sell"] if b["sell"] is not None else seg.index[-1]
-        # plain shape: add_vrect does not draw on these date subplots
         fig.add_shape(type="rect", xref="x", yref="y domain", x0=b["buy"], x1=end, y0=0, y1=1,
                       fillcolor=QUAD_FG["Leading"], opacity=0.14, line_width=0, layer="below")
     fig.add_trace(go.Scatter(x=seg.index, y=seg["Close"], name="Close",
@@ -1014,36 +1041,28 @@ def strategy_figure(daily, asof, book, value, bh_value, start, capital):
                   row=1, col=1)
     fig.add_trace(go.Scatter(
         x=[b["buy"] for b in book], y=[b["buy_px"] for b in book], mode="markers", name="Buy",
-        marker=dict(symbol="triangle-up", size=13, color=QUAD_FG["Leading"],
-                    line=dict(color=SURFACE, width=1)),
-        hovertext=["<b>BUY #%d</b>  %s<br>%d shares at ₹%.2f<br>paid %s (with charges)"
-                   % (i + 1, b["buy"].strftime("%a %d %b %Y"), b["shares"], b["buy_px"], inr(b["paid"]))
+        marker=dict(symbol="triangle-up", size=13, color=QUAD_FG["Leading"], line=dict(color=SURFACE, width=1)),
+        hovertext=[f"<b>BUY #{i + 1}</b>  {b['buy'].strftime('%a %d %b %Y')}<br>{b['shares']} shares at ₹{b['buy_px']:.2f}<br>paid {inr(b['paid'])}"
                    for i, b in enumerate(book)], hoverinfo="text"), row=1, col=1)
     sold = [(i, b) for i, b in enumerate(book) if b["sell"] is not None]
     fig.add_trace(go.Scatter(
-        x=[b["sell"] for _, b in sold], y=[b["sell_px"] for _, b in sold], mode="markers",
-        name="Sell", marker=dict(symbol="triangle-down", size=13, color=QUAD_FG["Lagging"],
-                                 line=dict(color=SURFACE, width=1)),
-        hovertext=["<b>SELL #%d</b>  %s<br>%d shares at ₹%.2f<br>got %s · %s"
-                   % (i + 1, b["sell"].strftime("%a %d %b %Y"), b["shares"], b["sell_px"],
-                      inr(b["got"]), inr(b["pnl"], sign=True))
+        x=[b["sell"] for _, b in sold], y=[b["sell_px"] for _, b in sold], mode="markers", name="Sell",
+        marker=dict(symbol="triangle-down", size=13, color=QUAD_FG["Lagging"], line=dict(color=SURFACE, width=1)),
+        hovertext=[f"<b>SELL #{i + 1}</b>  {b['sell'].strftime('%a %d %b %Y')}<br>{b['shares']} shares at ₹{b['sell_px']:.2f}<br>got {inr(b['got'])} · {inr(b['pnl'], sign=True)}"
                    for i, b in sold], hoverinfo="text"), row=1, col=1)
     fig.add_trace(go.Scatter(x=value.index, y=value, name="Strategy",
                              line=dict(color=SERIES, width=2.2),
-                             hovertemplate="%{x|%d %b %Y}<br>Strategy ₹%{y:,.0f}<extra></extra>"),
-                  row=3, col=1)
+                             hovertemplate="%{x|%d %b %Y}<br>Strategy ₹%{y:,.0f}<extra></extra>"), row=3, col=1)
     fig.add_trace(go.Scatter(x=bh_value.index, y=bh_value, name="Buy & hold",
                              line=dict(color=INK_3, width=1.5, dash="dot"),
-                             hovertemplate="%{x|%d %b %Y}<br>Buy & hold ₹%{y:,.0f}<extra></extra>"),
-                  row=3, col=1)
+                             hovertemplate="%{x|%d %b %Y}<br>Buy & hold ₹%{y:,.0f}<extra></extra>"), row=3, col=1)
     fig.add_hline(y=capital, line_color=INK_3, line_width=1, line_dash="dash", row=3, col=1,
                   annotation_text="money put in", annotation_position="bottom left",
                   annotation_font=dict(size=11, color=INK_3))
     fig.update_layout(height=760, margin=dict(l=75, r=20, t=75, b=10), hovermode="closest",
                       plot_bgcolor=SURFACE, paper_bgcolor=SURFACE, font=dict(color=INK_2),
                       legend=dict(orientation="h", y=0.995, yanchor="top", yref="container", x=0))
-    fig.update_annotations(selector=dict(xref="paper"), font=dict(size=13, color=INK_1),
-                           x=0, xanchor="left")
+    fig.update_annotations(selector=dict(xref="paper"), font=dict(size=13, color=INK_1), x=0, xanchor="left")
     fig.update_xaxes(gridcolor=GRID, dtick="M3", tickformat="%b %Y")
     fig.update_yaxes(gridcolor=GRID, tickprefix="₹", row=1, col=1)
     fig.update_yaxes(gridcolor=GRID, tickprefix="₹", tickformat=",.0f", row=3, col=1)
@@ -1052,29 +1071,37 @@ def strategy_figure(daily, asof, book, value, bh_value, start, capital):
 
 def status_box(color, title, lines, big=None):
     st.markdown(
-        "<div style='border-left:6px solid %s;background:%s;padding:14px 18px;border-radius:6px'>"
-        "<div style='font-size:1.45rem;font-weight:700;color:%s'>%s</div>%s"
-        "<div style='color:%s;margin-top:4px;line-height:1.6'>%s</div></div>"
-        % (color, SURFACE if color == INK_3 else color + "14", color, title,
-           "<div style='font-size:1.15rem;margin-top:4px;color:%s'>%s</div>" % (INK_1, big)
-           if big else "", INK_1, "<br>".join(lines)),
+        f"<div style='border-left:6px solid {color};background:{SURFACE if color == INK_3 else color + '14'};padding:14px 18px;border-radius:6px'>"
+        f"<div style='font-size:1.45rem;font-weight:700;color:{color}'>{title}</div>"
+        f"{f'<div style=\"font-size:1.15rem;margin-top:4px;color:{INK_1}\">{big}</div>' if big else ''}"
+        f"<div style='color:{INK_1};margin-top:4px;line-height:1.6'>{'<br>'.join(lines)}</div></div>",
         unsafe_allow_html=True)
 
 
-def strategy_page():
-    daily, source, fetched = get_rrg("Daily")
-    closes, _, _ = get_closes()
-    asof = weekly_asof(closes)
-    now = datetime.now(IST)
-    prov = latest_is_provisional(daily, "Daily", now)
+def strategy_page(stock_ticker: str):
+    stock_info = cfg.STOCKS.get(stock_ticker, {"name": stock_ticker, "sector": ""})
+    stock_name = stock_info["name"]
+
+    aligned, source, fetched = get_stock_data(stock_ticker)
+    if aligned is None or len(aligned) == 0:
+        st.error(f"No clean price data available for {stock_name}.")
+        return
+
+    daily, d_ok = compute_rrg(aligned, stock_name, tf="Daily")
+    weekly, w_ok = compute_rrg(aligned, stock_name, tf="Weekly")
+
+    if not w_ok or len(weekly) < 60:
+        first_date = aligned.index[0].strftime("%d %b %Y")
+        st.warning(f"Weekly RRG needs more history - {stock_name} listed on {first_date} (minimum 60 weekly bars required for weekly confirmation).")
+        return
+
+    asof = weekly_asof(aligned, stock_name)
+    now = datetime.now(cfg.IST)
     start = max(pd.Timestamp(bt_from), daily.index[1], asof.index[0])
 
-    header("strategy", source, fetched, now,
-           "today's signal is provisional until the 15:30 close" if prov else "signals are final")
-    st.caption("**Buy** when the daily RRG moves from Weakening/Lagging into Improving/Leading "
-               "while the weekly RRG is in Improving/Leading.  **Sell** when the daily RRG moves "
-               "from Improving/Leading into Weakening/Lagging.  Whole shares, bought and sold at "
-               "that day's close, charges of %.2f%% on every buy and every sell." % cost)
+    header("strategy", stock_name, source, fetched, now, "signals are final")
+    st.caption(f"**Buy** when daily RRG moves into Improving/Leading while weekly is Improving/Leading.  "
+               f"**Sell** when daily drops into Weakening/Lagging.  Whole shares, charges of {cost:.2f}%.")
 
     trades, skipped, _, _, held = backtest(daily, asof, start, cost)
     book, final_cash, value, bh_value, bh_shares = simulate(daily, trades, start, capital, cost)
@@ -1083,85 +1110,64 @@ def strategy_page():
     last_px = daily["Close"].iloc[-1]
 
     if book and book[0]["shares"] == 0:
-        st.warning("%s is less than one share (₹%.2f with charges), so no shares could be bought. "
-                   "Enter a bigger amount." % (inr(capital), book[0]["buy_px"] * (1 + cost / 100)))
+        st.warning(f"{inr(capital)} is less than one share (₹{book[0]['buy_px'] * (1 + cost / 100):.2f} with charges). Enter a larger amount.")
 
-    # ---- 1. the answer: profit or loss on the money put in --------------------
     made = pnl >= 0
     status_box(UP_FG if made else DOWN_FG,
-               "%s %s" % ("PROFIT" if made else "LOSS", inr(pnl, sign=True)),
-               ["You put in <b>%s</b> on %s → it is worth <b>%s</b> on %s (%s)."
-                % (inr(capital), start.strftime("%d %b %Y"), inr(final),
-                   daily.index[-1].strftime("%d %b %Y"), pct(100 * pnl / capital)),
-                "Buying %d shares on %s and just holding would be worth <b>%s</b> (%s, %s)."
-                % (bh_shares, start.strftime("%d %b %Y"), inr(bh_final), inr(bh_pnl, sign=True),
-                   pct(100 * bh_pnl / capital)),
-                "The strategy did <b>%s</b> than buy & hold by %s."
-                % ("better" if final >= bh_final else "worse", inr(abs(final - bh_final)))])
+               f"{'PROFIT' if made else 'LOSS'} {inr(pnl, sign=True)}",
+               [f"You put in <b>{inr(capital)}</b> on {start.strftime('%d %b %Y')} → worth <b>{inr(final)}</b> on {daily.index[-1].strftime('%d %b %Y')} ({pct(100 * pnl / capital)}).",
+                f"Buying {bh_shares} shares on {start.strftime('%d %b %Y')} and holding would be worth <b>{inr(bh_final)}</b> ({inr(bh_pnl, sign=True)}, {pct(100 * bh_pnl / capital)}).",
+                f"The strategy did <b>{'better' if final >= bh_final else 'worse'}</b> than buy & hold by {inr(abs(final - bh_final))}."])
     st.write("")
 
     closed = [b for b in book if b["sell"] is not None]
     wins = [b for b in closed if b["pnl"] > 0]
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Money now", inr(final), "%s on %s" % (inr(pnl, sign=True), inr(capital)))
-    c2.metric("Total charges paid", inr(sum(b["charges"] for b in book)),
-              "%.2f%% per buy / sell" % cost, delta_color="off")
-    c3.metric("Trades won / lost", "%d / %d" % (len(wins), len(closed) - len(wins)),
-              "%d closed%s" % (len(closed), " + 1 open" if book and book[-1]["sell"] is None else ""),
-              delta_color="off")
-    c4.metric("Money in the stock", "%.0f%% of days" % (100 * held.mean()),
-              "best %s · worst %s" % (inr(max(b["pnl"] for b in closed), sign=True),
-                                      inr(min(b["pnl"] for b in closed), sign=True))
-              if closed else "", delta_color="off")
+    c1.metric("Money now", inr(final), f"{inr(pnl, sign=True)} on {inr(capital)}")
+    c2.metric("Total charges paid", inr(sum(b["charges"] for b in book)), f"{cost:.2f}% per buy/sell", delta_color="off")
+    c3.metric("Trades won / lost", f"{len(wins)} / {len(closed) - len(wins)}",
+              f"{len(closed)} closed{' + 1 open' if book and book[-1]['sell'] is None else ''}", delta_color="off")
+    c4.metric("Money in the stock", f"{100 * held.mean():.0f}% of days",
+              f"best {inr(max(b['pnl'] for b in closed), sign=True)} · worst {inr(min(b['pnl'] for b in closed), sign=True)}" if closed else "", delta_color="off")
 
-    # ---- 2. what to do now -----------------------------------------------------
     dq, wq = daily["Quadrant"].iloc[-1], asof["Quadrant"].iloc[-1]
-    ok = lambda q: "✅" if q in UP else "❌"
-    state = ["Weekly now: %s <b style='color:%s'>%s</b>  ·  Daily now: %s <b style='color:%s'>%s</b>"
-             % (ok(wq), QUAD_FG[wq], wq, ok(dq), QUAD_FG[dq], dq)]
+    ok_sym = lambda q: "✅" if q in UP else "❌"
+    state = [f"Weekly now: {ok_sym(wq)} <b style='color:{QUAD_FG[wq]}'>{wq}</b>  ·  Daily now: {ok_sym(dq)} <b style='color:{QUAD_FG[dq]}'>{dq}</b>"]
     open_b = book[-1] if book and book[-1]["sell"] is None else None
     st.write("")
     if open_b and open_b["buy"] == daily.index[-1]:
         status_box(QUAD_FG["Leading"], "▲ BUY signal today",
-                   ["Buy %d shares at about ₹%.2f (%s with charges)."
-                    % (open_b["shares"], open_b["buy_px"], inr(open_b["paid"]))] + state)
+                   [f"Buy {open_b['shares']} shares at about ₹{open_b['buy_px']:.2f} ({inr(open_b['paid'])} with charges)."] + state)
     elif open_b:
-        status_box(QUAD_FG["Leading"], "HOLD — %d shares since %s"
-                   % (open_b["shares"], open_b["buy"].strftime("%a %d %b %Y")),
-                   ["Bought at ₹%.2f (paid %s). Today ₹%.2f — selling now would give %s: %s."
-                    % (open_b["buy_px"], inr(open_b["paid"]), last_px, inr(open_b["got"]),
-                       inr(open_b["pnl"], sign=True)),
-                    "Sell when the daily moves into Weakening or Lagging (daily RS-Momentum %.2f; "
-                    "sell below 100)." % daily["RS_Momentum"].iloc[-1]] + state)
+        status_box(QUAD_FG["Leading"], f"HOLD — {open_b['shares']} shares since {open_b['buy'].strftime('%a %d %b %Y')}",
+                   [f"Bought at ₹{open_b['buy_px']:.2f} (paid {inr(open_b['paid'])}). Today ₹{last_px:.2f} — selling now would give {inr(open_b['got'])}: {inr(open_b['pnl'], sign=True)}.",
+                    f"Sell when daily moves into Weakening or Lagging (daily RS-Momentum {daily['RS_Momentum'].iloc[-1]:.2f}; sell below 100)."] + state)
     elif closed and closed[-1]["sell"] == daily.index[-1]:
         b = closed[-1]
         status_box(QUAD_FG["Lagging"], "▼ SELL signal today",
-                   ["Sell all %d shares at about ₹%.2f → %s (%s)."
-                    % (b["shares"], b["sell_px"], inr(b["got"]), inr(b["pnl"], sign=True))] + state)
+                   [f"Sell all {b['shares']} shares at about ₹{b['sell_px']:.2f} → {inr(b['got'])} ({inr(b['pnl'], sign=True)})."] + state)
     else:
         need = []
         if wq not in UP:
             need.append("the weekly to be in Improving or Leading")
         need.append("the daily to move from Weakening/Lagging into Improving/Leading"
-                    if dq not in UP else
-                    "the daily to drop into Weakening/Lagging and then turn back up")
-        status_box(INK_3, "WAIT — all %s is in cash" % inr(final_cash),
-                   ["Next buy needs " + " and ".join(need) + "."] + state)
+                    if dq not in UP else "the daily to drop into Weakening/Lagging and turn back up")
+        status_box(INK_3, f"WAIT — all {inr(final_cash)} is in cash",
+                   [f"Next buy needs {' and '.join(need)}."] + state)
 
-    st.plotly_chart(strategy_figure(daily, asof, book, value, bh_value, start, capital),
+    st.plotly_chart(strategy_figure(daily, asof, book, value, bh_value, start, capital, stock_name),
                     width="stretch", theme=None, config={"displaylogo": False})
 
-    # ---- 3. every trade in rupees ---------------------------------------------
     st.subheader("Every trade in rupees, oldest first")
     if book:
         table = pd.DataFrame([{
             "#": i + 1,
             "Buy date": b["buy"].strftime("%d %b %Y"),
-            "Buy price": "₹%.2f" % b["buy_px"],
+            "Buy price": f"₹{b['buy_px']:.2f}",
             "Shares": b["shares"],
             "You paid": inr(b["paid"]),
             "Sell date": b["sell"].strftime("%d %b %Y") if b["sell"] is not None else "still holding",
-            "Sell price": "₹%.2f" % b["sell_px"] + ("" if b["sell"] is not None else " (today)"),
+            "Sell price": f"₹{b['sell_px']:.2f}" + ("" if b["sell"] is not None else " (today)"),
             "You got": inr(b["got"]) + ("" if b["sell"] is not None else " (if sold)"),
             "Profit / loss": inr(b["pnl"], sign=True),
             "%": pct(b["pnl_pct"]),
@@ -1171,47 +1177,92 @@ def strategy_page():
 
         def money_style(col):
             return ["color: %s; font-weight: bold" % (UP_FG if v.startswith("+") else
-                                                      DOWN_FG if v.startswith("-") else INK_2)
-                    for v in col]
+                                                      DOWN_FG if v.startswith("-") else INK_2) for v in col]
+
         st.dataframe(table.style.apply(money_style, subset=["Profit / loss", "%"]),
                      hide_index=True, width="stretch", height=38 + 35 * len(table))
-        st.caption("Start %s  →  %s from trades  →  end %s.  Weekly/daily quadrants for each "
-                   "trade are in the download."
-                   % (inr(capital), inr(sum(b["pnl"] for b in book), sign=True), inr(final)))
+        clean_name = dp.sanitize_ticker(stock_ticker).lower()
         full = pd.DataFrame([{
             "buy_date": b["buy"].date(), "buy_price": round(b["buy_px"], 2), "shares": b["shares"],
             "paid": round(b["paid"], 2), "weekly_at_buy": b["weekly"],
-            "daily_move": "%s -> %s" % (b["frm"], b["into"]),
+            "daily_move": f"{b['frm']} -> {b['into']}",
             "sell_date": b["sell"].date() if b["sell"] is not None else "open",
             "sell_price": round(b["sell_px"], 2), "got": round(b["got"], 2),
             "profit_loss": round(b["pnl"], 2), "charges": round(b["charges"], 2),
             "money_after": round(b["cash_after"], 2), "daily_exit_into": b["exit_into"] or "",
         } for b in book])
         st.download_button("Download trades as CSV", full.to_csv(index=False),
-                           file_name="pvrinox_strategy_trades.csv", mime="text/csv")
+                           file_name=f"{clean_name}_strategy_trades.csv", mime="text/csv")
     else:
-        st.info("No buy signal since %s, so the money stayed in cash." % start.strftime("%d %b %Y"))
+        st.info(f"No buy signal since {start.strftime('%d %b %Y')}, so money stayed in cash.")
 
-    with st.expander("Daily turned up but the weekly was down — no buy (%d times)" % len(skipped)):
+    with st.expander(f"Daily turned up but weekly was down — no buy ({len(skipped)} times)"):
         if skipped:
             st.dataframe(pd.DataFrame([{"Date": s["date"].strftime("%a %d %b %Y"),
-                                        "Daily moved": "%s → %s" % (s["frm"], s["into"]),
+                                        "Daily moved": f"{s['frm']} → {s['into']}",
                                         "Weekly that day": s["weekly"]} for s in skipped])
                          .style.apply(quad_style, subset=["Weekly that day"]),
                          hide_index=True, width="stretch")
 
-    formula_note("weekly position on each day is the week so far (no look-ahead)  ·  "
-                 "past results do not guarantee future returns")
 
+# ---- Sidebar & Main Execution -----------------------------------------------
+with st.sidebar:
+    st.header("Stock & View Selection")
+    selected_stock = st.selectbox(
+        "Select Stock",
+        options=list(cfg.STOCKS.keys()),
+        format_func=lambda t: f"{cfg.STOCKS[t]['name']} ({cfg.STOCKS[t]['sector']})",
+        index=0
+    )
+    stock_meta = cfg.STOCKS[selected_stock]
+    st.caption(f"**Selected:** {stock_meta['name']} · Sector: *{stock_meta['sector']}*")
 
-@st.fragment(run_every=refresh_every)
-def page():
-    if tf == "Strategy":
-        strategy_page()
-    elif tf == "Both":
-        both_page()
+    page_choice = st.radio("Timeframe / Page", ["Daily", "Weekly", "Both", "All stocks", "Strategy"],
+                           horizontal=False)
+
+    st.markdown("---")
+    if st.button("🔄 Refresh All Data", help="Fetch and validate latest data for all 6 stocks + NIFTY from Yahoo Finance"):
+        with st.spinner("Downloading and validating all tickers..."):
+            res = dp.refresh_data(force=True)
+            if res["status"] == "SUCCESS":
+                st.success("All 6 stocks + NIFTY refreshed and validated!")
+                st.rerun()
+            else:
+                st.error(f"Refresh failed: {res.get('message')}")
+
+    if page_choice == "Strategy":
+        with st.form("strategy_inputs"):
+            capital = st.number_input("Amount to invest (₹)", min_value=1000, max_value=10**9,
+                                      value=100000, step=10000, format="%d")
+            bt_from = st.date_input("Start date", value=CYCLES_FROM.date(),
+                                    min_value=datetime(2010, 1, 1).date(), key="bt_from")
+            cost = st.number_input("Charges per buy / sell (%)", min_value=0.0, max_value=2.0,
+                                   value=0.12, step=0.01, format="%.2f")
+            st.form_submit_button("▶ Run strategy", type="primary", width="stretch")
+    elif page_choice == "All stocks":
+        all_tf = st.radio("Comparison Timeframe", ["Daily", "Weekly"], horizontal=True)
     else:
-        single_page()
+        active_tf = "Daily" if page_choice == "Both" else page_choice
+        cfg_tf = TF_CONFIG[active_tf]
+        window = st.select_slider("Slider covers", options=[SINCE_2024] + cfg_tf["windows"],
+                                  value=SINCE_2024, key=f"win_{page_choice}",
+                                  format_func=lambda v: v if v == SINCE_2024 else f"last {v} {cfg_tf['units']}")
+        if page_choice == "Both":
+            tail_n = st.slider("Daily trail (sessions)", 5, 60, TF_CONFIG["Daily"]["tail"], key="tail_d")
+            tail_w = st.slider("Weekly trail (weeks)", 5, 60, TF_CONFIG["Weekly"]["tail"], key="tail_w")
+        else:
+            tail_n = st.slider(f"Trail length ({cfg_tf['units']})", 5, 60, cfg_tf["tail"], key="tail_s")
+        fixed_axes = st.toggle("Fixed axes while sliding", value=False)
 
 
-page()
+# Main layout
+render_status_panel(selected_stock)
+
+if page_choice == "Strategy":
+    strategy_page(selected_stock)
+elif page_choice == "All stocks":
+    all_stocks_page(all_tf)
+elif page_choice == "Both":
+    both_page(selected_stock)
+else:
+    single_page(selected_stock, page_choice)

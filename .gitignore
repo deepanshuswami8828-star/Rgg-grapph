@@ -4,3 +4,6 @@ __pycache__/
 tools/cloudflared.exe
 tools/share_link.ps1
 Share Link.bat
+logs/
+charts/
+.pytest_cache/
