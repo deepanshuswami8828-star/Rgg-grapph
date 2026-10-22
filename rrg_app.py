@@ -20,7 +20,9 @@ from plotly.subplots import make_subplots
 
 import config as cfg
 import data_pipeline as dp
+import importlib
 import strategies as strat
+importlib.reload(strat)
 from make_rrg_pvrinox import (
     calc_rs_ratio, calc_rs_momentum, quadrant,
     SURFACE, INK_1, INK_2, INK_3, GRID, SERIES, QUAD_BG, QUAD_FG,
@@ -1216,19 +1218,18 @@ def strategy_page(stock_ticker: str, default_strategy_id: int = 3):
 
     with tab_single:
         # Synchronize sidebar selection with tab selection
-        if "sidebar_strat_select" in st.session_state and st.session_state.get("_applied_sidebar_strat") != st.session_state["sidebar_strat_select"]:
-            st.session_state[f"strat_selector_{stock_ticker}"] = st.session_state["sidebar_strat_select"]
+        key_name = f"strat_selector_{stock_ticker}"
+        if key_name not in st.session_state:
+            st.session_state[key_name] = default_strategy_id
+        elif "sidebar_strat_select" in st.session_state and st.session_state.get("_applied_sidebar_strat") != st.session_state["sidebar_strat_select"]:
+            st.session_state[key_name] = st.session_state["sidebar_strat_select"]
             st.session_state["_applied_sidebar_strat"] = st.session_state["sidebar_strat_select"]
-
-        current_strat = st.session_state.get(f"strat_selector_{stock_ticker}", default_strategy_id)
-        default_idx = list(strat.STRATEGY_REGISTRY.keys()).index(current_strat) if current_strat in strat.STRATEGY_REGISTRY else 2
 
         selected_s_id = st.selectbox(
             "🎯 Select Strategy to Analyze (Choose from all 12 Strategies)",
             options=list(strat.STRATEGY_REGISTRY.keys()),
             format_func=lambda i: f"Strategy {i}: {strat.STRATEGY_REGISTRY[i]['name']} ({strat.STRATEGY_REGISTRY[i]['tag']})",
-            index=default_idx,
-            key=f"strat_selector_{stock_ticker}",
+            key=key_name,
             help="Choose which of the 12 RRG strategies to analyze for this stock."
         )
         meta = strat.STRATEGY_REGISTRY[selected_s_id]
