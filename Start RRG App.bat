@@ -1,7 +1,8 @@
 @echo off
-rem Launches the PVR INOX live RRG app and opens it in the browser.
-rem If the app is already running, it just opens the browser tab.
-title PVR INOX RRG app - keep this window open while using the app
+rem Launches the Multi-Stock Live RRG App (NSE stocks against NIFTY 50).
+rem The app works standalone with in-app automatic refresh and offline fallbacks;
+rem unattended Windows Task Scheduler is completely optional.
+title Multi-Stock RRG App - keep this window open while using the app
 cd /d "%~dp0"
 
 set PORT=8501
@@ -17,8 +18,9 @@ if %errorlevel%==0 (
     exit /b 0
 )
 
-echo Starting PVR INOX RRG app...
+echo Starting Multi-Stock RRG app...
 echo It opens in your browser in a few seconds.
+echo Note: The app runs standalone and does not require Task Scheduler.
 echo Close this window to stop the app.
 echo.
 

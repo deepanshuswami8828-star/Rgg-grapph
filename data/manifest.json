@@ -1,6 +1,6 @@
 {
-  "version_id": "v20261022_203905",
-  "updated_at": "2026-10-22T20:39:05.939498+05:30",
+  "version_id": "v20261022_211946",
+  "updated_at": "2026-10-22T21:19:46.067405+05:30",
   "status": "SUCCESS",
   "provider": "Yahoo Finance (yfinance)",
   "tickers": {
@@ -8,8 +8,8 @@
       "first_date": "2006-01-04",
       "last_date": "2026-10-22",
       "rows": 5127,
-      "sha256": "6b6fb4b8bad9b7dcb95670e0470d85d293c8177a2d457fb5e7fc682079b7549f",
-      "fetched_at": "2026-10-22T20:39:05.939498+05:30",
+      "sha256": "37b62ed4496709dfeb7ec043b66f85dd8bd5c463845d2e3ba0d4ef0290bb0454",
+      "fetched_at": "2026-10-22T21:19:46.067405+05:30",
       "status": "VALID",
       "benchmark_version": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
       "warnings": [],
@@ -19,8 +19,8 @@
       "first_date": "2002-07-01",
       "last_date": "2026-10-22",
       "rows": 6031,
-      "sha256": "2c1560b01650012fe2c1cdf7ffc429c6802c8d8baf7089b57ca2cd8334c92409",
-      "fetched_at": "2026-10-22T20:39:05.939498+05:30",
+      "sha256": "ab78a3e6fdfc939752bc186ce2a17f3df3a8be34160f6853e77c99b1db8a3cc0",
+      "fetched_at": "2026-10-22T21:19:46.067405+05:30",
       "status": "VALID",
       "benchmark_version": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
       "warnings": [
@@ -44,8 +44,8 @@
       "first_date": "2005-10-19",
       "last_date": "2026-10-22",
       "rows": 5179,
-      "sha256": "85fb86fcb319761e299f34f7164f479d07d41f61116d2ff4cec4fc42eb19848e",
-      "fetched_at": "2026-10-22T20:39:05.939498+05:30",
+      "sha256": "5c7a3e2c370626e370694e2126bcf3e8e756a9ae5ef5e968a8348c92cbff64df",
+      "fetched_at": "2026-10-22T21:19:46.067405+05:30",
       "status": "VALID",
       "benchmark_version": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
       "warnings": [
@@ -82,7 +82,7 @@
       "last_date": "2026-10-22",
       "rows": 491,
       "sha256": "27cb0f6f2bb094205683659d95a7906276468e4759bf0bb00af2653f337dea89",
-      "fetched_at": "2026-10-22T20:39:05.939498+05:30",
+      "fetched_at": "2026-10-22T21:19:46.067405+05:30",
       "status": "VALID",
       "benchmark_version": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
       "warnings": [],
@@ -92,8 +92,8 @@
       "first_date": "2002-07-01",
       "last_date": "2026-10-22",
       "rows": 6031,
-      "sha256": "c652b71d956c7f1fd31fb54127b2750694b6a04ea637eda76d9a8430b1ef3599",
-      "fetched_at": "2026-10-22T20:39:05.939498+05:30",
+      "sha256": "5812bd36eb838e53550057588b51945c74243a904390a4d703ebdb688c23a3d3",
+      "fetched_at": "2026-10-22T21:19:46.067405+05:30",
       "status": "VALID",
       "benchmark_version": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
       "warnings": [
@@ -111,8 +111,8 @@
       "first_date": "1996-01-01",
       "last_date": "2026-10-22",
       "rows": 7726,
-      "sha256": "6d081151d05e7f5001191349015c29a0de2b491684e431f57a5c3befea0e6379",
-      "fetched_at": "2026-10-22T20:39:05.939498+05:30",
+      "sha256": "da718a48c48758fb030f4a63b7dc2d01e39e00063008a4d308afd57253ac63fc",
+      "fetched_at": "2026-10-22T21:19:46.067405+05:30",
       "status": "VALID",
       "benchmark_version": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
       "warnings": [
@@ -149,7 +149,7 @@
       "last_date": "2026-10-22",
       "rows": 4683,
       "sha256": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
-      "fetched_at": "2026-10-22T20:39:05.939498+05:30",
+      "fetched_at": "2026-10-22T21:19:46.067405+05:30",
       "status": "VALID",
       "benchmark_version": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
       "warnings": [],
@@ -157,8 +157,8 @@
     }
   },
   "last_attempt": {
-    "time": "2026-10-22T20:39:05.939498+05:30",
-    "result": "SUCCESS",
-    "message": "Successfully published 6 stocks and ^NSEI"
+    "time": "2026-10-24T12:00:00+05:30",
+    "result": "NO_NEW_SESSION",
+    "message": "Weekend: NSE closed; skipping fetch/publish."
   }
 }

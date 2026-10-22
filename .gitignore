@@ -7,3 +7,5 @@ Share Link.bat
 logs/
 charts/
 .pytest_cache/
+data/backup/
+data/provisional/

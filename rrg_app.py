@@ -662,9 +662,8 @@ def all_stocks_page(timeframe: str):
     shared_start = max(min(df.index[0] for df, _ in valid_stocks.values()), pd.Timestamp("2024-01-01"))
     shared_dates = [d for d in next(iter(valid_stocks.values()))[0].index if shared_start <= d <= shared_end]
 
-    if len(shared_dates) < 10:
-        shared_dates = next(iter(valid_stocks.values()))[0].index[-60:]
-
+    # Slider covers the most recent 60 sessions for multi-stock comparison
+    shared_dates = shared_dates[-60:]
     tail_n = 15
     frames = []
     step_cmd = dict(mode="immediate", frame=dict(duration=0, redraw=True), transition=dict(duration=0))
@@ -677,24 +676,24 @@ def all_stocks_page(timeframe: str):
             if len(hist) < 2:
                 continue
             tail = hist.tail(tail_n)
-            xs = tail["RS_Ratio"].to_numpy()
-            ys = tail["RS_Momentum"].to_numpy()
-            traces.append(go.Scatter(
-                x=xs, y=ys, mode="lines", line=dict(color=color, width=2),
-                hoverinfo="skip", showlegend=False
+            xs = r3(tail["RS_Ratio"].to_numpy())
+            ys = r3(tail["RS_Momentum"].to_numpy())
+            traces.append(dict(
+                type="scatter", x=xs, y=ys, mode="lines",
+                line=dict(color=color, width=2), hoverinfo="skip", showlegend=False
             ))
-            traces.append(go.Scatter(
-                x=[xs[-1]], y=[ys[-1]], mode="markers+text", name=s_name,
+            traces.append(dict(
+                type="scatter", x=xs[-1:], y=ys[-1:], mode="markers+text", name=s_name,
                 text=[s_name], textposition="top center",
                 textfont=dict(color=INK_1, size=11),
                 marker=dict(size=14, color=color, line=dict(color=SURFACE, width=1.5)),
                 hovertemplate=f"<b>{s_name}</b><br>{target_d.strftime('%d %b %Y')}<br>"
                               f"RS-Ratio %{{x:.2f}}<br>RS-Momentum %{{y:.2f}}<extra></extra>"
             ))
-        frames.append(go.Frame(data=traces, name=target_d.strftime("%Y-%m-%d")))
+        frames.append(dict(data=traces, name=target_d.strftime("%Y-%m-%d")))
 
     # Initial frame
-    fig = go.Figure(data=frames[-1].data, frames=frames)
+    data_last = frames[-1]["data"]
     big = 1e4
     shapes = []
     for q, (x0, x1, y0, y1) in {"Improving": (-big, 100, 100, big),
@@ -706,16 +705,17 @@ def all_stocks_page(timeframe: str):
     shapes.append(dict(type="line", x0=-big, x1=big, y0=100, y1=100, line=dict(color=INK_3, width=1.1)))
     shapes.append(dict(type="line", x0=100, x1=100, y0=-big, y1=big, line=dict(color=INK_3, width=1.1)))
 
-    fig.update_layout(
+    layout = dict(
         shapes=shapes, height=650, margin=dict(l=65, r=20, t=30, b=80),
         plot_bgcolor=SURFACE, paper_bgcolor=SURFACE, font=dict(color=INK_2),
-        xaxis=dict(range=[90, 120], gridcolor=GRID, title=f"JdK RS-Ratio (100 = in line with {cfg.BENCHMARK_NAME})"),
-        yaxis=dict(range=[90, 115], gridcolor=GRID, title="JdK RS-Momentum"),
+        xaxis=dict(range=[85, 125], gridcolor=GRID, title=f"JdK RS-Ratio (100 = in line with {cfg.BENCHMARK_NAME})"),
+        yaxis=dict(range=[85, 120], gridcolor=GRID, title="JdK RS-Momentum"),
         sliders=[dict(active=len(frames) - 1, x=0, len=1, y=0, yanchor="top",
-                      steps=[dict(method="animate", label=f.name, args=[[f.name], step_cmd]) for f in frames],
+                      steps=[dict(method="animate", label=f["name"], args=[[f["name"]], step_cmd]) for f in frames],
                       currentvalue=dict(prefix="Session: ", xanchor="left", font=dict(size=13, color=INK_1)))]
     )
-    st.plotly_chart(fig, width="stretch", config={"displaylogo": False})
+    fig_dict = dict(data=data_last, layout=layout, frames=frames)
+    st.plotly_chart(fig_dict, width="stretch", config={"displaylogo": False})
 
 
 # ---- Single Page (Daily / Weekly) -------------------------------------------
