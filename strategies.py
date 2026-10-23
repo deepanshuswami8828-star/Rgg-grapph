@@ -26,6 +26,8 @@ WARMUP_WEEKLY = 15
 STRATEGY_REGISTRY = {
     1: {
         "id": 1,
+        "label": "Strategy 1",
+        "weekly_only": False,
         "name": "Daily + Weekly RRG Confirmation",
         "tag": "Multi-Timeframe",
         "short_desc": "Buy only when BOTH Daily & Weekly are Leading/Improving; Sell when EITHER drops into Weakening/Lagging.",
@@ -37,6 +39,8 @@ STRATEGY_REGISTRY = {
     },
     2: {
         "id": 2,
+        "label": "Strategy 2 · Version 1",
+        "weekly_only": True,
         "name": "Weekly RRG Only (Version 1)",
         "tag": "Weekly Only",
         "short_desc": "Buy when the Weekly RRG is Leading/Improving; Sell when it drops into Weakening/Lagging. Daily is ignored.",
@@ -45,6 +49,20 @@ STRATEGY_REGISTRY = {
         "exit_rule": "Sell at the week's close when Weekly ∈ {Weakening, Lagging}.",
         "best_market": "Long, steady trends where a stock outperforms NIFTY 50 for months at a time.",
         "risk_watch": "Reacts only once a week, so a sharp fall inside a week is not exited until that week closes.",
+    },
+    # Strategy 2, version 2 (internal key 3; shown as "Strategy 2 · Version 2")
+    3: {
+        "id": 3,
+        "label": "Strategy 2 · Version 2",
+        "weekly_only": True,
+        "name": "Weekly RRG Only (Version 2) — Early Exit at RS-Mom < 101",
+        "tag": "Weekly Only",
+        "short_desc": "Buy when Weekly enters Leading/Improving; Sell when Weekly is Leading with RS-Momentum < 101, or drops into Weakening/Lagging. Daily is ignored.",
+        "full_desc": "Weekly-only strategy with an early exit. Looks only at completed weekly candles. Buys when the Weekly RRG is in Leading or Improving. Sells early when the Weekly is in Leading but its RS-Momentum has fallen below 101 (momentum fading before it reaches Weakening), and also sells if the Weekly lands in Weakening or Lagging. After an early exit it buys again only after the Weekly has dropped into Weakening/Lagging and come back up. The Daily RRG is never used.",
+        "entry_rule": "Buy at the week's close when Weekly ∈ {Leading, Improving} (after an early exit: only once the Weekly has been in Weakening/Lagging and comes back up).",
+        "exit_rule": "Sell at the week's close when Weekly is Leading with RS-Momentum < 101, or when Weekly ∈ {Weakening, Lagging}.",
+        "best_market": "Trends that roll over gradually, where momentum fades inside Leading before the stock turns down.",
+        "risk_watch": "Can exit a strong trend on a brief momentum dip and must then wait for a full down-and-up cycle to re-enter.",
     },
 }
 
@@ -210,7 +228,58 @@ def gen_strat_2(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, co
     return trades, []
 
 
-SIGNALS = {1: gen_strat_1, 2: gen_strat_2}
+MOM_EXIT_V2 = 101.0   # Strategy 2 version 2: early exit level for weekly RS-Momentum in Leading
+
+
+def gen_strat_2_v2(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, cost_pct: float = 0.12) -> Tuple[List[Dict], List[Dict]]:
+    """Strategy 2, version 2: Weekly RRG only, with an early exit.
+
+    At each completed week's close:
+      SELL (open position): Weekly == Leading and RS-Momentum < 101   (early exit)
+                            or Weekly in {Weakening, Lagging}          (safety net)
+      BUY  (flat):          Weekly in {Leading, Improving}, provided the weekly has been in
+                            Weakening/Lagging since the last early exit (fresh entry only).
+    The Daily RRG is not used. Fills at the close of the week's last trading day.
+    """
+    wk = completed_weekly(asof, daily.index)
+    w_q, w_m = wk["Quadrant"], wk["RS_Momentum"]
+    prev_w = w_q.shift(1)
+    close = daily["Close"]
+    c = cost_pct / 100.0
+
+    trades, pos, armed = [], None, True
+    for d in wk.index[wk.index >= start]:
+        wq, wm = w_q[d], w_m[d]
+        if pos is not None:
+            if wq == "Leading" and wm < MOM_EXIT_V2:
+                reason = f"Weekly Leading, RS-Momentum {wm:.2f} < {MOM_EXIT_V2:.0f}"
+            elif wq in DOWN:
+                reason = f"Weekly → {wq}"
+            else:
+                continue
+            trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=wq, open=False,
+                               exit_reason=reason, daily_at_sell="", weekly_at_sell=wq,
+                               weekly_mom_at_sell=wm))
+            pos = None
+            armed = wq in DOWN          # an early exit waits for a full down-and-up cycle
+            continue
+        if wq in DOWN:
+            armed = True
+        elif armed and wq in UP:
+            pos = dict(buy=d, buy_px=close[d], weekly=wq, frm=prev_w[d], into=wq,
+                       daily_at_buy="", weekly_at_buy=wq, weekly_mom_at_buy=wm)
+    if pos is not None:
+        trades.append(dict(pos, sell=None, sell_px=close.iloc[-1], exit_into=None, open=True,
+                           exit_reason="Open Position", daily_at_sell="",
+                           weekly_at_sell=w_q.iloc[-1] if len(w_q) else ""))
+    for t in trades:
+        t["ret"] = 100.0 * ((t["sell_px"] * (1 - c)) / (t["buy_px"] * (1 + c)) - 1)
+        end = t["sell"] if t["sell"] is not None else daily.index[-1]
+        t["held"] = int(((daily.index > t["buy"]) & (daily.index <= end)).sum())
+    return trades, []
+
+
+SIGNALS = {1: gen_strat_1, 2: gen_strat_2, 3: gen_strat_2_v2}
 
 
 # ---- Execution Simulator -----------------------------------------------------

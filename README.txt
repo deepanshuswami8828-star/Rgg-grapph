@@ -126,7 +126,7 @@ signal day's close; daily mark-to-market value; no look-ahead):
 
 8b. STRATEGY 2 (VERSION 1) — WEEKLY RRG ONLY
 --------------------------------------------
-Choose it with the "Strategy" box in the sidebar on the Strategy page.
+Shown as "Strategy 2 · Version 1" in the "Strategy" box in the sidebar on the Strategy page.
   - Looks only at COMPLETED weekly candles; the Daily RRG is never used.
   - BUY  at the week's close when Weekly is Leading/Improving.
   - SELL at the week's close when Weekly is Weakening/Lagging.
@@ -136,6 +136,18 @@ Choose it with the "Strategy" box in the sidebar on the Strategy page.
     (17 May 2024, 30 May 2025, 13 Mar 2026, 31 Jul 2026 - still open), value Rs 1,36,019.
   - Tests: tests/test_strategy_2.py (rules, week-close only, daily ignored, unfinished week,
     independent check against the Weekly page's candles on every stock).
+
+8c. STRATEGY 2 (VERSION 2) — WEEKLY RRG ONLY, EARLY EXIT AT RS-MOMENTUM < 101
+-------------------------------------------------------------------------
+Shown as "Strategy 2 · Version 2" in the sidebar (internal registry key 3).
+  - Completed weekly candles only; the Daily RRG is never used.
+  - BUY  at the week's close when Weekly is Leading/Improving.
+  - SELL at the week's close when Weekly is Leading with RS-Momentum < 101 (early exit),
+    or when Weekly is Weakening/Lagging (safety net).
+  - After an early exit, buy again only once the Weekly has been in Weakening/Lagging and
+    comes back up (fresh entry). After a safety-net exit the next up week can buy.
+  - Tests: tests/test_strategy_2_v2.py (early exit, 101 boundary, safety net, fresh entry,
+    daily ignored, independent check against the Weekly page's candles on every stock).
 
 9. AUTOMATED TESTING
 --------------------

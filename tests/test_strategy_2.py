@@ -128,6 +128,6 @@ def test_pvr_baseline(stocks):
 
 
 def test_registry_and_runner():
-    assert list(strat.STRATEGY_REGISTRY) == [1, 2]
+    assert {1, 2} <= set(strat.STRATEGY_REGISTRY)
     assert strat.STRATEGY_REGISTRY[2]["name"] == "Weekly RRG Only (Version 1)"
     assert strat.SIGNALS[2] is strat.gen_strat_2
