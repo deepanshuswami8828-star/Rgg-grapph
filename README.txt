@@ -120,8 +120,10 @@ per side, daily mark-to-market portfolio accounting, and zero lookahead bias:
   2. Leading Profit Booking Strategy:
      - Enters on Leading. Exits on profit target (+8%), trailing stop (5% from peak), or Weakening.
   3. Daily + Weekly Confirmation Strategy (Baseline):
-     - The core multi-timeframe strategy. Buys on Daily Improving/Leading only when Weekly is Improving/Leading.
-     - Preserves the exact 11 PVR INOX baseline trades from 24 May 2024 to 12 Oct 2026.
+     - BUY when BOTH Daily and Weekly are Improving/Leading; SELL when EITHER enters Weakening/Lagging.
+     - One position at a time; re-entry only when both qualify again. Weekly = as-of reading (no look-ahead).
+     - PVR INOX baseline (data to 16 Oct 2026, Rs 1,00,000 from 1 Jan 2024): 14 trades, first buy
+       24 May 2024 (Rs 1339.05), open position from 12 Oct 2026 (Rs 1401.30). Tests: tests/test_strategy_3_rules.py
   4. Early Rotation Catcher (Lagging to Improving):
      - Early bottoming rotation: Buys on Lagging-to-Improving with RS-Mom >= 100 & price recovery. 5% stop-loss.
   5. Leading-Only Momentum Strategy:

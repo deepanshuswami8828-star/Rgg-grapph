@@ -52,12 +52,12 @@ STRATEGY_REGISTRY = {
         "id": 3,
         "name": "Daily + Weekly Confirmation",
         "tag": "Multi-Timeframe",
-        "short_desc": "Baseline strategy: Buy on Daily Improving/Leading confirmed by Weekly Improving/Leading.",
-        "full_desc": "The primary multi-timeframe baseline strategy. Requires higher-timeframe alignment: buys when Daily moves into Improving or Leading ONLY if the Weekly RRG is also in Improving or Leading. Sells when Daily drops into Weakening or Lagging.",
-        "entry_rule": "Buy when Daily enters Improving/Leading AND Weekly RRG is confirmed in Improving/Leading.",
-        "exit_rule": "Sell when Daily RRG drops into Weakening or Lagging quadrant.",
+        "short_desc": "Buy when BOTH Daily and Weekly are Improving/Leading; sell when EITHER drops to Weakening/Lagging.",
+        "full_desc": "Multi-timeframe confirmation. A position is opened only while both the Daily and the Weekly RRG are in Improving or Leading, and closed as soon as either timeframe enters Weakening or Lagging, even if the other is still strong. One position at a time; after a sale it re-enters only when both qualify again.",
+        "entry_rule": "Buy when Daily is Improving/Leading AND Weekly is Improving/Leading (both must qualify).",
+        "exit_rule": "Sell when Daily OR Weekly enters Weakening/Lagging (either one triggers the exit).",
         "best_market": "Sustained intermediate-term bull trends with weekly institutional participation.",
-        "risk_watch": "Misses early trend reversals if the weekly timeframe takes several weeks to confirm.",
+        "risk_watch": "Exits on the first sign of weakness in either timeframe, so short dips can cause early exits and re-entries.",
     },
     4: {
         "id": 4,
@@ -294,8 +294,9 @@ def gen_strat_2(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, co
     return trades
 
 
-def gen_strat_3(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, cost_pct: float = 0.12) -> Tuple[List[Dict], List[Dict]]:
-    """Strategy 3: Daily + Weekly RRG Confirmation (Baseline strategy)."""
+def _gen_confirmation_daily_exit(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, cost_pct: float = 0.12) -> Tuple[List[Dict], List[Dict]]:
+    """Original confirmation rules (daily entry event + weekly filter, daily-only exit).
+    Kept unchanged for Strategy 12's single-stock fallback; Strategy 3 now uses gen_strat_3."""
     q = daily["Quadrant"]
     up = q.isin(UP)
     prev_q = q.shift(1)
@@ -315,6 +316,51 @@ def gen_strat_3(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, co
         elif pos is not None and not up[d] and prev_up[d]:
             trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=q[d], open=False,
                                exit_reason="Daily Drop to Weakening/Lagging"))
+            pos = None
+    if pos is not None:
+        trades.append(dict(pos, sell=None, sell_px=close.iloc[-1], exit_into=None, open=True,
+                           exit_reason="Open Position"))
+    for t in trades:
+        t["ret"] = 100.0 * ((t["sell_px"] * (1 - c)) / (t["buy_px"] * (1 + c)) - 1)
+        end = t["sell"] if t["sell"] is not None else daily.index[-1]
+        t["held"] = int(((daily.index > t["buy"]) & (daily.index <= end)).sum())
+    return trades, skipped
+
+
+def gen_strat_3(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, cost_pct: float = 0.12) -> Tuple[List[Dict], List[Dict]]:
+    """Strategy 3: Daily + Weekly RRG Confirmation.
+
+    BUY  (no open position): Daily in {Leading, Improving} AND Weekly in {Leading, Improving}.
+    SELL (open position):    Daily in {Weakening, Lagging} OR  Weekly in {Weakening, Lagging}.
+    Otherwise an open position is held. Weekly is the as-of reading for that day (no look-ahead);
+    a day without a weekly reading neither buys nor sells. Fills at that day's close, as before.
+    """
+    q = daily["Quadrant"]
+    prev_q = q.shift(1)
+    w_q = asof["Quadrant"].reindex(daily.index)
+    close = daily["Close"]
+    c = cost_pct / 100.0
+
+    trades, skipped, pos = [], [], None
+    for d in daily.index[daily.index >= start]:
+        dq, wq = q[d], w_q[d]
+        if pd.isna(wq):
+            continue
+        if pos is None:
+            if dq in UP and wq in UP:
+                pos = dict(buy=d, buy_px=close[d], weekly=wq, frm=prev_q[d], into=dq,
+                           daily_at_buy=dq, weekly_at_buy=wq)
+            elif dq in UP and prev_q[d] not in UP and pd.notna(prev_q[d]):
+                # daily turned up but the weekly did not qualify: no buy (shown on the page)
+                skipped.append(dict(date=d, weekly=wq, frm=prev_q[d], into=dq))
+        elif dq in DOWN or wq in DOWN:
+            who = [n for n, x in (("Daily", dq), ("Weekly", wq)) if x in DOWN]
+            reason = " & ".join(f"{n} → {x}" for n, x in (("Daily", dq), ("Weekly", wq)) if x in DOWN)
+            if len(who) == 1:
+                other = "Weekly" if who[0] == "Daily" else "Daily"
+                reason += f" ({other} {wq if other == 'Weekly' else dq})"
+            trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=dq, open=False,
+                               exit_reason=reason, daily_at_sell=dq, weekly_at_sell=wq))
             pos = None
     if pos is not None:
         trades.append(dict(pos, sell=None, sell_px=close.iloc[-1], exit_into=None, open=True,
@@ -1041,7 +1087,7 @@ def run_strategy(strat_id: int, daily: pd.DataFrame, asof: pd.DataFrame, start: 
             cash = float(val.iloc[-1])
             bh_sh = 1
         else:
-            raw, _ = gen_strat_3(daily, asof, start, cost_pct)
+            raw, _ = _gen_confirmation_daily_exit(daily, asof, start, cost_pct)
             book, cash, val, bh_val, bh_sh = simulate_single_strategy(daily, raw, start, capital, cost_pct)
     else:
         raise ValueError(f"Unknown strategy ID: {strat_id}")

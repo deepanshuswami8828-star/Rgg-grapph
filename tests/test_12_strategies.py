@@ -81,7 +81,8 @@ def test_all_12_strategies_run_on_pvrinox(prepared_data):
 
 
 def test_baseline_strategy_3_exact_trades(prepared_data):
-    """Verify Strategy 3 matches untouched PVR INOX baseline numbers."""
+    """Strategy 3 (both timeframes to buy, either to sell) on the PVR INOX baseline data.
+    Full rule coverage lives in test_strategy_3_rules.py."""
     _, _, stocks_rrg = prepared_data
     pvr_data = stocks_rrg["PVRINOX.NS"]
     daily = pvr_data["daily"]
@@ -97,16 +98,16 @@ def test_baseline_strategy_3_exact_trades(prepared_data):
         daily_trunc, raw, start, capital=100000.0, cost_pct=0.12
     )
 
-    assert len(book) >= 11
+    assert len(book) == 14
     t1 = book[0]
     assert t1["buy"].strftime("%Y-%m-%d") == "2024-05-24"
     assert round(t1["buy_px"], 2) == 1339.05
     assert t1["sell"].strftime("%Y-%m-%d") == "2024-07-11"
     assert round(t1["sell_px"], 2) == 1460.20
 
-    t11 = book[10]
-    assert t11["buy"].strftime("%Y-%m-%d") in ["2024-10-12", "2026-10-12"]
-    assert round(t11["buy_px"], 2) == 1401.30
+    t_last = book[-1]
+    assert t_last["buy"].strftime("%Y-%m-%d") == "2026-10-12"
+    assert round(t_last["buy_px"], 2) == 1401.30
 
 
 def test_strategy_6_partial_profit_booking(prepared_data):

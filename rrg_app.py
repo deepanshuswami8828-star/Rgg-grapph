@@ -1265,7 +1265,7 @@ def strategy_page(stock_ticker: str, default_strategy_id: int = 3):
         )
 
         if selected_s_id == 3:
-            trades, skipped, _, _, held = backtest(daily, asof, start, cost)
+            trades, skipped = strat.gen_strat_3(daily, asof, start, cost)
             book, final_cash, value, bh_value, bh_shares = simulate(daily, trades, start, capital, cost)
         elif selected_s_id == 6:
             book, final_cash, value, bh_value, bh_shares = strat.simulate_partial_strategy(daily, asof, start, capital, cost)
@@ -1389,6 +1389,7 @@ def strategy_page(stock_ticker: str, default_strategy_id: int = 3):
                 "buy_date": b["buy"].date(), "buy_price": round(b["buy_px"], 2), "shares": b["shares"],
                 "paid": round(b["paid"], 2), "weekly_at_buy": b.get("weekly", ""),
                 "daily_move": f"{b.get('frm', '')} -> {b.get('into', '')}",
+                "daily_at_sell": b.get("daily_at_sell", ""), "weekly_at_sell": b.get("weekly_at_sell", ""),
                 "sell_date": b["sell"].date() if b["sell"] is not None else "open",
                 "sell_price": round(b["sell_px"], 2), "got": round(b["got"], 2),
                 "profit_loss": round(b["pnl"], 2), "charges": round(b["charges"], 2),
