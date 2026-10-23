@@ -152,6 +152,19 @@ Shown as "Strategy 2 · Version 2" in the sidebar (internal registry key 3).
     momentum held, 101 boundary, safety net, fresh entry, daily ignored, independent check
     against the Weekly page's candles on every stock, PVR INOX examples).
 
+8d. STRATEGY 2 (VERSION 3) — WEEKLY RRG ONLY + 10% STOP-LOSS
+-----------------------------------------------------------
+Shown as "Strategy 2 · Version 3" in the sidebar (internal registry key 4).
+  - Completed weekly candles only; the Daily RRG is never used.
+  - BUY  at the week's close when Weekly is Leading/Improving.
+  - SELL at the week's close when Weekly is Weakening/Lagging, or when the close is at or
+    below 90% of the buy price (10% stop-loss; the loss is booked). The stop is checked only
+    at week closes, so a sharp fall inside a week can book more than 10%.
+  - After a stop-loss, buy again only once the Weekly has been in Weakening/Lagging and comes
+    back up (fresh entry). After a weekly exit the next up week can buy.
+  - Tests: tests/test_strategy_2_v3.py (10% boundary, week-close only, weekly exit, fresh
+    entry, daily ignored, independent check on every stock, Suzlon stop-loss example).
+
 9. AUTOMATED TESTING
 --------------------
 Run test suite:
