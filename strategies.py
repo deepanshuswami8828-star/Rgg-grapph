@@ -71,12 +71,12 @@ STRATEGY_REGISTRY = {
         "weekly_only": True,
         "name": "Weekly RRG Only (Version 3) — 10% Stop-Loss",
         "tag": "Weekly Only",
-        "short_desc": "Buy when Weekly is Leading/Improving; Sell when Weekly drops into Weakening/Lagging, or when the week's close is 10% or more below your buy price (stop-loss). Daily is ignored.",
-        "full_desc": "Version 1 with a protective stop-loss. Looks only at completed weekly candles. Buys when the Weekly RRG is in Leading or Improving and sells when it drops into Weakening or Lagging. In addition, if a week closes at or below 90% of the buy price, the position is sold at that close and the loss is booked. After a stop-loss sale it buys again only after the Weekly has dropped into Weakening/Lagging and come back up. The Daily RRG is never used; the stop is checked only at the week's close.",
+        "short_desc": "Buy when Weekly is Leading/Improving; Sell when Weekly drops into Weakening/Lagging, or on ANY day's close 10% or more below your buy price (stop-loss). Daily RRG is ignored.",
+        "full_desc": "Version 1 with a protective stop-loss. Buys and sells on the Weekly RRG only, at completed week closes: buys when the Weekly is in Leading or Improving and sells when it drops into Weakening or Lagging. In addition, the price is checked at every day's close: the first close at or below 90% of the buy price sells the position that day and books the loss. After a stop-loss sale it buys again only after the Weekly has dropped into Weakening/Lagging and come back up. The Daily RRG is never used - the daily check looks only at the price.",
         "entry_rule": "Buy at the week's close when Weekly ∈ {Leading, Improving} (after a stop-loss: only once the Weekly has been in Weakening/Lagging and comes back up).",
-        "exit_rule": "Sell at the week's close when Weekly ∈ {Weakening, Lagging}, or when the close is ≤ 90% of the buy price (10% stop-loss).",
+        "exit_rule": "Sell at the week's close when Weekly ∈ {Weakening, Lagging}, or at ANY day's close that is ≤ 90% of the buy price (10% stop-loss).",
         "best_market": "Trending stocks where the weekly RRG works well but you want a hard limit on any single loss.",
-        "risk_watch": "Checked only at week closes, so a sharp fall inside a week can make the booked loss bigger than 10%.",
+        "risk_watch": "A gap-down below the stop on one day books a loss a little bigger than 10%; a stopped-out stock that recovers is only re-bought after a weekly down-and-up cycle.",
     },
 }
 
@@ -303,41 +303,48 @@ STOP_LOSS_V3 = 10.0   # Strategy 2 version 3: stop-loss, % below the buy price
 
 
 def gen_strat_2_v3(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, cost_pct: float = 0.12) -> Tuple[List[Dict], List[Dict]]:
-    """Strategy 2, version 3: Weekly RRG only (version 1) plus a 10% stop-loss.
+    """Strategy 2, version 3: Weekly RRG only (version 1) plus a 10% stop-loss on price.
 
-    At each completed week's close:
+    Every trading day's close (price only - the Daily RRG is never used):
       SELL (open position): close <= 90% of the buy price          -> stop-loss, loss booked
-                            or Weekly in {Weakening, Lagging}       -> weekly exit
+    At each completed week's close (weekly RRG):
+      SELL (open position): Weekly in {Weakening, Lagging}         -> weekly exit
       BUY  (flat):          Weekly in {Leading, Improving}, provided the weekly has been in
                             Weakening/Lagging since the last stop-loss (fresh entry only).
-    The Daily RRG is not used; the stop is checked only at week closes. Fills at the close of
-    the week's last trading day.
+    Buys and weekly exits fill at the week's last close; a stop-loss fills at that day's close.
     """
     wk = completed_weekly(asof, daily.index)
     w_q = wk["Quadrant"]
     prev_w = w_q.shift(1)
+    week_close = set(wk.index)
     close = daily["Close"]
     c = cost_pct / 100.0
 
     trades, pos, armed = [], None, True
-    for d in wk.index[wk.index >= start]:
-        wq, px = w_q[d], close[d]
-        if pos is not None:
+    for d in daily.index[daily.index >= start]:
+        px = close[d]
+        is_week_close = d in week_close
+        wq = w_q[d] if is_week_close else None
+
+        if pos is not None and d > pos["buy"]:
             stop_px = pos["buy_px"] * (1 - STOP_LOSS_V3 / 100.0)
             if px <= stop_px:
-                reason = f"Stop-loss {STOP_LOSS_V3:.0f}%: close ₹{px:.2f} ≤ ₹{stop_px:.2f} (Weekly {wq})"
-            elif wq in DOWN:
-                reason = f"Weekly → {wq}"
-            else:
-                continue
-            trades.append(dict(pos, sell=d, sell_px=px, exit_into=wq, open=False, exit_reason=reason,
-                               daily_at_sell="", weekly_at_sell=wq, stop_px=stop_px))
-            pos = None
-            armed = wq in DOWN          # after a stop-loss in an up week, wait for down-and-up
+                where = f"week close, Weekly {wq}" if is_week_close else "daily close"
+                trades.append(dict(pos, sell=d, sell_px=px, exit_into=wq or "", open=False,
+                                   exit_reason=f"Stop-loss {STOP_LOSS_V3:.0f}%: close ₹{px:.2f} ≤ ₹{stop_px:.2f} ({where})",
+                                   daily_at_sell="", weekly_at_sell=wq or "", stop_px=stop_px))
+                pos, armed = None, False   # wait for a weekly down-and-up before buying again
+            elif is_week_close and wq in DOWN:
+                trades.append(dict(pos, sell=d, sell_px=px, exit_into=wq, open=False,
+                                   exit_reason=f"Weekly → {wq}", daily_at_sell="",
+                                   weekly_at_sell=wq, stop_px=stop_px))
+                pos = None
+
+        if not is_week_close or pos is not None:
             continue
         if wq in DOWN:
             armed = True
-        elif armed and wq in UP:
+        elif armed and wq in UP and not (trades and trades[-1]["sell"] == d):
             pos = dict(buy=d, buy_px=px, weekly=wq, frm=prev_w[d], into=wq,
                        daily_at_buy="", weekly_at_buy=wq)
     if pos is not None:

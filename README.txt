@@ -157,13 +157,15 @@ Shown as "Strategy 2 · Version 2" in the sidebar (internal registry key 3).
 Shown as "Strategy 2 · Version 3" in the sidebar (internal registry key 4).
   - Completed weekly candles only; the Daily RRG is never used.
   - BUY  at the week's close when Weekly is Leading/Improving.
-  - SELL at the week's close when Weekly is Weakening/Lagging, or when the close is at or
-    below 90% of the buy price (10% stop-loss; the loss is booked). The stop is checked only
-    at week closes, so a sharp fall inside a week can book more than 10%.
+  - SELL at the week's close when Weekly is Weakening/Lagging.
+  - STOP-LOSS checked at EVERY day's close (price only, the Daily RRG is never used): the first
+    close at or below 90% of the buy price sells that day and books the loss. A gap-down day
+    can book a little more than 10%.
   - After a stop-loss, buy again only once the Weekly has been in Weakening/Lagging and comes
     back up (fresh entry). After a weekly exit the next up week can buy.
-  - Tests: tests/test_strategy_2_v3.py (10% boundary, week-close only, weekly exit, fresh
-    entry, daily ignored, independent check on every stock, Suzlon stop-loss example).
+  - Tests: tests/test_strategy_2_v3.py (10% boundary, mid-week daily-close stop, weekly exit, fresh
+    entry, daily RRG ignored, independent day-by-day check on every stock, Suzlon stop-loss
+    examples).
 
 9. AUTOMATED TESTING
 --------------------

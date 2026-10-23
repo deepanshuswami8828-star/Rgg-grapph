@@ -1,9 +1,10 @@
 """
-Strategy 2, version 3 — Weekly RRG only (version 1) plus a 10% stop-loss.
+Strategy 2, version 3 — Weekly RRG only (version 1) plus a 10% stop-loss on price.
 
-At each COMPLETED week's close:
+Every trading day's close (price only, never the Daily RRG):
   SELL (open):  close <= 90% of the buy price  (stop-loss, loss booked)
-                or Weekly in {Weakening, Lagging}
+At each COMPLETED week's close:
+  SELL (open):  Weekly in {Weakening, Lagging}
   BUY  (flat):  Weekly in {Leading, Improving}; after a stop-loss only once the weekly has
                 been in Weakening/Lagging and comes back up (fresh entry).
 The Daily RRG is never used. Internal registry key 4, shown as "Strategy 2 · Version 3".
@@ -27,14 +28,16 @@ DOWN = {"Weakening", "Lagging"}
 
 def weeks(rows, daily_q=None, midweek_px=None):
     """rows: [(weekly quadrant, Friday close)]; 5 sessions per week. Mon-Thu closes are
-    midweek_px (default: same as Friday) - they must never trigger anything."""
+    midweek_px (default: the previous Friday's close, so each week's move happens on Friday)."""
     days = pd.bdate_range("2024-01-01", periods=5 * len(rows))
     asof = pd.DataFrame({"Quadrant": np.repeat([q for q, _ in rows], 5),
                          "RS_Momentum": 100.5}, index=days)
-    px = []
+    px, last_friday = [], rows[0][1]
     for _, p in rows:
-        mid = p if midweek_px is None else midweek_px
+        # Mon-Thu stay at last Friday's close unless midweek_px is given; the move is on Friday
+        mid = last_friday if midweek_px is None else midweek_px
         px += [mid, mid, mid, mid, p]
+        last_friday = p
     dq = daily_q if daily_q is not None else ["Lagging"] * len(days)
     daily = pd.DataFrame({"Quadrant": dq, "Close": px}, index=days)
     return daily, asof, days, days[days.weekday == 4]
@@ -59,10 +62,22 @@ def test_just_above_stop_holds():
     assert out == [(0, None, "Open Position")]
 
 
-def test_stop_checked_only_at_week_close():
-    # Mon-Thu closes far below the stop, Friday closes fine -> no stop
-    out = run([("Leading", 100.0), ("Leading", 98.0)], midweek_px=70.0)
-    assert out == [(0, None, "Open Position")]
+def test_stop_triggers_on_a_midweek_daily_close():
+    # week 1: Mon-Thu close at 89 (below the 90 stop) although Friday is back at 98
+    daily, asof, days, fri = weeks([("Leading", 100.0), ("Leading", 98.0)], midweek_px=89.0)
+    daily.loc[days[:5], "Close"] = 100.0                      # week 0 flat at the buy price
+    trades, _ = strat.gen_strat_2_v3(daily, asof, days[0])
+    assert len(trades) == 1 and trades[0]["sell"] == days[5]  # Monday of week 1
+    assert trades[0]["sell_px"] == 89.0
+    assert "daily close" in trades[0]["exit_reason"]
+
+
+def test_daily_rrg_never_moves_the_stop_or_the_trades():
+    # same prices, any daily quadrants -> identical trades (the daily check uses price only)
+    rows = [("Leading", 100.0), ("Leading", 95.0), ("Improving", 92.0)]
+    base = run(rows, midweek_px=91.0)
+    for dq in (["Lagging"] * 15, ["Leading"] * 15, ["Weakening", "Improving", "Lagging"] * 5):
+        assert run(rows, daily_q=dq, midweek_px=91.0) == base
 
 
 @pytest.mark.parametrize("q", sorted(DOWN))
@@ -119,32 +134,39 @@ def test_matches_weekly_chart_on_every_stock(stocks):
         wk, _ = strat.compute_rrg(al, name, "Weekly")
         if wk.index[-1] == daily.index[-1] and wk.index[-1].weekday() != 4:
             wk = wk.iloc[:-1]
+        wq = wk["Quadrant"]
         mine, held, held_px, can_buy = [], None, None, True
-        for d, r in wk.iterrows():
+        for d, px in daily["Close"].items():
             if d < start:
                 continue
-            q, px = r["Quadrant"], daily.loc[d, "Close"]
-            if held is not None:
-                if px <= held_px * 0.9 or q in DOWN:
-                    mine.append((held, d))
-                    held, can_buy = None, q in DOWN
-            elif q in DOWN:
-                can_buy = True
-            elif can_buy and q in UP:
-                held, held_px = d, px
+            if held is not None and d > held and px <= held_px * 0.9:     # daily price stop
+                mine.append((held, d))
+                held, can_buy = None, False
+            elif held is not None and d in wq.index and wq[d] in DOWN:    # weekly exit
+                mine.append((held, d))
+                held = None
+            if d in wq.index and held is None and not (mine and mine[-1][1] == d and wq[d] in UP):
+                if wq[d] in DOWN:
+                    can_buy = True
+                elif can_buy and wq[d] in UP:
+                    held, held_px = d, px
         assert [(t["buy"], t["sell"]) for t in trades if not t["open"]] == mine, ticker
         assert (trades[-1]["buy"] if trades and trades[-1]["open"] else None) == held, ticker
 
 
-def test_suzlon_stop_loss_example(stocks):
+def test_suzlon_stop_loss_examples(stocks):
+    """Daily-close stops: Wed 18 Jun 2025 (-10.4%) and Wed 29 Jul 2026 (-10.4%)."""
     name, al = stocks["SUZLON.NS"]
     al = al[al.index <= "2026-10-16"]
     daily, _ = strat.compute_rrg(al, name, "Daily")
     trades, _ = strat.gen_strat_2_v3(daily, strat.weekly_asof(al, name), pd.Timestamp("2024-01-01"))
-    stop = [t for t in trades if t["exit_reason"].startswith("Stop-loss")]
-    assert len(stop) == 1
-    assert (stop[0]["buy"].strftime("%Y-%m-%d"), stop[0]["sell"].strftime("%Y-%m-%d")) == ("2025-05-30", "2025-06-20")
-    assert stop[0]["sell_px"] <= stop[0]["buy_px"] * 0.9
+    stops = [t for t in trades if t["exit_reason"].startswith("Stop-loss")]
+    assert [(t["buy"].strftime("%Y-%m-%d"), t["sell"].strftime("%Y-%m-%d")) for t in stops] ==         [("2025-05-30", "2025-06-18"), ("2026-04-17", "2026-07-29")]
+    for t in stops:
+        assert t["sell_px"] <= t["buy_px"] * 0.9
+        # the previous day's close was still above the stop: sold on the first close below it
+        prev_close = daily["Close"][daily.index < t["sell"]].iloc[-1]
+        assert prev_close > t["buy_px"] * 0.9
 
 
 def test_registry_entry():
