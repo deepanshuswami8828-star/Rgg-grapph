@@ -1155,16 +1155,14 @@ def strategy_page(stock_ticker: str, strategy_id: int = 1):
     ok_sym = lambda q: "✅" if q in UP else "❌"
     state = [f"Weekly now: {ok_sym(wq)} <b style='color:{QUAD_FG[wq]}'>{wq}</b>  ·  Daily now: {ok_sym(dq)} <b style='color:{QUAD_FG[dq]}'>{dq}</b>"]
     if meta["weekly_only"]:   # weekly only: report the last completed week, never the daily
-        wk_done = strat.completed_weekly(asof, daily.index)
-        wq_done = wk_done["Quadrant"].iloc[-1]
-        state = [f"Last completed week ({wk_done.index[-1].strftime('%a %d %b %Y')}): {ok_sym(wq_done)} "
-                 f"<b style='color:{QUAD_FG[wq_done]}'>{wq_done}</b> — Weekly RS-Ratio "
-                 f"{wk_done['RS_Ratio'].iloc[-1]:.2f}, RS-Momentum {wk_done['RS_Momentum'].iloc[-1]:.2f}. "
-                 f"Strategy 2 decides only at each week's close; the daily chart is not used."]
+        w_now = asof.iloc[-1]
+        state = [f"Weekly as of {asof.index[-1].strftime('%a %d %b %Y')} (week so far): {ok_sym(wq)} "
+                 f"<b style='color:{QUAD_FG[wq]}'>{wq}</b> — Weekly RS-Ratio {w_now['RS_Ratio']:.2f}, "
+                 f"RS-Momentum {w_now['RS_Momentum']:.2f}. Checked every trading day; the daily chart is not used."]
     open_b = book[-1] if book and book[-1].get("sell") is None else None
     st.write("")
     if open_b and open_b["buy"] == daily.index[-1]:
-        status_box(QUAD_FG["Leading"], "▲ BUY signal today" + (" (week close)" if meta["weekly_only"] else ""),
+        status_box(QUAD_FG["Leading"], "▲ BUY signal today",
                    [f"Buy {open_b['shares']} shares at about ₹{open_b['buy_px']:.2f} ({inr(open_b['paid'])} with charges)."] + state)
     elif open_b:
         status_box(QUAD_FG["Leading"], f"HOLD — {open_b['shares']} shares since {open_b['buy'].strftime('%a %d %b %Y')}",
@@ -1174,7 +1172,7 @@ def strategy_page(stock_ticker: str, strategy_id: int = 1):
                      f"Current status: {open_b.get('exit_reason', 'Open Position')}. Daily RS-Momentum: {daily['RS_Momentum'].iloc[-1]:.2f}.")] + state)
     elif closed and closed[-1]["sell"] == daily.index[-1]:
         b = closed[-1]
-        status_box(QUAD_FG["Lagging"], "▼ SELL signal today" + (" (week close)" if meta["weekly_only"] else ""),
+        status_box(QUAD_FG["Lagging"], "▼ SELL signal today",
                    [f"Sell all {b['shares']} shares at about ₹{b['sell_px']:.2f} → {inr(b['got'])} ({inr(b['pnl'], sign=True)}). Reason: {b.get('exit_reason', '')}"] + state)
     else:
         status_box(INK_3, f"WAIT — all {inr(final_cash)} is in cash",

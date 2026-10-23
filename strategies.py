@@ -19,8 +19,9 @@ from make_rrg_pvrinox import (
 
 UP = {"Improving", "Leading"}
 DOWN = {"Weakening", "Lagging"}
-WARMUP_DAILY = 30
-WARMUP_WEEKLY = 15
+# same warm-up as the charts (config.py), so strategies use exactly the readings the app shows
+WARMUP_DAILY = cfg.WARMUP_DAILY
+WARMUP_WEEKLY = cfg.WARMUP_WEEKLY
 
 # Strategy Registry Metadata
 STRATEGY_REGISTRY = {
@@ -44,11 +45,11 @@ STRATEGY_REGISTRY = {
         "name": "Weekly RRG Only (Version 1)",
         "tag": "Weekly Only",
         "short_desc": "Buy when the Weekly RRG is Leading/Improving; Sell when it drops into Weakening/Lagging. Daily is ignored.",
-        "full_desc": "Single-timeframe weekly strategy. Looks only at completed weekly candles: at each week's close, buys if the Weekly RRG is in Leading or Improving and sells if it is in Weakening or Lagging. The Daily RRG is never used. Trades at the close of the week's last trading day.",
-        "entry_rule": "Buy at the week's close when Weekly ∈ {Leading, Improving}.",
-        "exit_rule": "Sell at the week's close when Weekly ∈ {Weakening, Lagging}.",
+        "full_desc": "Single-timeframe weekly strategy. Every trading day it reads the Weekly RRG as it stands at that day's close (week so far): buys on the first day the Weekly is in Leading or Improving and sells on the first day it is in Weakening or Lagging. The Daily RRG is never used. Trades at that day's close.",
+        "entry_rule": "Buy on the first day the Weekly (as of that day) is in {Leading, Improving}.",
+        "exit_rule": "Sell on the first day the Weekly (as of that day) is in {Weakening, Lagging}.",
         "best_market": "Long, steady trends where a stock outperforms NIFTY 50 for months at a time.",
-        "risk_watch": "Reacts only once a week, so a sharp fall inside a week is not exited until that week closes.",
+        "risk_watch": "The weekly reading of an unfinished week can change before the week ends, so a signal can flip back; there is no stop-loss.",
     },
     # Strategy 2, version 2 (internal key 3; shown as "Strategy 2 · Version 2")
     3: {
@@ -58,9 +59,9 @@ STRATEGY_REGISTRY = {
         "name": "Weekly RRG Only (Version 2) — Sell when RS-Mom falls below 101",
         "tag": "Weekly Only",
         "short_desc": "Buy when Weekly enters Leading/Improving; Sell when Weekly RS-Momentum falls back below 101 after being Leading at 101+, or Weekly drops into Weakening/Lagging. Daily is ignored.",
-        "full_desc": "Weekly-only strategy with an early exit. Looks only at completed weekly candles. Buys when the Weekly RRG is in Leading or Improving. Once the trade has had a week in Leading with RS-Momentum at 101 or more, it sells at the first week the Weekly RS-Momentum falls below 101 - whether the stock is still Leading or has slipped into Improving - instead of waiting for Weakening. It also sells if the Weekly lands in Weakening or Lagging. After an early exit it buys again only after the Weekly has dropped into Weakening/Lagging and come back up. The Daily RRG is never used.",
-        "entry_rule": "Buy at the week's close when Weekly ∈ {Leading, Improving} (after an early exit: only once the Weekly has been in Weakening/Lagging and comes back up).",
-        "exit_rule": "Sell at the week's close when Weekly RS-Momentum falls below 101 after the trade has been Leading at 101+, or when Weekly ∈ {Weakening, Lagging}.",
+        "full_desc": "Weekly-only strategy with an early exit. Reads the Weekly RRG every trading day (week so far). Buys when the Weekly RRG is in Leading or Improving. Once the trade has had a week in Leading with RS-Momentum at 101 or more, it sells on the first day the Weekly RS-Momentum falls below 101 - whether the stock is still Leading or has slipped into Improving - instead of waiting for Weakening. It also sells if the Weekly lands in Weakening or Lagging. After an early exit it buys again only after the Weekly has dropped into Weakening/Lagging and come back up. The Daily RRG is never used.",
+        "entry_rule": "Buy on the first day the Weekly (as of that day) is in {Leading, Improving} (after an early exit: only once the Weekly has been in Weakening/Lagging and comes back up).",
+        "exit_rule": "Sell on the first day the Weekly RS-Momentum falls below 101 after the trade has been Leading at 101+, or the Weekly is in {Weakening, Lagging}.",
         "best_market": "Trends that roll over gradually, where momentum fades before the stock turns down.",
         "risk_watch": "Can exit a strong trend on a brief momentum dip and must then wait for a full down-and-up cycle to re-enter.",
     },
@@ -72,9 +73,9 @@ STRATEGY_REGISTRY = {
         "name": "Weekly RRG Only (Version 3) — 10% Stop-Loss",
         "tag": "Weekly Only",
         "short_desc": "Buy when Weekly is Leading/Improving; Sell when Weekly drops into Weakening/Lagging, or on ANY day's close 10% or more below your buy price (stop-loss). Daily RRG is ignored.",
-        "full_desc": "Version 1 with a protective stop-loss. Buys and sells on the Weekly RRG only, at completed week closes: buys when the Weekly is in Leading or Improving and sells when it drops into Weakening or Lagging. In addition, the price is checked at every day's close: the first close at or below 90% of the buy price sells the position that day and books the loss. After a stop-loss sale it buys again only after the Weekly has dropped into Weakening/Lagging and come back up. The Daily RRG is never used - the daily check looks only at the price.",
-        "entry_rule": "Buy at the week's close when Weekly ∈ {Leading, Improving} (after a stop-loss: only once the Weekly has been in Weakening/Lagging and comes back up).",
-        "exit_rule": "Sell at the week's close when Weekly ∈ {Weakening, Lagging}, or at ANY day's close that is ≤ 90% of the buy price (10% stop-loss).",
+        "full_desc": "Version 1 with a protective stop-loss. Buys and sells on the Weekly RRG only, read every trading day (week so far): buys on the first day the Weekly is in Leading or Improving and sells on the first day it is in Weakening or Lagging. In addition, the price is checked at every day's close: the first close at or below 90% of the buy price sells the position that day and books the loss. After a stop-loss sale it buys again only after the Weekly has dropped into Weakening/Lagging and come back up. The Daily RRG is never used - the daily check looks only at the price.",
+        "entry_rule": "Buy on the first day the Weekly (as of that day) is in {Leading, Improving} (after a stop-loss: only once the Weekly has been in Weakening/Lagging and comes back up).",
+        "exit_rule": "Sell on the first day the Weekly (as of that day) is in {Weakening, Lagging}, or at ANY day's close that is ≤ 90% of the buy price (10% stop-loss).",
         "best_market": "Trending stocks where the weekly RRG works well but you want a hard limit on any single loss.",
         "risk_watch": "A gap-down below the stop on one day books a loss a little bigger than 10%; a stopped-out stock that recovers is only re-bought after a weekly down-and-up cycle.",
     },
@@ -193,37 +194,47 @@ def gen_strat_1(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, co
     return trades, skipped
 
 
-# ---- Signal Generator (Strategy 2: Weekly RRG only, version 1) -------------
-def completed_weekly(asof: pd.DataFrame, daily_index: pd.DatetimeIndex) -> pd.DataFrame:
-    """One row per COMPLETED week: the weekly reading at the week's last trading day
-    (equal to the weekly candle). The current week is left out until it has closed
-    (its last session is a Friday, or a later week has started)."""
-    if asof.empty:
-        return asof
-    wk = asof.groupby(asof.index.to_period("W-FRI")).tail(1)
-    last_day = daily_index[-1]
-    if len(wk) and wk.index[-1].to_period("W-FRI") == last_day.to_period("W-FRI") and last_day.weekday() != 4:
-        wk = wk.iloc[:-1]
-    return wk
+# ---- Signal Generators (Strategy 2: Weekly RRG only) ------------------------
+# All Strategy 2 versions read the Weekly RRG on EVERY trading day: the weekly reading as it
+# stands at that day's close (week so far, `weekly_asof`). That uses completed daily closes
+# only - no look-ahead - and acts on the first day a signal is valid instead of waiting for
+# the week's last session. Fills are at that day's close, like every strategy in the app.
+def _weekly_days(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp) -> pd.DataFrame:
+    """Daily rows (from `start`) that have a weekly reading, with that day's weekly values."""
+    w = asof[["Quadrant", "RS_Momentum"]].reindex(daily.index)
+    return w[(w.index >= start) & w["Quadrant"].notna()]
+
+
+def _finish(trades, pos, daily, days, cost_pct, extra_open=None):
+    """Close-out an open position at the latest close and add return / held sessions."""
+    c = cost_pct / 100.0
+    close = daily["Close"]
+    if pos is not None:
+        trades.append(dict(pos, sell=None, sell_px=close.iloc[-1], exit_into=None, open=True,
+                           exit_reason="Open Position", daily_at_sell="",
+                           weekly_at_sell=days["Quadrant"].iloc[-1] if len(days) else "",
+                           **(extra_open or {})))
+    for t in trades:
+        t["ret"] = 100.0 * ((t["sell_px"] * (1 - c)) / (t["buy_px"] * (1 + c)) - 1)
+        end = t["sell"] if t["sell"] is not None else daily.index[-1]
+        t["held"] = int(((daily.index > t["buy"]) & (daily.index <= end)).sum())
+    return trades, []
 
 
 def gen_strat_2(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, cost_pct: float = 0.12) -> Tuple[List[Dict], List[Dict]]:
     """Strategy 2 (version 1): Weekly RRG only.
 
-    At each completed week's close:
+    Every trading day, on the weekly reading as of that day's close:
       BUY  (no open position): Weekly in {Leading, Improving}
       SELL (open position):    Weekly in {Weakening, Lagging}
-    The Daily RRG is not used. Fills at the close of the week's last trading day.
+    The Daily RRG is not used. Fills at that day's close.
     """
-    wk = completed_weekly(asof, daily.index)
-    w_q = wk["Quadrant"]
-    prev_w = w_q.shift(1)
+    days = _weekly_days(daily, asof, start)
+    prev_w = asof["Quadrant"].reindex(daily.index).shift(1)
     close = daily["Close"]
-    c = cost_pct / 100.0
-
     trades, pos = [], None
-    for d in wk.index[wk.index >= start]:
-        wq = w_q[d]
+    for d, r in days.iterrows():
+        wq = r["Quadrant"]
         if pos is None and wq in UP:
             pos = dict(buy=d, buy_px=close[d], weekly=wq, frm=prev_w[d], into=wq,
                        daily_at_buy="", weekly_at_buy=wq)
@@ -231,15 +242,7 @@ def gen_strat_2(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, co
             trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=wq, open=False,
                                exit_reason=f"Weekly → {wq}", daily_at_sell="", weekly_at_sell=wq))
             pos = None
-    if pos is not None:
-        trades.append(dict(pos, sell=None, sell_px=close.iloc[-1], exit_into=None, open=True,
-                           exit_reason="Open Position", daily_at_sell="",
-                           weekly_at_sell=w_q.iloc[-1] if len(w_q) else ""))
-    for t in trades:
-        t["ret"] = 100.0 * ((t["sell_px"] * (1 - c)) / (t["buy_px"] * (1 + c)) - 1)
-        end = t["sell"] if t["sell"] is not None else daily.index[-1]
-        t["held"] = int(((daily.index > t["buy"]) & (daily.index <= end)).sum())
-    return trades, []
+    return _finish(trades, pos, daily, days, cost_pct)
 
 
 MOM_EXIT_V2 = 101.0   # Strategy 2 version 2: early exit level for weekly RS-Momentum in Leading
@@ -248,25 +251,20 @@ MOM_EXIT_V2 = 101.0   # Strategy 2 version 2: early exit level for weekly RS-Mom
 def gen_strat_2_v2(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, cost_pct: float = 0.12) -> Tuple[List[Dict], List[Dict]]:
     """Strategy 2, version 2: Weekly RRG only, sell when momentum falls through 101.
 
-    At each completed week's close:
-      SELL (open position): the trade has had a week in Leading with RS-Momentum >= 101, and
+    Every trading day, on the weekly reading as of that day's close:
+      SELL (open position): the trade has been Leading with RS-Momentum >= 101, and
                             RS-Momentum is now below 101 (in any quadrant)     -> early exit
                             or Weekly in {Weakening, Lagging}                  -> safety net
       BUY  (flat):          Weekly in {Leading, Improving}, provided the weekly has been in
                             Weakening/Lagging since the last early exit (fresh entry only).
-    "Has been >= 101 in Leading" makes the early exit a DOWNWARD cross of 101, so a stock that
-    has just entered Leading with momentum around 100.2 (still rising) is not sold for that.
-    The Daily RRG is not used. Fills at the close of the week's last trading day.
+    The Daily RRG is not used. Fills at that day's close.
     """
-    wk = completed_weekly(asof, daily.index)
-    w_q, w_m = wk["Quadrant"], wk["RS_Momentum"]
-    prev_w = w_q.shift(1)
+    days = _weekly_days(daily, asof, start)
+    prev_w = asof["Quadrant"].reindex(daily.index).shift(1)
     close = daily["Close"]
-    c = cost_pct / 100.0
-
     trades, pos, armed, peaked = [], None, True, False
-    for d in wk.index[wk.index >= start]:
-        wq, wm = w_q[d], w_m[d]
+    for d, r in days.iterrows():
+        wq, wm = r["Quadrant"], r["RS_Momentum"]
         if pos is not None:
             if peaked and wm < MOM_EXIT_V2 and wq not in DOWN:
                 reason = f"Weekly RS-Momentum fell below {MOM_EXIT_V2:.0f} ({wm:.2f}, {wq})"
@@ -288,15 +286,7 @@ def gen_strat_2_v2(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp,
             pos = dict(buy=d, buy_px=close[d], weekly=wq, frm=prev_w[d], into=wq,
                        daily_at_buy="", weekly_at_buy=wq, weekly_mom_at_buy=wm)
             peaked = wq == "Leading" and wm >= MOM_EXIT_V2
-    if pos is not None:
-        trades.append(dict(pos, sell=None, sell_px=close.iloc[-1], exit_into=None, open=True,
-                           exit_reason="Open Position", daily_at_sell="",
-                           weekly_at_sell=w_q.iloc[-1] if len(w_q) else ""))
-    for t in trades:
-        t["ret"] = 100.0 * ((t["sell_px"] * (1 - c)) / (t["buy_px"] * (1 + c)) - 1)
-        end = t["sell"] if t["sell"] is not None else daily.index[-1]
-        t["held"] = int(((daily.index > t["buy"]) & (daily.index <= end)).sum())
-    return trades, []
+    return _finish(trades, pos, daily, days, cost_pct)
 
 
 STOP_LOSS_V3 = 10.0   # Strategy 2 version 3: stop-loss, % below the buy price
@@ -305,58 +295,39 @@ STOP_LOSS_V3 = 10.0   # Strategy 2 version 3: stop-loss, % below the buy price
 def gen_strat_2_v3(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, cost_pct: float = 0.12) -> Tuple[List[Dict], List[Dict]]:
     """Strategy 2, version 3: Weekly RRG only (version 1) plus a 10% stop-loss on price.
 
-    Every trading day's close (price only - the Daily RRG is never used):
-      SELL (open position): close <= 90% of the buy price          -> stop-loss, loss booked
-    At each completed week's close (weekly RRG):
-      SELL (open position): Weekly in {Weakening, Lagging}         -> weekly exit
-      BUY  (flat):          Weekly in {Leading, Improving}, provided the weekly has been in
-                            Weakening/Lagging since the last stop-loss (fresh entry only).
-    Buys and weekly exits fill at the week's last close; a stop-loss fills at that day's close.
+    Every trading day's close:
+      SELL (open position): close <= 90% of the buy price               -> stop-loss, loss booked
+                            or Weekly (as of that day) in {Weakening, Lagging}
+      BUY  (flat):          Weekly (as of that day) in {Leading, Improving}, provided the weekly
+                            has been in Weakening/Lagging since the last stop-loss (fresh entry).
+    The Daily RRG is never used - the daily check looks only at the price. Fills at that day's close.
     """
-    wk = completed_weekly(asof, daily.index)
-    w_q = wk["Quadrant"]
-    prev_w = w_q.shift(1)
-    week_close = set(wk.index)
+    days = _weekly_days(daily, asof, start)
+    prev_w = asof["Quadrant"].reindex(daily.index).shift(1)
     close = daily["Close"]
-    c = cost_pct / 100.0
-
     trades, pos, armed = [], None, True
-    for d in daily.index[daily.index >= start]:
-        px = close[d]
-        is_week_close = d in week_close
-        wq = w_q[d] if is_week_close else None
-
-        if pos is not None and d > pos["buy"]:
+    for d, r in days.iterrows():
+        wq, px = r["Quadrant"], close[d]
+        if pos is not None:
             stop_px = pos["buy_px"] * (1 - STOP_LOSS_V3 / 100.0)
             if px <= stop_px:
-                where = f"week close, Weekly {wq}" if is_week_close else "daily close"
-                trades.append(dict(pos, sell=d, sell_px=px, exit_into=wq or "", open=False,
-                                   exit_reason=f"Stop-loss {STOP_LOSS_V3:.0f}%: close ₹{px:.2f} ≤ ₹{stop_px:.2f} ({where})",
-                                   daily_at_sell="", weekly_at_sell=wq or "", stop_px=stop_px))
-                pos, armed = None, False   # wait for a weekly down-and-up before buying again
-            elif is_week_close and wq in DOWN:
-                trades.append(dict(pos, sell=d, sell_px=px, exit_into=wq, open=False,
-                                   exit_reason=f"Weekly → {wq}", daily_at_sell="",
-                                   weekly_at_sell=wq, stop_px=stop_px))
-                pos = None
-
-        if not is_week_close or pos is not None:
+                reason = f"Stop-loss {STOP_LOSS_V3:.0f}%: close ₹{px:.2f} ≤ ₹{stop_px:.2f} (Weekly {wq})"
+            elif wq in DOWN:
+                reason = f"Weekly → {wq}"
+            else:
+                continue
+            trades.append(dict(pos, sell=d, sell_px=px, exit_into=wq, open=False, exit_reason=reason,
+                               daily_at_sell="", weekly_at_sell=wq, stop_px=stop_px))
+            pos = None
+            armed = wq in DOWN          # after a stop-loss in an up week, wait for down-and-up
             continue
         if wq in DOWN:
             armed = True
-        elif armed and wq in UP and not (trades and trades[-1]["sell"] == d):
+        elif armed and wq in UP:
             pos = dict(buy=d, buy_px=px, weekly=wq, frm=prev_w[d], into=wq,
                        daily_at_buy="", weekly_at_buy=wq)
-    if pos is not None:
-        trades.append(dict(pos, sell=None, sell_px=close.iloc[-1], exit_into=None, open=True,
-                           exit_reason="Open Position", daily_at_sell="",
-                           weekly_at_sell=w_q.iloc[-1] if len(w_q) else "",
-                           stop_px=pos["buy_px"] * (1 - STOP_LOSS_V3 / 100.0)))
-    for t in trades:
-        t["ret"] = 100.0 * ((t["sell_px"] * (1 - c)) / (t["buy_px"] * (1 + c)) - 1)
-        end = t["sell"] if t["sell"] is not None else daily.index[-1]
-        t["held"] = int(((daily.index > t["buy"]) & (daily.index <= end)).sum())
-    return trades, []
+    stop_open = {"stop_px": pos["buy_px"] * (1 - STOP_LOSS_V3 / 100.0)} if pos is not None else None
+    return _finish(trades, pos, daily, days, cost_pct, stop_open)
 
 
 SIGNALS = {1: gen_strat_1, 2: gen_strat_2, 3: gen_strat_2_v2, 4: gen_strat_2_v3}

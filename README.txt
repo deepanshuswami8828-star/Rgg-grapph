@@ -124,48 +124,38 @@ signal day's close; daily mark-to-market value; no look-ahead):
   - PVR INOX baseline (data to 16 Oct 2026, Rs 1,00,000 from 1 Jan 2024): 14 trades, first buy
     24 May 2024 (Rs 1339.05), open position from 12 Oct 2026 (Rs 1401.30), value Rs 98,785.
 
-8b. STRATEGY 2 (VERSION 1) — WEEKLY RRG ONLY
---------------------------------------------
-Shown as "Strategy 2 · Version 1" in the "Strategy" box in the sidebar on the Strategy page.
-  - Looks only at COMPLETED weekly candles; the Daily RRG is never used.
-  - BUY  at the week's close when Weekly is Leading/Improving.
-  - SELL at the week's close when Weekly is Weakening/Lagging.
-  - Fills at the close of the week's last trading day. The current week is ignored until it
-    has closed (its last session is a Friday, or the next week has started).
-  - PVR INOX baseline (data to 16 Oct 2026, Rs 1,00,000 from 1 Jan 2024): 4 trades
-    (17 May 2024, 30 May 2025, 13 Mar 2026, 31 Jul 2026 - still open), value Rs 1,36,019.
-  - Tests: tests/test_strategy_2.py (rules, week-close only, daily ignored, unfinished week,
-    independent check against the Weekly page's candles on every stock).
+8b. STRATEGY 2 — WEEKLY RRG ONLY (VERSIONS 1, 2, 3)
+--------------------------------------------------
+Chosen in the "Strategy" box in the sidebar of the Strategy page. All three versions use only
+the Weekly RRG (never the Daily RRG) and check it on EVERY trading day: the weekly reading as
+it stands at that day's close (week so far, the same reading as the weekly strip on the chart).
+It uses completed daily closes only, so there is no look-ahead, and a signal is acted on the
+first day it is valid - not at the end of the week. Fills are at that day's close (only closing
+prices are available). Because an unfinished week's reading can change, a signal can flip back
+within the same week.
 
-8c. STRATEGY 2 (VERSION 2) — WEEKLY RRG ONLY, SELL WHEN RS-MOMENTUM FALLS BELOW 101
----------------------------------------------------------------------------------
-Shown as "Strategy 2 · Version 2" in the sidebar (internal registry key 3).
-  - Completed weekly candles only; the Daily RRG is never used.
-  - BUY  at the week's close when Weekly is Leading/Improving.
-  - SELL at the week's close when Weekly RS-Momentum falls below 101 after the trade has had a
-    week in Leading at 101 or more (a downward cross of 101, whether the stock is still Leading
-    or has slipped into Improving), or when Weekly is Weakening/Lagging (safety net).
-  - A stock that has just entered Leading with momentum around 100.2 (still rising) is not sold.
-  - After an early exit, buy again only once the Weekly has been in Weakening/Lagging and
-    comes back up (fresh entry). After a safety-net exit the next up week can buy.
-  - Tests: tests/test_strategy_2_v2.py (downward cross in Leading and into Improving, rising
-    momentum held, 101 boundary, safety net, fresh entry, daily ignored, independent check
-    against the Weekly page's candles on every stock, PVR INOX examples).
+  Version 1 (Strategy 2 · Version 1):
+    - BUY  when Weekly is Leading/Improving; SELL when Weekly is Weakening/Lagging.
+    - PVR INOX (data to 16 Oct 2026, Rs 1,00,000 from 1 Jan 2024): first buy Mon 13 May 2024
+      at Rs 1315.60 (the day the weekly turned Improving); value Rs 1,32,488.
+  Version 2 (Strategy 2 · Version 2, registry key 3):
+    - BUY  when Weekly is Leading/Improving.
+    - SELL when Weekly RS-Momentum falls below 101 after the trade has been Leading at 101+
+      (in any quadrant), or when Weekly is Weakening/Lagging (safety net).
+    - After an early exit, re-entry only after the weekly has been down and comes back up.
+  Version 3 (Strategy 2 · Version 3, registry key 4):
+    - Version 1 rules plus a 10% stop-loss: SELL on any day's close at or below 90% of the
+      buy price (loss booked). After a stop-loss, re-entry only after a weekly down-and-up.
 
-8d. STRATEGY 2 (VERSION 3) — WEEKLY RRG ONLY + 10% STOP-LOSS
------------------------------------------------------------
-Shown as "Strategy 2 · Version 3" in the sidebar (internal registry key 4).
-  - Completed weekly candles only; the Daily RRG is never used.
-  - BUY  at the week's close when Weekly is Leading/Improving.
-  - SELL at the week's close when Weekly is Weakening/Lagging.
-  - STOP-LOSS checked at EVERY day's close (price only, the Daily RRG is never used): the first
-    close at or below 90% of the buy price sells that day and books the loss. A gap-down day
-    can book a little more than 10%.
-  - After a stop-loss, buy again only once the Weekly has been in Weakening/Lagging and comes
-    back up (fresh entry). After a weekly exit the next up week can buy.
-  - Tests: tests/test_strategy_2_v3.py (10% boundary, mid-week daily-close stop, weekly exit, fresh
-    entry, daily RRG ignored, independent day-by-day check on every stock, Suzlon stop-loss
-    examples).
+  Tests: tests/test_strategy_2.py, test_strategy_2_v2.py, test_strategy_2_v3.py (rules, first
+  valid day, daily RRG ignored, plain replay on every stock, weekly reading on each trade day
+  rebuilt from data up to that day, PVR INOX / Suzlon examples).
+
+TIMING NOTE (fixed 23 Oct 2026): Strategy 2 used to act only on completed weekly candles, so a
+weekly signal on a Monday was traded on Friday (PVR INOX: weekly Improving Mon 13 May 2024,
+bought Fri 17 May). All versions now act on the first valid day. The strategy module also now
+uses the same warm-up as the charts (config.py), so strategies run on exactly the readings
+the app shows (this changed only Waaree, the short-history stock).
 
 9. AUTOMATED TESTING
 --------------------
