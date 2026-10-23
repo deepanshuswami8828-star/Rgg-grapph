@@ -55,13 +55,13 @@ STRATEGY_REGISTRY = {
         "id": 3,
         "label": "Strategy 2 · Version 2",
         "weekly_only": True,
-        "name": "Weekly RRG Only (Version 2) — Early Exit at RS-Mom < 101",
+        "name": "Weekly RRG Only (Version 2) — Sell when RS-Mom falls below 101",
         "tag": "Weekly Only",
-        "short_desc": "Buy when Weekly enters Leading/Improving; Sell when Weekly is Leading with RS-Momentum < 101, or drops into Weakening/Lagging. Daily is ignored.",
-        "full_desc": "Weekly-only strategy with an early exit. Looks only at completed weekly candles. Buys when the Weekly RRG is in Leading or Improving. Sells early when the Weekly is in Leading but its RS-Momentum has fallen below 101 (momentum fading before it reaches Weakening), and also sells if the Weekly lands in Weakening or Lagging. After an early exit it buys again only after the Weekly has dropped into Weakening/Lagging and come back up. The Daily RRG is never used.",
+        "short_desc": "Buy when Weekly enters Leading/Improving; Sell when Weekly RS-Momentum falls back below 101 after being Leading at 101+, or Weekly drops into Weakening/Lagging. Daily is ignored.",
+        "full_desc": "Weekly-only strategy with an early exit. Looks only at completed weekly candles. Buys when the Weekly RRG is in Leading or Improving. Once the trade has had a week in Leading with RS-Momentum at 101 or more, it sells at the first week the Weekly RS-Momentum falls below 101 - whether the stock is still Leading or has slipped into Improving - instead of waiting for Weakening. It also sells if the Weekly lands in Weakening or Lagging. After an early exit it buys again only after the Weekly has dropped into Weakening/Lagging and come back up. The Daily RRG is never used.",
         "entry_rule": "Buy at the week's close when Weekly ∈ {Leading, Improving} (after an early exit: only once the Weekly has been in Weakening/Lagging and comes back up).",
-        "exit_rule": "Sell at the week's close when Weekly is Leading with RS-Momentum < 101, or when Weekly ∈ {Weakening, Lagging}.",
-        "best_market": "Trends that roll over gradually, where momentum fades inside Leading before the stock turns down.",
+        "exit_rule": "Sell at the week's close when Weekly RS-Momentum falls below 101 after the trade has been Leading at 101+, or when Weekly ∈ {Weakening, Lagging}.",
+        "best_market": "Trends that roll over gradually, where momentum fades before the stock turns down.",
         "risk_watch": "Can exit a strong trend on a brief momentum dip and must then wait for a full down-and-up cycle to re-enter.",
     },
 }
@@ -232,13 +232,16 @@ MOM_EXIT_V2 = 101.0   # Strategy 2 version 2: early exit level for weekly RS-Mom
 
 
 def gen_strat_2_v2(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, cost_pct: float = 0.12) -> Tuple[List[Dict], List[Dict]]:
-    """Strategy 2, version 2: Weekly RRG only, with an early exit.
+    """Strategy 2, version 2: Weekly RRG only, sell when momentum falls through 101.
 
     At each completed week's close:
-      SELL (open position): Weekly == Leading and RS-Momentum < 101   (early exit)
-                            or Weekly in {Weakening, Lagging}          (safety net)
+      SELL (open position): the trade has had a week in Leading with RS-Momentum >= 101, and
+                            RS-Momentum is now below 101 (in any quadrant)     -> early exit
+                            or Weekly in {Weakening, Lagging}                  -> safety net
       BUY  (flat):          Weekly in {Leading, Improving}, provided the weekly has been in
                             Weakening/Lagging since the last early exit (fresh entry only).
+    "Has been >= 101 in Leading" makes the early exit a DOWNWARD cross of 101, so a stock that
+    has just entered Leading with momentum around 100.2 (still rising) is not sold for that.
     The Daily RRG is not used. Fills at the close of the week's last trading day.
     """
     wk = completed_weekly(asof, daily.index)
@@ -247,15 +250,17 @@ def gen_strat_2_v2(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp,
     close = daily["Close"]
     c = cost_pct / 100.0
 
-    trades, pos, armed = [], None, True
+    trades, pos, armed, peaked = [], None, True, False
     for d in wk.index[wk.index >= start]:
         wq, wm = w_q[d], w_m[d]
         if pos is not None:
-            if wq == "Leading" and wm < MOM_EXIT_V2:
-                reason = f"Weekly Leading, RS-Momentum {wm:.2f} < {MOM_EXIT_V2:.0f}"
+            if peaked and wm < MOM_EXIT_V2 and wq not in DOWN:
+                reason = f"Weekly RS-Momentum fell below {MOM_EXIT_V2:.0f} ({wm:.2f}, {wq})"
             elif wq in DOWN:
-                reason = f"Weekly → {wq}"
+                reason = f"Weekly → {wq}" + (f" (RS-Momentum {wm:.2f})" if peaked else "")
             else:
+                if wq == "Leading" and wm >= MOM_EXIT_V2:
+                    peaked = True
                 continue
             trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=wq, open=False,
                                exit_reason=reason, daily_at_sell="", weekly_at_sell=wq,
@@ -268,6 +273,7 @@ def gen_strat_2_v2(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp,
         elif armed and wq in UP:
             pos = dict(buy=d, buy_px=close[d], weekly=wq, frm=prev_w[d], into=wq,
                        daily_at_buy="", weekly_at_buy=wq, weekly_mom_at_buy=wm)
+            peaked = wq == "Leading" and wm >= MOM_EXIT_V2
     if pos is not None:
         trades.append(dict(pos, sell=None, sell_px=close.iloc[-1], exit_into=None, open=True,
                            exit_reason="Open Position", daily_at_sell="",

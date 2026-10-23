@@ -1,8 +1,9 @@
 """
-Strategy 2, version 2 — Weekly RRG only, early exit at RS-Momentum < 101.
+Strategy 2, version 2 — Weekly RRG only, sell when RS-Momentum falls below 101.
 
 At each COMPLETED week's close:
-  SELL (open):  Weekly == Leading and RS-Momentum < 101   (early exit)
+  SELL (open):  the trade has had a week in Leading with RS-Momentum >= 101 and
+                RS-Momentum is now < 101, in any quadrant  (early exit: a downward cross)
                 or Weekly in {Weakening, Lagging}          (safety net)
   BUY  (flat):  Weekly in {Leading, Improving}; after an early exit only once the weekly
                 has been in Weakening/Lagging and comes back up (fresh entry).
@@ -42,15 +43,30 @@ def run(rows, daily_q=None):
              t["exit_reason"]) for t in trades]
 
 
-def test_early_exit_in_leading_below_101():
+def test_early_exit_when_momentum_falls_below_101_in_leading():
     out = run([("Improving", 100.5), ("Leading", 102.0), ("Leading", 100.9)])
     assert [(b, s) for b, s, _ in out] == [(0, 2)]
-    assert out[0][2] == "Weekly Leading, RS-Momentum 100.90 < 101"
+    assert out[0][2] == "Weekly RS-Momentum fell below 101 (100.90, Leading)"
 
 
-def test_no_early_exit_at_or_above_101_or_outside_leading():
-    # Leading at exactly 101 holds; Improving below 101 is not an early exit
-    out = run([("Leading", 103.0), ("Leading", 101.0), ("Improving", 100.2), ("Leading", 101.5)])
+def test_early_exit_when_leading_slips_into_improving_below_101():
+    # the PVR INOX case: Leading 101.21 -> Improving 100.51 must sell
+    out = run([("Improving", 100.3), ("Leading", 101.21), ("Improving", 100.51), ("Lagging", 99.7)])
+    assert [(b, s) for b, s, _ in out] == [(0, 2)]
+    assert out[0][2] == "Weekly RS-Momentum fell below 101 (100.51, Improving)"
+
+
+def test_no_sell_while_momentum_still_rising_below_101():
+    # just entered Leading at ~100.2 and never reached 101: not a downward cross -> hold
+    out = run([("Weakening", 99.6), ("Leading", 100.2), ("Leading", 100.6), ("Leading", 100.9)])
+    assert out == [(1, None, "Open Position")]
+
+
+def test_no_early_exit_at_exactly_101_or_before_reaching_leading_101():
+    out = run([("Leading", 103.0), ("Leading", 101.0), ("Leading", 101.5)])
+    assert out == [(0, None, "Open Position")]
+    # Improving at 101.5 does not arm the early exit (only Leading at 101+ does)
+    out = run([("Improving", 101.5), ("Improving", 100.5), ("Improving", 100.2)])
     assert out == [(0, None, "Open Position")]
 
 
@@ -61,7 +77,7 @@ def test_safety_net_exit(q):
 
 
 def test_fresh_entry_after_early_exit():
-    rows = [("Leading", 103.0), ("Leading", 100.5),          # buy w0, early exit w1
+    rows = [("Leading", 103.0), ("Leading", 100.5),          # buy w0 (Leading 101+), early exit w1
             ("Leading", 102.0), ("Improving", 101.0),         # still up: no re-buy
             ("Weakening", 99.5),                               # down: re-armed
             ("Improving", 100.3)]                              # fresh entry: buy w5
@@ -103,22 +119,36 @@ def test_matches_weekly_chart_on_every_stock(stocks):
         wk, _ = strat.compute_rrg(al, name, "Weekly")
         if wk.index[-1] == daily.index[-1] and wk.index[-1].weekday() != 4:
             wk = wk.iloc[:-1]
-        mine, held, can_buy = [], None, True
+        mine, held, can_buy, hit101 = [], None, True, False
         for d, r in wk.iterrows():
             if d < start:
                 continue
             q, mom = r["Quadrant"], r["RS_Momentum"]
             if held is not None:
-                early = q == "Leading" and mom < 101
-                if early or q in DOWN:
+                if q in DOWN or (hit101 and mom < 101):
                     mine.append((held, d))
-                    held, can_buy = None, not early
+                    held, can_buy = None, q in DOWN
+                elif q == "Leading" and mom >= 101:
+                    hit101 = True
             elif q in DOWN:
                 can_buy = True
             elif can_buy and q in UP:
-                held = d
+                held, hit101 = d, (q == "Leading" and mom >= 101)
         assert [(t["buy"], t["sell"]) for t in trades if not t["open"]] == mine, ticker
         assert (trades[-1]["buy"] if trades and trades[-1]["open"] else None) == held, ticker
+
+
+def test_pvr_examples(stocks):
+    """Real PVR INOX trades: sold when momentum fell below 101 while slipping into Improving."""
+    name, al = stocks["PVRINOX.NS"]
+    al = al[al.index <= "2026-10-16"]
+    daily, _ = strat.compute_rrg(al, name, "Daily")
+    trades, _ = strat.gen_strat_2_v2(daily, strat.weekly_asof(al, name), pd.Timestamp("2024-01-01"))
+    got = [(t["buy"].strftime("%Y-%m-%d"), t["sell"].strftime("%Y-%m-%d") if t["sell"] is not None else None)
+           for t in trades]
+    assert got == [("2024-05-17", "2024-12-06"), ("2025-05-30", "2025-12-05"),
+                   ("2026-03-13", "2026-06-19"), ("2026-07-31", None)]
+    assert round(trades[0]["sell_px"], 2) == 1547.85
 
 
 def test_registry_entry():

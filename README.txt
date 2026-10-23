@@ -137,17 +137,20 @@ Shown as "Strategy 2 · Version 1" in the "Strategy" box in the sidebar on the S
   - Tests: tests/test_strategy_2.py (rules, week-close only, daily ignored, unfinished week,
     independent check against the Weekly page's candles on every stock).
 
-8c. STRATEGY 2 (VERSION 2) — WEEKLY RRG ONLY, EARLY EXIT AT RS-MOMENTUM < 101
--------------------------------------------------------------------------
+8c. STRATEGY 2 (VERSION 2) — WEEKLY RRG ONLY, SELL WHEN RS-MOMENTUM FALLS BELOW 101
+---------------------------------------------------------------------------------
 Shown as "Strategy 2 · Version 2" in the sidebar (internal registry key 3).
   - Completed weekly candles only; the Daily RRG is never used.
   - BUY  at the week's close when Weekly is Leading/Improving.
-  - SELL at the week's close when Weekly is Leading with RS-Momentum < 101 (early exit),
-    or when Weekly is Weakening/Lagging (safety net).
+  - SELL at the week's close when Weekly RS-Momentum falls below 101 after the trade has had a
+    week in Leading at 101 or more (a downward cross of 101, whether the stock is still Leading
+    or has slipped into Improving), or when Weekly is Weakening/Lagging (safety net).
+  - A stock that has just entered Leading with momentum around 100.2 (still rising) is not sold.
   - After an early exit, buy again only once the Weekly has been in Weakening/Lagging and
     comes back up (fresh entry). After a safety-net exit the next up week can buy.
-  - Tests: tests/test_strategy_2_v2.py (early exit, 101 boundary, safety net, fresh entry,
-    daily ignored, independent check against the Weekly page's candles on every stock).
+  - Tests: tests/test_strategy_2_v2.py (downward cross in Leading and into Improving, rising
+    momentum held, 101 boundary, safety net, fresh entry, daily ignored, independent check
+    against the Weekly page's candles on every stock, PVR INOX examples).
 
 9. AUTOMATED TESTING
 --------------------
