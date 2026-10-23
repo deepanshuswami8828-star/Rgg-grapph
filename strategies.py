@@ -35,6 +35,17 @@ STRATEGY_REGISTRY = {
         "best_market": "Sustained intermediate-term bull trends with confirmed weekly institutional participation.",
         "risk_watch": "Susceptible to quick exits if either timeframe stumbles; capital preservation prioritized.",
     },
+    2: {
+        "id": 2,
+        "name": "Weekly RRG Only (Version 1)",
+        "tag": "Weekly Only",
+        "short_desc": "Buy when the Weekly RRG is Leading/Improving; Sell when it drops into Weakening/Lagging. Daily is ignored.",
+        "full_desc": "Single-timeframe weekly strategy. Looks only at completed weekly candles: at each week's close, buys if the Weekly RRG is in Leading or Improving and sells if it is in Weakening or Lagging. The Daily RRG is never used. Trades at the close of the week's last trading day.",
+        "entry_rule": "Buy at the week's close when Weekly ∈ {Leading, Improving}.",
+        "exit_rule": "Sell at the week's close when Weekly ∈ {Weakening, Lagging}.",
+        "best_market": "Long, steady trends where a stock outperforms NIFTY 50 for months at a time.",
+        "risk_watch": "Reacts only once a week, so a sharp fall inside a week is not exited until that week closes.",
+    },
 }
 
 
@@ -150,6 +161,58 @@ def gen_strat_1(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, co
     return trades, skipped
 
 
+# ---- Signal Generator (Strategy 2: Weekly RRG only, version 1) -------------
+def completed_weekly(asof: pd.DataFrame, daily_index: pd.DatetimeIndex) -> pd.DataFrame:
+    """One row per COMPLETED week: the weekly reading at the week's last trading day
+    (equal to the weekly candle). The current week is left out until it has closed
+    (its last session is a Friday, or a later week has started)."""
+    if asof.empty:
+        return asof
+    wk = asof.groupby(asof.index.to_period("W-FRI")).tail(1)
+    last_day = daily_index[-1]
+    if len(wk) and wk.index[-1].to_period("W-FRI") == last_day.to_period("W-FRI") and last_day.weekday() != 4:
+        wk = wk.iloc[:-1]
+    return wk
+
+
+def gen_strat_2(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, cost_pct: float = 0.12) -> Tuple[List[Dict], List[Dict]]:
+    """Strategy 2 (version 1): Weekly RRG only.
+
+    At each completed week's close:
+      BUY  (no open position): Weekly in {Leading, Improving}
+      SELL (open position):    Weekly in {Weakening, Lagging}
+    The Daily RRG is not used. Fills at the close of the week's last trading day.
+    """
+    wk = completed_weekly(asof, daily.index)
+    w_q = wk["Quadrant"]
+    prev_w = w_q.shift(1)
+    close = daily["Close"]
+    c = cost_pct / 100.0
+
+    trades, pos = [], None
+    for d in wk.index[wk.index >= start]:
+        wq = w_q[d]
+        if pos is None and wq in UP:
+            pos = dict(buy=d, buy_px=close[d], weekly=wq, frm=prev_w[d], into=wq,
+                       daily_at_buy="", weekly_at_buy=wq)
+        elif pos is not None and wq in DOWN:
+            trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=wq, open=False,
+                               exit_reason=f"Weekly → {wq}", daily_at_sell="", weekly_at_sell=wq))
+            pos = None
+    if pos is not None:
+        trades.append(dict(pos, sell=None, sell_px=close.iloc[-1], exit_into=None, open=True,
+                           exit_reason="Open Position", daily_at_sell="",
+                           weekly_at_sell=w_q.iloc[-1] if len(w_q) else ""))
+    for t in trades:
+        t["ret"] = 100.0 * ((t["sell_px"] * (1 - c)) / (t["buy_px"] * (1 + c)) - 1)
+        end = t["sell"] if t["sell"] is not None else daily.index[-1]
+        t["held"] = int(((daily.index > t["buy"]) & (daily.index <= end)).sum())
+    return trades, []
+
+
+SIGNALS = {1: gen_strat_1, 2: gen_strat_2}
+
+
 # ---- Execution Simulator -----------------------------------------------------
 def simulate_single_strategy(daily: pd.DataFrame, raw_trades: List[Dict], start: pd.Timestamp,
                              capital: float = 10000.0, cost_pct: float = 0.12) -> Tuple[List[Dict], float, pd.Series, pd.Series, int]:
@@ -215,8 +278,8 @@ def simulate_single_strategy(daily: pd.DataFrame, raw_trades: List[Dict], start:
 def run_strategy(strat_id: int, daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp,
                  capital: float = 10000.0, cost_pct: float = 0.12,
                  stocks_rrg: Optional[Dict] = None, bench_clean: Optional[pd.DataFrame] = None) -> Tuple[List[Dict], float, pd.Series, pd.Series, int, Dict]:
-    """Runs Strategy 1 and returns (book, cash, value, bh_value, bh_shares, metrics)."""
-    raw, _ = gen_strat_1(daily, asof, start, cost_pct)
+    """Runs a strategy by id and returns (book, cash, value, bh_value, bh_shares, metrics)."""
+    raw, _ = SIGNALS[strat_id](daily, asof, start, cost_pct)
     book, cash, val, bh_val, bh_sh = simulate_single_strategy(daily, raw, start, capital, cost_pct)
     metrics = compute_metrics(book, val, bh_val, capital, start)
     return book, cash, val, bh_val, bh_sh, metrics

@@ -34,8 +34,8 @@ def stocks():
     return out
 
 
-def test_only_strategy_1_registered():
-    assert list(strat.STRATEGY_REGISTRY) == [1]
+def test_strategy_1_registered():
+    assert 1 in strat.STRATEGY_REGISTRY
     meta = strat.STRATEGY_REGISTRY[1]
     assert meta["id"] == 1
     for field in ("name", "tag", "short_desc", "full_desc", "entry_rule", "exit_rule",

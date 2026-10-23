@@ -1037,7 +1037,7 @@ def status_box(color, title, lines, big=None):
         unsafe_allow_html=True)
 
 
-def strategy_page(stock_ticker: str):
+def strategy_page(stock_ticker: str, strategy_id: int = 1):
     stock_info = cfg.STOCKS.get(stock_ticker, {"name": stock_ticker, "sector": ""})
     stock_name = stock_info["name"]
 
@@ -1060,7 +1060,7 @@ def strategy_page(stock_ticker: str):
 
     header("strategy", stock_name, source, fetched, now, "signals are final")
 
-    selected_s_id = 1
+    selected_s_id = strategy_id
     meta = strat.STRATEGY_REGISTRY[selected_s_id]
 
     # Prominent Strategy Explanation Card
@@ -1093,7 +1093,7 @@ def strategy_page(stock_ticker: str):
         unsafe_allow_html=True
     )
 
-    trades, skipped = strat.gen_strat_1(daily, asof, start, cost)
+    trades, skipped = strat.SIGNALS[selected_s_id](daily, asof, start, cost)
     book, final_cash, value, bh_value, bh_shares = simulate(daily, trades, start, capital, cost)
 
     final, bh_final = float(value.iloc[-1]), float(bh_value.iloc[-1])
@@ -1154,18 +1154,27 @@ def strategy_page(stock_ticker: str):
     dq, wq = daily["Quadrant"].iloc[-1], asof["Quadrant"].iloc[-1]
     ok_sym = lambda q: "✅" if q in UP else "❌"
     state = [f"Weekly now: {ok_sym(wq)} <b style='color:{QUAD_FG[wq]}'>{wq}</b>  ·  Daily now: {ok_sym(dq)} <b style='color:{QUAD_FG[dq]}'>{dq}</b>"]
+    if selected_s_id == 2:   # weekly only: report the last completed week, never the daily
+        wk_done = strat.completed_weekly(asof, daily.index)
+        wq_done = wk_done["Quadrant"].iloc[-1]
+        state = [f"Last completed week ({wk_done.index[-1].strftime('%a %d %b %Y')}): {ok_sym(wq_done)} "
+                 f"<b style='color:{QUAD_FG[wq_done]}'>{wq_done}</b> — Weekly RS-Ratio "
+                 f"{wk_done['RS_Ratio'].iloc[-1]:.2f}, RS-Momentum {wk_done['RS_Momentum'].iloc[-1]:.2f}. "
+                 f"Strategy 2 decides only at each week's close; the daily chart is not used."]
     open_b = book[-1] if book and book[-1].get("sell") is None else None
     st.write("")
     if open_b and open_b["buy"] == daily.index[-1]:
-        status_box(QUAD_FG["Leading"], "▲ BUY signal today",
+        status_box(QUAD_FG["Leading"], "▲ BUY signal today" + (" (week close)" if selected_s_id == 2 else ""),
                    [f"Buy {open_b['shares']} shares at about ₹{open_b['buy_px']:.2f} ({inr(open_b['paid'])} with charges)."] + state)
     elif open_b:
         status_box(QUAD_FG["Leading"], f"HOLD — {open_b['shares']} shares since {open_b['buy'].strftime('%a %d %b %Y')}",
                    [f"Bought at ₹{open_b['buy_px']:.2f} (paid {inr(open_b['paid'])}). Today ₹{last_px:.2f} — selling now would give {inr(open_b['got'])}: {inr(open_b['pnl'], sign=True)}.",
-                    f"Current status: {open_b.get('exit_reason', 'Open Position')}. Daily RS-Momentum: {daily['RS_Momentum'].iloc[-1]:.2f}."] + state)
+                    (f"Sells at a week's close when the Weekly RRG is in Weakening or Lagging."
+                     if selected_s_id == 2 else
+                     f"Current status: {open_b.get('exit_reason', 'Open Position')}. Daily RS-Momentum: {daily['RS_Momentum'].iloc[-1]:.2f}.")] + state)
     elif closed and closed[-1]["sell"] == daily.index[-1]:
         b = closed[-1]
-        status_box(QUAD_FG["Lagging"], "▼ SELL signal today",
+        status_box(QUAD_FG["Lagging"], "▼ SELL signal today" + (" (week close)" if selected_s_id == 2 else ""),
                    [f"Sell all {b['shares']} shares at about ₹{b['sell_px']:.2f} → {inr(b['got'])} ({inr(b['pnl'], sign=True)}). Reason: {b.get('exit_reason', '')}"] + state)
     else:
         status_box(INK_3, f"WAIT — all {inr(final_cash)} is in cash",
@@ -1254,9 +1263,12 @@ with st.sidebar:
                 st.error(f"Refresh failed: {res.get('message')}")
 
     if page_choice == "Strategy":
+        strategy_choice = st.selectbox(
+            "Strategy", options=list(strat.STRATEGY_REGISTRY),
+            format_func=lambda i: f"Strategy {i}: {strat.STRATEGY_REGISTRY[i]['name']}",
+            key="strategy_choice")
+        st.caption(f"💡 *{strat.STRATEGY_REGISTRY[strategy_choice]['short_desc']}*")
         with st.form("strategy_inputs"):
-            st.markdown(f"**Strategy 1: {strat.STRATEGY_REGISTRY[1]['name']}**")
-            st.caption(f"💡 *{strat.STRATEGY_REGISTRY[1]['short_desc']}*")
             capital = st.number_input("Amount to invest (₹)", min_value=1000, max_value=10**9,
                                       value=10000, step=1000, format="%d")
             bt_from = st.date_input("Start date", value=CYCLES_FROM.date(),
@@ -1284,7 +1296,7 @@ with st.sidebar:
 render_status_panel(selected_stock)
 
 if page_choice == "Strategy":
-    strategy_page(selected_stock)
+    strategy_page(selected_stock, strategy_choice)
 elif page_choice == "All stocks":
     all_stocks_page(all_tf)
 elif page_choice == "Both":

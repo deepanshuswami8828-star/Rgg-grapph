@@ -1,5 +1,5 @@
 Multi-Stock Relative Rotation Graph (RRG) App
-NSE Stocks against NIFTY 50 (^NSEI) — Daily, Weekly, Both, All Stocks, Strategy 1
+NSE Stocks against NIFTY 50 (^NSEI) — Daily, Weekly, Both, All Stocks, Strategies 1-2
 ================================================================================
 
 1. START THE APP
@@ -111,7 +111,7 @@ Located at the top of the app in an expandable section:
 
 8. STRATEGY 1 — DAILY + WEEKLY RRG CONFIRMATION
 -----------------------------------------------
-The app has one strategy, run per stock on the Strategy page (amount, start date and
+Strategy 1 is run per stock on the Strategy page (amount, start date and
 charges in the sidebar; whole shares; 0.12% charges per side by default; fills at the
 signal day's close; daily mark-to-market value; no look-ahead):
 
@@ -123,6 +123,19 @@ signal day's close; daily mark-to-market value; no look-ahead):
     exit reason and charges (CSV download on the page).
   - PVR INOX baseline (data to 16 Oct 2026, Rs 1,00,000 from 1 Jan 2024): 14 trades, first buy
     24 May 2024 (Rs 1339.05), open position from 12 Oct 2026 (Rs 1401.30), value Rs 98,785.
+
+8b. STRATEGY 2 (VERSION 1) — WEEKLY RRG ONLY
+--------------------------------------------
+Choose it with the "Strategy" box in the sidebar on the Strategy page.
+  - Looks only at COMPLETED weekly candles; the Daily RRG is never used.
+  - BUY  at the week's close when Weekly is Leading/Improving.
+  - SELL at the week's close when Weekly is Weakening/Lagging.
+  - Fills at the close of the week's last trading day. The current week is ignored until it
+    has closed (its last session is a Friday, or the next week has started).
+  - PVR INOX baseline (data to 16 Oct 2026, Rs 1,00,000 from 1 Jan 2024): 4 trades
+    (17 May 2024, 30 May 2025, 13 Mar 2026, 31 Jul 2026 - still open), value Rs 1,36,019.
+  - Tests: tests/test_strategy_2.py (rules, week-close only, daily ignored, unfinished week,
+    independent check against the Weekly page's candles on every stock).
 
 9. AUTOMATED TESTING
 --------------------
