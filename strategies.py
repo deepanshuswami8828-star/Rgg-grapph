@@ -1,12 +1,10 @@
 """
-strategies.py — Comprehensive RRG Trading Strategy Engine.
+strategies.py — RRG Trading Strategy Engine.
+Strategy 1: Daily + Weekly RRG Confirmation.
 
-Provides signal generators, realistic backtesting simulation (₹10k default,
-whole shares, 0.12% charges, mark-to-market daily values, no lookahead bias),
-comprehensive metrics calculation, multi-strategy comparison, and cross-sectional
-portfolio rotation for all 6 configured stocks against NIFTY 50.
-
-Zero Streamlit dependencies for ultra-fast, sub-second headless execution & testing.
+BUY RULE:  (Daily in {Leading, Improving}) AND (Weekly in {Leading, Improving})
+SELL RULE: (Daily in {Lagging, Weakening}) OR  (Weekly in {Lagging, Weakening})
+Otherwise an open position is held; never a second buy while open.
 """
 
 from typing import Dict, List, Tuple, Any, Optional
@@ -28,135 +26,14 @@ WARMUP_WEEKLY = 15
 STRATEGY_REGISTRY = {
     1: {
         "id": 1,
-        "name": "Basic Quadrant Rotation",
-        "tag": "Single Timeframe",
-        "short_desc": "Buy on Daily entering Improving/Leading; Sell on Weakening/Lagging (no weekly filter).",
-        "full_desc": "Pure single-timeframe RRG rotation. Buys whenever the daily quadrant rotates clockwise from Lagging/Weakening into Improving or Leading. Sells as soon as daily drops into Weakening or Lagging. High trade frequency.",
-        "entry_rule": "Buy when Daily RRG rotates clockwise into Improving or Leading quadrant.",
-        "exit_rule": "Sell immediately when Daily RRG falls into Weakening or Lagging quadrant.",
-        "best_market": "High-volatility swing markets where short-term sector rotation cycles occur frequently.",
-        "risk_watch": "High trade frequency with no higher-timeframe filter; susceptible to whipsaws in sideways choppy markets.",
-    },
-    2: {
-        "id": 2,
-        "name": "Leading Profit Booking",
-        "tag": "Profit Target",
-        "short_desc": "Buy on Improving-to-Leading; Exit on profit target (+8%), trailing stop (5%), or Weakening.",
-        "full_desc": "Enters exclusively on high-momentum rotation into the Leading quadrant. Protects capital by locking in profits when target (+8%) is reached, cutting losses with a 5% trailing stop from peak close, or exiting if the quadrant drops into Weakening.",
-        "entry_rule": "Buy only when Daily rotates directly into the Leading quadrant (strongest relative strength & momentum).",
-        "exit_rule": "Sell when +8% profit target is reached, or 5% trailing stop from peak close is hit, or quadrant drops to Weakening/Lagging.",
-        "best_market": "Strong momentum breakouts where leading stocks surge quickly.",
-        "risk_watch": "May exit too early during monster 50%+ multi-month trends due to the 8% target.",
-    },
-    3: {
-        "id": 3,
-        "name": "Daily + Weekly Confirmation",
+        "name": "Daily + Weekly RRG Confirmation",
         "tag": "Multi-Timeframe",
-        "short_desc": "Buy when BOTH Daily and Weekly are Improving/Leading; sell when EITHER drops to Weakening/Lagging.",
-        "full_desc": "Multi-timeframe confirmation. A position is opened only while both the Daily and the Weekly RRG are in Improving or Leading, and closed as soon as either timeframe enters Weakening or Lagging, even if the other is still strong. One position at a time; after a sale it re-enters only when both qualify again.",
-        "entry_rule": "Buy when Daily is Improving/Leading AND Weekly is Improving/Leading (both must qualify).",
-        "exit_rule": "Sell when Daily OR Weekly enters Weakening/Lagging (either one triggers the exit).",
-        "best_market": "Sustained intermediate-term bull trends with weekly institutional participation.",
-        "risk_watch": "Exits on the first sign of weakness in either timeframe, so short dips can cause early exits and re-entries.",
-    },
-    4: {
-        "id": 4,
-        "name": "Early Rotation Catcher",
-        "tag": "Early Entry",
-        "short_desc": "Catch bottoming rotation: Buy on Lagging-to-Improving with RS-Mom >= 100 and price recovery.",
-        "full_desc": "Identifies early bottoms before the market realizes the turn. Buys at the exact transition from Lagging to Improving when RS-Momentum >= 100 and daily price is rising. Exits on momentum failure (< 100) or tight 5% stop-loss.",
-        "entry_rule": "Buy at bottom: Stock crosses from Lagging into Improving with RS-Momentum >= 100 and positive price change.",
-        "exit_rule": "Sell if RS-Momentum falls back below 100 or protective 5% stop-loss is triggered.",
-        "best_market": "Market bottoming phases and oversold sector recoveries.",
-        "risk_watch": "Catching falling knives if the bottoming rotation fails and stock plunges back into deep Lagging.",
-    },
-    5: {
-        "id": 5,
-        "name": "Leading-Only Momentum",
-        "tag": "Trend Following",
-        "short_desc": "Strongest trend filter: Both Daily & Weekly Leading + Price > 50-day SMA.",
-        "full_desc": "Maximum confluence strategy. Requires Daily in Leading, Weekly in Leading, AND Close above 50-day SMA. Exits when RS-Momentum drops below 100, price breaks below 50-SMA, or 7% protective stop is hit.",
-        "entry_rule": "Triple confluence buy: Daily is Leading, Weekly is Leading, AND Price is above its 50-day SMA.",
-        "exit_rule": "Sell when RS-Momentum falls below 100, or price closes below 50-day SMA, or 7% stop-loss is triggered.",
-        "best_market": "Powerful secular bull markets with strong sector leadership.",
-        "risk_watch": "Very strict filter generates fewer trades; enters after a significant portion of the move has already occurred.",
-    },
-    6: {
-        "id": 6,
-        "name": "Partial Profit Booking",
-        "tag": "Partial Exits",
-        "short_desc": "Buy on confirmed RRG; Sell 50% at +8% target, trail remainder to breakeven stop / RRG exit.",
-        "full_desc": "Disciplined scaling: Enters on confirmed Daily+Weekly RRG signal. When price reaches +8%, sells half the position to bank gains and moves stop-loss on remaining shares to breakeven. Remaining half runs until RRG exit.",
-        "entry_rule": "Buy full position on Daily Improving/Leading confirmed by Weekly Improving/Leading.",
-        "exit_rule": "Sell 50% at +8% gain and move stop to breakeven. Sell remainder when Daily leaves Leading/Improving or breakeven is hit.",
-        "best_market": "Trend extensions where locking in early gains removes risk while letting runners run.",
-        "risk_watch": "If stock reverses just before +8% target, full position absorbs the reversal.",
-    },
-    7: {
-        "id": 7,
-        "name": "Improving-to-Leading Crossover",
-        "tag": "Sweet Spot",
-        "short_desc": "Classic sweet spot: Enter when RS-Ratio crosses above 100 with RS-Momentum >= 100.",
-        "full_desc": "Classic JdK RRG entry. Triggers at the exact session RS-Ratio crosses above 100 while RS-Momentum is >= 100 (crossing vertical axis into Leading). Exits on RS-Momentum falling below 100 or 6% stop-loss.",
-        "entry_rule": "Buy at the exact crossover: RS-Ratio crosses above 100 while RS-Momentum is >= 100 (entering Leading from Improving).",
-        "exit_rule": "Sell when RS-Momentum drops below 100, or drops into Lagging, or 6% stop-loss is hit.",
-        "best_market": "Stocks transitioning from accumulation into strong outperformance.",
-        "risk_watch": "False crossovers where RS-Ratio hugs 100 line and flips back and forth.",
-    },
-    8: {
-        "id": 8,
-        "name": "Leading Pullback Entry",
-        "tag": "Buy Dip in Trend",
-        "short_desc": "Weekly Leading primary trend; buy when temporary Daily pullback into Weakening turns back up.",
-        "full_desc": "Trend pullback strategy. When Weekly is firmly in Leading, waits for Daily to pull back into Weakening or Lagging, then buys the moment Daily resumes upward momentum into Improving/Leading. Exits if Weekly leaves Leading or 6% stop-loss.",
-        "entry_rule": "Buy the dip: Weekly is firmly Leading, Daily pulls back to Weakening/Lagging and then rotates back up into Improving/Leading.",
-        "exit_rule": "Sell if Weekly leaves Leading, or Daily falls into Lagging, or 6% stop-loss is triggered.",
-        "best_market": "Trending bull markets where pullbacks offer low-risk, high-reward re-entries.",
-        "risk_watch": "Pullback turns into a deeper trend reversal that drags down the Weekly timeframe.",
-    },
-    9: {
-        "id": 9,
-        "name": "Weakening Early Exit",
-        "tag": "Early Exit",
-        "short_desc": "Standard entry, but exit immediately when Daily touches Weakening (ahead of Lagging).",
-        "full_desc": "Capital preservation focus. Uses confirmed Daily+Weekly entry, but exits on the very first session Daily enters Weakening without waiting for Lagging. Locks in trend gains before deep deceleration occurs.",
-        "entry_rule": "Buy on standard Daily Improving/Leading confirmed by Weekly Improving/Leading.",
-        "exit_rule": "Sell immediately on the first day Daily enters Weakening (locks in gains before momentum turns negative).",
-        "best_market": "Mature bull markets and volatile topping patterns where early exit protects gains.",
-        "risk_watch": "Can exit prematurely on minor momentum dips that quickly resume upward rotation.",
-    },
-    10: {
-        "id": 10,
-        "name": "Price + RRG Confirmation",
-        "tag": "Price Filtered",
-        "short_desc": "Confirmed RRG entry + Close > 50-day SMA + 20-day SMA upward sloping.",
-        "full_desc": "Hybrid technical strategy. Combines confirmed RRG quadrant status with traditional trend filters: Price must exceed 50-day SMA and 20-day SMA must be sloping upward. Exits on RRG breakdown or Close < 50-SMA.",
-        "entry_rule": "Buy when Daily+Weekly are confirmed in Improving/Leading AND Price > 50-day SMA AND 20-day SMA is rising.",
-        "exit_rule": "Sell when Daily drops into Weakening/Lagging, or Price closes below 50-day SMA, or 7% stop-loss.",
-        "best_market": "Clear moving average trend alignments with institutional volume.",
-        "risk_watch": "Moving average lag can delay entry and exit compared to pure RRG momentum.",
-    },
-    11: {
-        "id": 11,
-        "name": "RS-Momentum Reversal",
-        "tag": "Momentum Oscillator",
-        "short_desc": "Pure oscillator: Buy when RS-Momentum crosses above 100; Sell when it crosses below 100.",
-        "full_desc": "Fastest reacting strategy. Treats RS-Momentum as a pure zero-line oscillator. Buys whenever RS-Momentum crosses above 100 regardless of quadrant (even in Lagging). Sells whenever RS-Momentum crosses below 100.",
-        "entry_rule": "Buy when RS-Momentum crosses above 100 (rate of change turns positive vs benchmark).",
-        "exit_rule": "Sell when RS-Momentum crosses below 100 (rate of change turns negative vs benchmark).",
-        "best_market": "High-beta swing trading where rapid momentum shifts can be captured quickly.",
-        "risk_watch": "Oscillator whip in range-bound markets; does not filter for overall trend direction (RS-Ratio).",
-    },
-    12: {
-        "id": 12,
-        "name": "Portfolio Rotation (Multi-Stock)",
-        "tag": "Multi-Stock Portfolio",
-        "short_desc": "Cross-sectional portfolio: Dynamically allocate single ₹10k pool to top 2 stocks across all 6.",
-        "full_desc": "Actual multi-stock portfolio simulation. Starting capital is ₹10,000 for the entire portfolio. Every session, all 6 stocks are ranked by composite RRG relative strength. Capital is allocated to the top eligible stocks in Leading/Improving, rotating out of weakening stocks with realistic whole-share accounting.",
-        "entry_rule": "Buy top 2 stocks with highest RRG composite score in Improving/Leading quadrant across all 6 stocks.",
-        "exit_rule": "Sell/Rotate when a held stock drops out of top ranks, enters Lagging/Weakening, or better leader emerges.",
-        "best_market": "All market conditions with dispersion across sectors and stocks.",
-        "risk_watch": "Concentration in top 2 stocks; cash drag if fewer than 2 stocks qualify.",
+        "short_desc": "Buy only when BOTH Daily & Weekly are Leading/Improving; Sell when EITHER drops into Weakening/Lagging.",
+        "full_desc": "Strict dual-timeframe confirmation strategy. Buys only when BOTH Daily and Weekly RRG are in Leading or Improving. Exits immediately if EITHER timeframe falls into Weakening or Lagging. Held otherwise.",
+        "entry_rule": "Buy when Daily ∈ {Leading, Improving} AND Weekly ∈ {Leading, Improving}.",
+        "exit_rule": "Sell immediately when Daily ∈ {Lagging, Weakening} OR Weekly ∈ {Lagging, Weakening}.",
+        "best_market": "Sustained intermediate-term bull trends with confirmed weekly institutional participation.",
+        "risk_watch": "Susceptible to quick exits if either timeframe stumbles; capital preservation prioritized.",
     },
 }
 
@@ -226,114 +103,14 @@ def weekly_asof(closes: pd.DataFrame, stock_name: str, bench_name: str = cfg.BEN
     return out
 
 
-# ---- Signal Generators (Strategies 1 to 11) ----------------------------------
-def gen_strat_1(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, cost_pct: float = 0.12) -> List[Dict]:
-    """Strategy 1: Basic Quadrant Rotation (No weekly filter)."""
-    q = daily["Quadrant"]
-    up = q.isin(UP)
-    prev_q = q.shift(1)
-    prev_up = prev_q.isin(UP)
-    close = daily["Close"]
-    c = cost_pct / 100.0
-
-    trades, pos = [], None
-    for d in daily.index[daily.index >= start]:
-        if pos is None and up[d] and not prev_up[d] and pd.notna(prev_q[d]):
-            pos = dict(buy=d, buy_px=close[d], weekly="", frm=prev_q[d], into=q[d])
-        elif pos is not None and not up[d] and prev_up[d]:
-            trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=q[d], open=False,
-                               exit_reason="Daily Drop to Weakening/Lagging"))
-            pos = None
-    if pos is not None:
-        trades.append(dict(pos, sell=None, sell_px=close.iloc[-1], exit_into=None, open=True,
-                           exit_reason="Open Position"))
-    for t in trades:
-        t["ret"] = 100.0 * ((t["sell_px"] * (1 - c)) / (t["buy_px"] * (1 + c)) - 1)
-        end = t["sell"] if t["sell"] is not None else daily.index[-1]
-        t["held"] = int(((daily.index > t["buy"]) & (daily.index <= end)).sum())
-    return trades
-
-
-def gen_strat_2(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, cost_pct: float = 0.12,
-                profit_target: float = 8.0, trail_stop: float = 5.0) -> List[Dict]:
-    """Strategy 2: Leading Profit Booking (+8% Target, 5% Trailing Stop, or Weakening exit)."""
-    q = daily["Quadrant"]
-    prev_q = q.shift(1)
-    close = daily["Close"]
-    c = cost_pct / 100.0
-
-    trades, pos = [], None
-    peak_px = 0.0
-    for d in daily.index[daily.index >= start]:
-        if pos is None and q[d] == "Leading" and prev_q[d] != "Leading" and pd.notna(prev_q[d]):
-            pos = dict(buy=d, buy_px=close[d], weekly="", frm=prev_q[d], into=q[d])
-            peak_px = close[d]
-        elif pos is not None:
-            peak_px = max(peak_px, close[d])
-            gain_pct = 100.0 * (close[d] / pos["buy_px"] - 1.0)
-            drop_from_peak = 100.0 * (peak_px - close[d]) / peak_px
-            if gain_pct >= profit_target:
-                trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=q[d], open=False,
-                                   exit_reason=f"Profit Target (+{profit_target:.1f}%)"))
-                pos = None
-            elif drop_from_peak >= trail_stop and peak_px > pos["buy_px"] * 1.02:
-                trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=q[d], open=False,
-                                   exit_reason=f"Trailing Stop (-{trail_stop:.1f}% from peak)"))
-                pos = None
-            elif q[d] in DOWN:
-                trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=q[d], open=False,
-                                   exit_reason="Daily Drop to Weakening/Lagging"))
-                pos = None
-    if pos is not None:
-        trades.append(dict(pos, sell=None, sell_px=close.iloc[-1], exit_into=None, open=True,
-                           exit_reason="Open Position"))
-    for t in trades:
-        t["ret"] = 100.0 * ((t["sell_px"] * (1 - c)) / (t["buy_px"] * (1 + c)) - 1)
-        end = t["sell"] if t["sell"] is not None else daily.index[-1]
-        t["held"] = int(((daily.index > t["buy"]) & (daily.index <= end)).sum())
-    return trades
-
-
-def _gen_confirmation_daily_exit(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, cost_pct: float = 0.12) -> Tuple[List[Dict], List[Dict]]:
-    """Original confirmation rules (daily entry event + weekly filter, daily-only exit).
-    Kept unchanged for Strategy 12's single-stock fallback; Strategy 3 now uses gen_strat_3."""
-    q = daily["Quadrant"]
-    up = q.isin(UP)
-    prev_q = q.shift(1)
-    prev_up = prev_q.isin(UP)
-    w_q = asof["Quadrant"].reindex(daily.index)
-    w_up = w_q.isin(UP)
-    close = daily["Close"]
-    c = cost_pct / 100.0
-
-    trades, skipped, pos = [], [], None
-    for d in daily.index[daily.index >= start]:
-        if pos is None and up[d] and not prev_up[d] and pd.notna(prev_q[d]):
-            if w_up[d]:
-                pos = dict(buy=d, buy_px=close[d], weekly=w_q[d], frm=prev_q[d], into=q[d])
-            else:
-                skipped.append(dict(date=d, weekly=w_q[d], frm=prev_q[d], into=q[d]))
-        elif pos is not None and not up[d] and prev_up[d]:
-            trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=q[d], open=False,
-                               exit_reason="Daily Drop to Weakening/Lagging"))
-            pos = None
-    if pos is not None:
-        trades.append(dict(pos, sell=None, sell_px=close.iloc[-1], exit_into=None, open=True,
-                           exit_reason="Open Position"))
-    for t in trades:
-        t["ret"] = 100.0 * ((t["sell_px"] * (1 - c)) / (t["buy_px"] * (1 + c)) - 1)
-        end = t["sell"] if t["sell"] is not None else daily.index[-1]
-        t["held"] = int(((daily.index > t["buy"]) & (daily.index <= end)).sum())
-    return trades, skipped
-
-
-def gen_strat_3(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, cost_pct: float = 0.12) -> Tuple[List[Dict], List[Dict]]:
-    """Strategy 3: Daily + Weekly RRG Confirmation.
+# ---- Signal Generator (Strategy 1: Daily + Weekly Confirmation) -------------
+def gen_strat_1(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, cost_pct: float = 0.12) -> Tuple[List[Dict], List[Dict]]:
+    """Strategy 1: Daily + Weekly RRG Confirmation.
 
     BUY  (no open position): Daily in {Leading, Improving} AND Weekly in {Leading, Improving}.
     SELL (open position):    Daily in {Weakening, Lagging} OR  Weekly in {Weakening, Lagging}.
     Otherwise an open position is held. Weekly is the as-of reading for that day (no look-ahead);
-    a day without a weekly reading neither buys nor sells. Fills at that day's close, as before.
+    a day without a weekly reading neither buys nor sells. Fills at that day's close.
     """
     q = daily["Quadrant"]
     prev_q = q.shift(1)
@@ -351,7 +128,6 @@ def gen_strat_3(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, co
                 pos = dict(buy=d, buy_px=close[d], weekly=wq, frm=prev_q[d], into=dq,
                            daily_at_buy=dq, weekly_at_buy=wq)
             elif dq in UP and prev_q[d] not in UP and pd.notna(prev_q[d]):
-                # daily turned up but the weekly did not qualify: no buy (shown on the page)
                 skipped.append(dict(date=d, weekly=wq, frm=prev_q[d], into=dq))
         elif dq in DOWN or wq in DOWN:
             who = [n for n, x in (("Daily", dq), ("Weekly", wq)) if x in DOWN]
@@ -364,7 +140,9 @@ def gen_strat_3(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, co
             pos = None
     if pos is not None:
         trades.append(dict(pos, sell=None, sell_px=close.iloc[-1], exit_into=None, open=True,
-                           exit_reason="Open Position"))
+                           exit_reason="Open Position",
+                           daily_at_sell=daily["Quadrant"].iloc[-1],
+                           weekly_at_sell=w_q.iloc[-1] if len(w_q) else ""))
     for t in trades:
         t["ret"] = 100.0 * ((t["sell_px"] * (1 - c)) / (t["buy_px"] * (1 + c)) - 1)
         end = t["sell"] if t["sell"] is not None else daily.index[-1]
@@ -372,277 +150,11 @@ def gen_strat_3(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, co
     return trades, skipped
 
 
-def gen_strat_4(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, cost_pct: float = 0.12,
-                stop_loss_pct: float = 5.0) -> List[Dict]:
-    """Strategy 4: Early Rotation Catcher (Lagging to Improving)."""
-    q = daily["Quadrant"]
-    prev_q = q.shift(1)
-    rm = daily["RS_Momentum"]
-    close = daily["Close"]
-    prev_close = close.shift(1)
-    c = cost_pct / 100.0
-
-    trades, pos = [], None
-    for d in daily.index[daily.index >= start]:
-        is_lag_to_imp = (prev_q[d] == "Lagging" and q[d] == "Improving")
-        price_recovering = close[d] >= prev_close[d]
-        if pos is None and is_lag_to_imp and rm[d] >= 100.0 and price_recovering:
-            pos = dict(buy=d, buy_px=close[d], weekly="", frm=prev_q[d], into=q[d])
-        elif pos is not None:
-            loss_pct = 100.0 * (1.0 - close[d] / pos["buy_px"])
-            if rm[d] < 100.0:
-                trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=q[d], open=False,
-                                   exit_reason="RS-Momentum Failure (<100)"))
-                pos = None
-            elif loss_pct >= stop_loss_pct:
-                trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=q[d], open=False,
-                                   exit_reason=f"Stop Loss (-{stop_loss_pct:.1f}%)"))
-                pos = None
-            elif q[d] in DOWN:
-                trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=q[d], open=False,
-                                   exit_reason="Daily Drop to Weakening/Lagging"))
-                pos = None
-    if pos is not None:
-        trades.append(dict(pos, sell=None, sell_px=close.iloc[-1], exit_into=None, open=True,
-                           exit_reason="Open Position"))
-    for t in trades:
-        t["ret"] = 100.0 * ((t["sell_px"] * (1 - c)) / (t["buy_px"] * (1 + c)) - 1)
-        end = t["sell"] if t["sell"] is not None else daily.index[-1]
-        t["held"] = int(((daily.index > t["buy"]) & (daily.index <= end)).sum())
-    return trades
-
-
-def gen_strat_5(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, cost_pct: float = 0.12,
-                stop_loss_pct: float = 7.0) -> List[Dict]:
-    """Strategy 5: Leading-Only Momentum (Daily Leading + Weekly Leading + Close > SMA50)."""
-    q = daily["Quadrant"]
-    w_q = asof["Quadrant"].reindex(daily.index)
-    close = daily["Close"]
-    sma50 = close.rolling(50, min_periods=20).mean()
-    rm = daily["RS_Momentum"]
-    c = cost_pct / 100.0
-
-    in_zone = (q == "Leading") & (w_q == "Leading") & (close > sma50)
-    prev_zone = in_zone.shift(1).fillna(False)
-
-    trades, pos = [], None
-    for d in daily.index[daily.index >= start]:
-        if pos is None and in_zone[d] and not prev_zone[d]:
-            pos = dict(buy=d, buy_px=close[d], weekly=w_q[d], frm=q.shift(1)[d], into=q[d])
-        elif pos is not None:
-            loss_pct = 100.0 * (1.0 - close[d] / pos["buy_px"])
-            if rm[d] < 100.0:
-                trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=q[d], open=False,
-                                   exit_reason="RS-Momentum Drop (<100)"))
-                pos = None
-            elif close[d] < sma50[d]:
-                trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=q[d], open=False,
-                                   exit_reason="Close Below 50-SMA"))
-                pos = None
-            elif loss_pct >= stop_loss_pct:
-                trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=q[d], open=False,
-                                   exit_reason=f"Stop Loss (-{stop_loss_pct:.1f}%)"))
-                pos = None
-    if pos is not None:
-        trades.append(dict(pos, sell=None, sell_px=close.iloc[-1], exit_into=None, open=True,
-                           exit_reason="Open Position"))
-    for t in trades:
-        t["ret"] = 100.0 * ((t["sell_px"] * (1 - c)) / (t["buy_px"] * (1 + c)) - 1)
-        end = t["sell"] if t["sell"] is not None else daily.index[-1]
-        t["held"] = int(((daily.index > t["buy"]) & (daily.index <= end)).sum())
-    return trades
-
-
-def gen_strat_7(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, cost_pct: float = 0.12,
-                stop_loss_pct: float = 6.0) -> List[Dict]:
-    """Strategy 7: Improving-to-Leading Crossover (RS_Ratio crosses 100 with RS_Mom >= 100)."""
-    rr = daily["RS_Ratio"]
-    prev_rr = rr.shift(1)
-    rm = daily["RS_Momentum"]
-    close = daily["Close"]
-    q = daily["Quadrant"]
-    c = cost_pct / 100.0
-
-    crossover = (prev_rr < 100.0) & (rr >= 100.0) & (rm >= 100.0)
-    trades, pos = [], None
-    for d in daily.index[daily.index >= start]:
-        if pos is None and crossover[d]:
-            pos = dict(buy=d, buy_px=close[d], weekly="", frm="Improving", into="Leading")
-        elif pos is not None:
-            loss_pct = 100.0 * (1.0 - close[d] / pos["buy_px"])
-            if rm[d] < 100.0:
-                trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=q[d], open=False,
-                                   exit_reason="RS-Momentum Loss (<100)"))
-                pos = None
-            elif loss_pct >= stop_loss_pct:
-                trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=q[d], open=False,
-                                   exit_reason=f"Stop Loss (-{stop_loss_pct:.1f}%)"))
-                pos = None
-            elif q[d] == "Lagging":
-                trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=q[d], open=False,
-                                   exit_reason="Drop to Lagging"))
-                pos = None
-    if pos is not None:
-        trades.append(dict(pos, sell=None, sell_px=close.iloc[-1], exit_into=None, open=True,
-                           exit_reason="Open Position"))
-    for t in trades:
-        t["ret"] = 100.0 * ((t["sell_px"] * (1 - c)) / (t["buy_px"] * (1 + c)) - 1)
-        end = t["sell"] if t["sell"] is not None else daily.index[-1]
-        t["held"] = int(((daily.index > t["buy"]) & (daily.index <= end)).sum())
-    return trades
-
-
-def gen_strat_8(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, cost_pct: float = 0.12,
-                stop_loss_pct: float = 6.0) -> List[Dict]:
-    """Strategy 8: Leading Pullback Entry (Weekly Leading, Daily pullback turns back up)."""
-    q = daily["Quadrant"]
-    w_q = asof["Quadrant"].reindex(daily.index)
-    close = daily["Close"]
-    c = cost_pct / 100.0
-
-    trades, pos = [], None
-    pullback_active = False
-    for d in daily.index[daily.index >= start]:
-        if w_q[d] == "Leading":
-            if q[d] in ["Weakening", "Lagging"]:
-                pullback_active = True
-            elif pullback_active and q[d] in ["Leading", "Improving"]:
-                if pos is None:
-                    pos = dict(buy=d, buy_px=close[d], weekly="Leading", frm="Pullback", into=q[d])
-                    pullback_active = False
-        else:
-            pullback_active = False
-
-        if pos is not None:
-            loss_pct = 100.0 * (1.0 - close[d] / pos["buy_px"])
-            if w_q[d] != "Leading":
-                trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=q[d], open=False,
-                                   exit_reason="Weekly Left Leading"))
-                pos = None
-            elif q[d] == "Lagging":
-                trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=q[d], open=False,
-                                   exit_reason="Daily Drop to Lagging"))
-                pos = None
-            elif loss_pct >= stop_loss_pct:
-                trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=q[d], open=False,
-                                   exit_reason=f"Stop Loss (-{stop_loss_pct:.1f}%)"))
-                pos = None
-    if pos is not None:
-        trades.append(dict(pos, sell=None, sell_px=close.iloc[-1], exit_into=None, open=True,
-                           exit_reason="Open Position"))
-    for t in trades:
-        t["ret"] = 100.0 * ((t["sell_px"] * (1 - c)) / (t["buy_px"] * (1 + c)) - 1)
-        end = t["sell"] if t["sell"] is not None else daily.index[-1]
-        t["held"] = int(((daily.index > t["buy"]) & (daily.index <= end)).sum())
-    return trades
-
-
-def gen_strat_9(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, cost_pct: float = 0.12) -> List[Dict]:
-    """Strategy 9: Weakening Early Exit (Exits immediately when Daily touches Weakening)."""
-    q = daily["Quadrant"]
-    up = q.isin(UP)
-    prev_q = q.shift(1)
-    prev_up = prev_q.isin(UP)
-    w_q = asof["Quadrant"].reindex(daily.index)
-    w_up = w_q.isin(UP)
-    close = daily["Close"]
-    c = cost_pct / 100.0
-
-    trades, pos = [], None
-    for d in daily.index[daily.index >= start]:
-        if pos is None and up[d] and not prev_up[d] and pd.notna(prev_q[d]):
-            if w_up[d]:
-                pos = dict(buy=d, buy_px=close[d], weekly=w_q[d], frm=prev_q[d], into=q[d])
-        elif pos is not None and q[d] in DOWN:
-            reason = "Early Exit: Daily Weakening" if q[d] == "Weakening" else "Drop to Lagging"
-            trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=q[d], open=False, exit_reason=reason))
-            pos = None
-    if pos is not None:
-        trades.append(dict(pos, sell=None, sell_px=close.iloc[-1], exit_into=None, open=True,
-                           exit_reason="Open Position"))
-    for t in trades:
-        t["ret"] = 100.0 * ((t["sell_px"] * (1 - c)) / (t["buy_px"] * (1 + c)) - 1)
-        end = t["sell"] if t["sell"] is not None else daily.index[-1]
-        t["held"] = int(((daily.index > t["buy"]) & (daily.index <= end)).sum())
-    return trades
-
-
-def gen_strat_10(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, cost_pct: float = 0.12,
-                 stop_loss_pct: float = 6.0) -> List[Dict]:
-    """Strategy 10: Price + RRG Confirmation (RRG UP + Close > SMA50 + SMA20 slope up)."""
-    q = daily["Quadrant"]
-    w_q = asof["Quadrant"].reindex(daily.index)
-    close = daily["Close"]
-    sma50 = close.rolling(50, min_periods=20).mean()
-    sma20 = close.rolling(20, min_periods=10).mean()
-    sma20_slope_up = sma20 > sma20.shift(1)
-    c = cost_pct / 100.0
-
-    cond = q.isin(UP) & w_q.isin(UP) & (close > sma50) & sma20_slope_up
-    prev_cond = cond.shift(1).fillna(False)
-
-    trades, pos = [], None
-    for d in daily.index[daily.index >= start]:
-        if pos is None and cond[d] and not prev_cond[d]:
-            pos = dict(buy=d, buy_px=close[d], weekly=w_q[d], frm=q.shift(1)[d], into=q[d])
-        elif pos is not None:
-            loss_pct = 100.0 * (1.0 - close[d] / pos["buy_px"])
-            if q[d] in DOWN:
-                trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=q[d], open=False,
-                                   exit_reason="RRG Drop to Weakening/Lagging"))
-                pos = None
-            elif close[d] < sma50[d]:
-                trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=q[d], open=False,
-                                   exit_reason="Close Below 50-SMA"))
-                pos = None
-            elif loss_pct >= stop_loss_pct:
-                trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=q[d], open=False,
-                                   exit_reason=f"Stop Loss (-{stop_loss_pct:.1f}%)"))
-                pos = None
-    if pos is not None:
-        trades.append(dict(pos, sell=None, sell_px=close.iloc[-1], exit_into=None, open=True,
-                           exit_reason="Open Position"))
-    for t in trades:
-        t["ret"] = 100.0 * ((t["sell_px"] * (1 - c)) / (t["buy_px"] * (1 + c)) - 1)
-        end = t["sell"] if t["sell"] is not None else daily.index[-1]
-        t["held"] = int(((daily.index > t["buy"]) & (daily.index <= end)).sum())
-    return trades
-
-
-def gen_strat_11(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, cost_pct: float = 0.12) -> List[Dict]:
-    """Strategy 11: RS-Momentum Reversal (Pure oscillator crossover)."""
-    rm = daily["RS_Momentum"]
-    prev_rm = rm.shift(1)
-    close = daily["Close"]
-    q = daily["Quadrant"]
-    c = cost_pct / 100.0
-
-    cross_up = (prev_rm < 100.0) & (rm >= 100.0)
-    cross_down = (prev_rm >= 100.0) & (rm < 100.0)
-
-    trades, pos = [], None
-    for d in daily.index[daily.index >= start]:
-        if pos is None and cross_up[d]:
-            pos = dict(buy=d, buy_px=close[d], weekly="", frm="RM<100", into="RM>=100")
-        elif pos is not None and cross_down[d]:
-            trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=q[d], open=False,
-                               exit_reason="RS-Momentum Cross Below 100"))
-            pos = None
-    if pos is not None:
-        trades.append(dict(pos, sell=None, sell_px=close.iloc[-1], exit_into=None, open=True,
-                           exit_reason="Open Position"))
-    for t in trades:
-        t["ret"] = 100.0 * ((t["sell_px"] * (1 - c)) / (t["buy_px"] * (1 + c)) - 1)
-        end = t["sell"] if t["sell"] is not None else daily.index[-1]
-        t["held"] = int(((daily.index > t["buy"]) & (daily.index <= end)).sum())
-    return trades
-
-
-# ---- Execution Simulators ----------------------------------------------------
+# ---- Execution Simulator -----------------------------------------------------
 def simulate_single_strategy(daily: pd.DataFrame, raw_trades: List[Dict], start: pd.Timestamp,
                              capital: float = 10000.0, cost_pct: float = 0.12) -> Tuple[List[Dict], float, pd.Series, pd.Series, int]:
     """
-    Simulates realistic cash and share execution for standard single-exit strategies.
+    Simulates realistic cash and share execution for Strategy 1.
     Ensures whole shares, transaction costs, mark-to-market daily portfolio value.
     """
     c = cost_pct / 100.0
@@ -699,287 +211,21 @@ def simulate_single_strategy(daily: pd.DataFrame, raw_trades: List[Dict], start:
     return book, cash, value, bh_value, bh_shares
 
 
-def simulate_partial_strategy(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp,
-                              capital: float = 10000.0, cost_pct: float = 0.12,
-                              profit_target: float = 8.0, stop_loss_pct: float = 6.0) -> Tuple[List[Dict], float, pd.Series, pd.Series, int]:
-    """
-    Simulates Strategy 6 (Partial Profit Booking):
-    - Buys whole shares on confirmed Daily+Weekly RRG.
-    - Sells 50% of position when Close reaches +8% profit target.
-    - Moves stop loss on remaining shares to breakeven.
-    - Sells remaining shares when Daily drops into Weakening/Lagging or breakeven stop.
-    """
-    c = cost_pct / 100.0
-    close = daily["Close"][daily.index >= start]
-    q = daily["Quadrant"].reindex(close.index)
-    w_q = asof["Quadrant"].reindex(close.index)
-    up = q.isin(UP)
-    prev_up = up.shift(1).fillna(False)
-
-    cash = float(capital)
-    book = []
-    shares_by_day = pd.Series(0, index=close.index)
-    cash_by_day = pd.Series(float(capital), index=close.index)
-
-    in_pos = False
-    buy_date, buy_px = None, 0.0
-    total_shares = 0
-    rem_shares = 0
-    target_hit = False
-
-    for d in close.index:
-        cur_px = close[d]
-
-        # Check entry
-        if not in_pos and up[d] and not prev_up[d] and w_q[d] in UP:
-            in_pos = True
-            buy_date = d
-            buy_px = cur_px
-            total_shares = int(cash // (buy_px * (1 + c)))
-            rem_shares = total_shares
-            paid = total_shares * buy_px * (1 + c)
-            charges = total_shares * buy_px * c
-            cash -= paid
-            target_hit = False
-            shares_by_day[d] = rem_shares
-            cash_by_day[d] = cash
-            continue
-
-        if in_pos:
-            gain_pct = 100.0 * (cur_px / buy_px - 1.0)
-            loss_pct = 100.0 * (1.0 - cur_px / buy_px)
-
-            # Check 50% partial profit target
-            if not target_hit and gain_pct >= profit_target and total_shares >= 2:
-                half_shares = total_shares // 2
-                got_half = half_shares * cur_px * (1 - c)
-                paid_half = half_shares * buy_px * (1 + c)
-                charges_half = (half_shares * buy_px * c) + (half_shares * cur_px * c)
-                cash += got_half
-                rem_shares = total_shares - half_shares
-                target_hit = True
-                book.append({
-                    "buy": buy_date, "buy_px": buy_px, "sell": d, "sell_px": cur_px,
-                    "shares": half_shares, "paid": paid_half, "got": got_half,
-                    "pnl": got_half - paid_half,
-                    "pnl_pct": 100.0 * (got_half - paid_half) / paid_half,
-                    "charges": charges_half, "cash_before": cash - got_half, "cash_after": cash,
-                    "exit_reason": f"Partial Target (+{profit_target:.1f}%)", "open": False,
-                    "weekly": w_q.loc[buy_date] if buy_date in w_q.index else "",
-                    "frm": "Improving", "into": "Leading", "exit_into": q[d],
-                    "held": int(((daily.index > buy_date) & (daily.index <= d)).sum())
-                })
-
-            # Check exit for remaining shares
-            do_exit = False
-            exit_reason = ""
-            if target_hit and cur_px <= buy_px:
-                do_exit = True
-                exit_reason = "Breakeven Stop (after +8% hit)"
-            elif not target_hit and loss_pct >= stop_loss_pct:
-                do_exit = True
-                exit_reason = f"Stop Loss (-{stop_loss_pct:.1f}%)"
-            elif q[d] in DOWN:
-                do_exit = True
-                exit_reason = "Daily Drop to Weakening/Lagging"
-
-            if do_exit:
-                got = rem_shares * cur_px * (1 - c)
-                paid_rem = rem_shares * buy_px * (1 + c)
-                charges_rem = (rem_shares * buy_px * c) + (rem_shares * cur_px * c)
-                cash += got
-                book.append({
-                    "buy": buy_date, "buy_px": buy_px, "sell": d, "sell_px": cur_px,
-                    "shares": rem_shares, "paid": paid_rem, "got": got,
-                    "pnl": got - paid_rem,
-                    "pnl_pct": 100.0 * (got - paid_rem) / paid_rem if paid_rem > 0 else 0.0,
-                    "charges": charges_rem, "cash_before": cash - got, "cash_after": cash,
-                    "exit_reason": exit_reason, "open": False,
-                    "weekly": w_q.loc[buy_date] if buy_date in w_q.index else "",
-                    "frm": "Improving", "into": "Leading", "exit_into": q[d],
-                    "held": int(((daily.index > buy_date) & (daily.index <= d)).sum())
-                })
-                in_pos = False
-                rem_shares = 0
-
-        shares_by_day[d] = rem_shares
-        cash_by_day[d] = cash
-
-    if in_pos and rem_shares > 0:
-        last_px = close.iloc[-1]
-        got = rem_shares * last_px * (1 - c)
-        paid_rem = rem_shares * buy_px * (1 + c)
-        charges_rem = (rem_shares * buy_px * c) + (rem_shares * last_px * c)
-        book.append({
-            "buy": buy_date, "buy_px": buy_px, "sell": None, "sell_px": last_px,
-            "shares": rem_shares, "paid": paid_rem, "got": got,
-            "pnl": got - paid_rem,
-            "pnl_pct": 100.0 * (got - paid_rem) / paid_rem if paid_rem > 0 else 0.0,
-            "charges": charges_rem, "cash_before": cash, "cash_after": cash + got,
-            "exit_reason": "Still Holding (Open)", "open": True,
-            "weekly": w_q.loc[buy_date] if buy_date in w_q.index else "",
-            "frm": "Improving", "into": "Leading", "exit_into": None,
-            "held": int(((daily.index > buy_date) & (daily.index <= close.index[-1])).sum())
-        })
-
-    value = cash_by_day + shares_by_day * close * (1 - c)
-    if book and book[-1]["sell"] is None:
-        value.iloc[-1] = book[-1]["cash_after"]
-
-    bh_shares = int(capital // (close.iloc[0] * (1 + c)))
-    bh_left = capital - bh_shares * close.iloc[0] * (1 + c)
-    bh_value = bh_left + bh_shares * close * (1 - c)
-
-    return book, cash, value, bh_value, bh_shares
-
-
-def run_portfolio_rotation(stocks_rrg: Dict[str, Dict], bench_clean: pd.DataFrame, start: pd.Timestamp,
-                           capital: float = 10000.0, cost_pct: float = 0.12,
-                           max_positions: int = 2) -> Tuple[List[Dict], pd.Series, pd.Series, List[Dict]]:
-    """
-    Simulates Strategy 12 (Multi-Stock Portfolio Rotation):
-    - Starting capital is a single ₹10,000 pool across all 6 stocks.
-    - Evaluates cross-sectional relative strength daily.
-    - Holds top eligible stocks (Leading/Improving).
-    - Rotates out of stocks dropping into Weakening/Lagging.
-    """
-    c = cost_pct / 100.0
-    all_dates = sorted(list(set.union(*[set(d["daily"].index[d["daily"].index >= start]) for d in stocks_rrg.values()])))
-    date_idx = pd.DatetimeIndex(all_dates)
-
-    cash = float(capital)
-    held_positions = {}
-    trades = []
-    portfolio_equity = pd.Series(index=date_idx, dtype=float)
-    holdings_history = []
-
-    for d in date_idx:
-        cur_px = {}
-        for ticker, data in stocks_rrg.items():
-            if d in data["daily"].index:
-                cur_px[ticker] = data["daily"].loc[d, "Close"]
-
-        # Check existing positions for exit (drop out of UP)
-        to_sell = []
-        for ticker, pos in list(held_positions.items()):
-            daily = stocks_rrg[ticker]["daily"]
-            if d in daily.index:
-                q = daily.loc[d, "Quadrant"]
-                if q in DOWN:
-                    to_sell.append((ticker, f"Daily dropped to {q}"))
-            else:
-                to_sell.append((ticker, "No data/delisted"))
-
-        for ticker, reason in to_sell:
-            pos = held_positions.pop(ticker)
-            px_out = cur_px[ticker]
-            got = pos["shares"] * px_out * (1 - c)
-            charges = (pos["shares"] * pos["buy_px"] * c) + (pos["shares"] * px_out * c)
-            pnl = got - pos["paid"]
-            cash += got
-            trades.append({
-                "ticker": ticker,
-                "name": pos["name"],
-                "buy": pos["buy_date"],
-                "buy_px": pos["buy_px"],
-                "sell": d,
-                "sell_px": px_out,
-                "shares": pos["shares"],
-                "paid": pos["paid"],
-                "got": got,
-                "pnl": pnl,
-                "pnl_pct": 100.0 * pnl / pos["paid"] if pos["paid"] > 0 else 0.0,
-                "charges": charges,
-                "exit_reason": reason,
-                "open": False,
-                "held": int(((stocks_rrg[ticker]["daily"].index > pos["buy_date"]) &
-                             (stocks_rrg[ticker]["daily"].index <= d)).sum())
-            })
-
-        # Check for entries into open slots
-        open_slots = max_positions - len(held_positions)
-        if open_slots > 0 and cash > 500.0:
-            scores = []
-            for ticker, data in stocks_rrg.items():
-                if ticker in held_positions:
-                    continue
-                daily = data["daily"]
-                if d in daily.index:
-                    q = daily.loc[d, "Quadrant"]
-                    rr = daily.loc[d, "RS_Ratio"]
-                    rm = daily.loc[d, "RS_Momentum"]
-                    if q in UP:
-                        score = (100.0 if q == "Leading" else 50.0) + (rr - 100.0) + (rm - 100.0)
-                        scores.append((score, ticker))
-            scores.sort(key=lambda x: x[0], reverse=True)
-
-            for score, ticker in scores[:open_slots]:
-                px = cur_px[ticker]
-                slot_budget = cash / open_slots
-                shares = int(slot_budget // (px * (1 + c)))
-                if shares > 0:
-                    paid = shares * px * (1 + c)
-                    cash -= paid
-                    held_positions[ticker] = {
-                        "buy_date": d,
-                        "buy_px": px,
-                        "shares": shares,
-                        "paid": paid,
-                        "name": stocks_rrg[ticker]["name"]
-                    }
-                    open_slots -= 1
-                    if open_slots <= 0 or cash < 500.0:
-                        break
-
-        invested_val = sum(pos["shares"] * cur_px.get(t, pos["buy_px"]) * (1 - c) for t, pos in held_positions.items())
-        total_val = cash + invested_val
-        portfolio_equity[d] = total_val
-        holdings_history.append({
-            "date": d,
-            "cash": cash,
-            "invested": invested_val,
-            "total": total_val,
-            "positions": ", ".join([f"{pos['name']} ({pos['shares']} sh)" for pos in held_positions.values()]) or "100% Cash"
-        })
-
-    last_d = date_idx[-1]
-    for ticker, pos in held_positions.items():
-        px_out = cur_px.get(ticker, pos["buy_px"])
-        got = pos["shares"] * px_out * (1 - c)
-        charges = (pos["shares"] * pos["buy_px"] * c) + (pos["shares"] * px_out * c)
-        pnl = got - pos["paid"]
-        trades.append({
-            "ticker": ticker,
-            "name": pos["name"],
-            "buy": pos["buy_date"],
-            "buy_px": pos["buy_px"],
-            "sell": None,
-            "sell_px": px_out,
-            "shares": pos["shares"],
-            "paid": pos["paid"],
-            "got": got,
-            "pnl": pnl,
-            "pnl_pct": 100.0 * pnl / pos["paid"] if pos["paid"] > 0 else 0.0,
-            "charges": charges,
-            "exit_reason": "Still Holding (Open)",
-            "open": True,
-            "held": int(((stocks_rrg[ticker]["daily"].index > pos["buy_date"]) &
-                         (stocks_rrg[ticker]["daily"].index <= last_d)).sum())
-        })
-
-    bench_close = bench_clean["Close"][bench_clean.index >= start] if "Close" in bench_clean.columns else bench_clean[bench_clean.index >= start]
-    bh_shares = int(capital // (bench_close.iloc[0] * (1 + c)))
-    bh_left = capital - bh_shares * bench_close.iloc[0] * (1 + c)
-    bh_val = bh_left + bh_shares * bench_close * (1 - c)
-    bh_val = bh_val.reindex(date_idx).ffill()
-
-    return trades, portfolio_equity, bh_val, holdings_history
+# ---- Strategy Runner ---------------------------------------------------------
+def run_strategy(strat_id: int, daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp,
+                 capital: float = 10000.0, cost_pct: float = 0.12,
+                 stocks_rrg: Optional[Dict] = None, bench_clean: Optional[pd.DataFrame] = None) -> Tuple[List[Dict], float, pd.Series, pd.Series, int, Dict]:
+    """Runs Strategy 1 and returns (book, cash, value, bh_value, bh_shares, metrics)."""
+    raw, _ = gen_strat_1(daily, asof, start, cost_pct)
+    book, cash, val, bh_val, bh_sh = simulate_single_strategy(daily, raw, start, capital, cost_pct)
+    metrics = compute_metrics(book, val, bh_val, capital, start)
+    return book, cash, val, bh_val, bh_sh, metrics
 
 
 # ---- Metrics Calculation -----------------------------------------------------
 def compute_metrics(book: List[Dict], value: pd.Series, bh_value: pd.Series,
                     capital: float, start: pd.Timestamp) -> Dict[str, Any]:
-    """Calculates full quantitative performance metrics for a strategy."""
+    """Calculates full quantitative performance metrics for the strategy."""
     final_val = float(value.iloc[-1])
     net_pnl = final_val - capital
     return_pct = 100.0 * net_pnl / capital
@@ -1043,146 +289,6 @@ def compute_metrics(book: List[Dict], value: pd.Series, bh_value: pd.Series,
     }
 
 
-# ---- Strategy Runner & Comparison Engine -------------------------------------
-def run_strategy(strat_id: int, daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp,
-                 capital: float = 10000.0, cost_pct: float = 0.12,
-                 stocks_rrg: Optional[Dict] = None, bench_clean: Optional[pd.DataFrame] = None) -> Tuple[List[Dict], float, pd.Series, pd.Series, int, Dict]:
-    """Runs a single strategy by ID and returns (book, cash, value, bh_value, bh_shares, metrics)."""
-    if strat_id == 1:
-        raw = gen_strat_1(daily, asof, start, cost_pct)
-        book, cash, val, bh_val, bh_sh = simulate_single_strategy(daily, raw, start, capital, cost_pct)
-    elif strat_id == 2:
-        raw = gen_strat_2(daily, asof, start, cost_pct)
-        book, cash, val, bh_val, bh_sh = simulate_single_strategy(daily, raw, start, capital, cost_pct)
-    elif strat_id == 3:
-        raw, _ = gen_strat_3(daily, asof, start, cost_pct)
-        book, cash, val, bh_val, bh_sh = simulate_single_strategy(daily, raw, start, capital, cost_pct)
-    elif strat_id == 4:
-        raw = gen_strat_4(daily, asof, start, cost_pct)
-        book, cash, val, bh_val, bh_sh = simulate_single_strategy(daily, raw, start, capital, cost_pct)
-    elif strat_id == 5:
-        raw = gen_strat_5(daily, asof, start, cost_pct)
-        book, cash, val, bh_val, bh_sh = simulate_single_strategy(daily, raw, start, capital, cost_pct)
-    elif strat_id == 6:
-        book, cash, val, bh_val, bh_sh = simulate_partial_strategy(daily, asof, start, capital, cost_pct)
-    elif strat_id == 7:
-        raw = gen_strat_7(daily, asof, start, cost_pct)
-        book, cash, val, bh_val, bh_sh = simulate_single_strategy(daily, raw, start, capital, cost_pct)
-    elif strat_id == 8:
-        raw = gen_strat_8(daily, asof, start, cost_pct)
-        book, cash, val, bh_val, bh_sh = simulate_single_strategy(daily, raw, start, capital, cost_pct)
-    elif strat_id == 9:
-        raw = gen_strat_9(daily, asof, start, cost_pct)
-        book, cash, val, bh_val, bh_sh = simulate_single_strategy(daily, raw, start, capital, cost_pct)
-    elif strat_id == 10:
-        raw = gen_strat_10(daily, asof, start, cost_pct)
-        book, cash, val, bh_val, bh_sh = simulate_single_strategy(daily, raw, start, capital, cost_pct)
-    elif strat_id == 11:
-        raw = gen_strat_11(daily, asof, start, cost_pct)
-        book, cash, val, bh_val, bh_sh = simulate_single_strategy(daily, raw, start, capital, cost_pct)
-    elif strat_id == 12:
-        if stocks_rrg is not None and bench_clean is not None:
-            trades, val, bh_val, _ = run_portfolio_rotation(stocks_rrg, bench_clean, start, capital, cost_pct)
-            book = trades
-            cash = float(val.iloc[-1])
-            bh_sh = 1
-        else:
-            raw, _ = _gen_confirmation_daily_exit(daily, asof, start, cost_pct)
-            book, cash, val, bh_val, bh_sh = simulate_single_strategy(daily, raw, start, capital, cost_pct)
-    else:
-        raise ValueError(f"Unknown strategy ID: {strat_id}")
-
-    metrics = compute_metrics(book, val, bh_val, capital, start)
-    return book, cash, val, bh_val, bh_sh, metrics
-
-
-def compare_all_strategies(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp,
-                           capital: float = 10000.0, cost_pct: float = 0.12,
-                           stocks_rrg: Optional[Dict] = None, bench_clean: Optional[pd.DataFrame] = None) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, Dict]:
-    """
-    Executes all 12 strategies side-by-side and produces:
-    - Summary DataFrame with key metrics
-    - Synchronized Equity Curves DataFrame
-    - Drawdown Curves DataFrame
-    - Winner Highlights dictionary
-    """
-    rows = []
-    equity_dict = {}
-    drawdown_dict = {}
-
-    for s_id in range(1, 13):
-        meta = STRATEGY_REGISTRY[s_id]
-        book, cash, val, bh_val, bh_sh, m = run_strategy(
-            s_id, daily, asof, start, capital, cost_pct, stocks_rrg, bench_clean
-        )
-        s_name = f"S{s_id}: {meta['name']}"
-        equity_dict[s_name] = val
-        peak = val.cummax()
-        dd = 100.0 * (peak - val) / peak
-        drawdown_dict[s_name] = dd
-
-        rows.append({
-            "ID": s_id,
-            "Strategy": meta["name"],
-            "Tag": meta["tag"],
-            "Final Value (₹)": m["final_value"],
-            "Net PnL (₹)": m["net_pnl"],
-            "Return (%)": m["return_pct"],
-            "CAGR (%)": m["cagr_pct"],
-            "Max Drawdown (%)": m["max_dd_pct"],
-            "Max DD (₹)": m["max_dd_rupees"],
-            "Win Rate (%)": m["win_rate"],
-            "Total Trades": m["total_trades"],
-            "Profit Factor": m["profit_factor"],
-            "Avg Trade (%)": m["avg_trade_pct"],
-            "Avg Hold (Days)": m["avg_holding_days"],
-            "Charges (₹)": m["total_charges"],
-            "Alpha vs B&H (%p)": m["alpha_pct"],
-        })
-
-    # Add Buy & Hold baseline to equity curve
-    equity_dict["Buy & Hold"] = bh_val
-    peak_bh = bh_val.cummax()
-    drawdown_dict["Buy & Hold"] = 100.0 * (peak_bh - bh_val) / peak_bh
-
-    summary_df = pd.DataFrame(rows)
-    equity_df = pd.DataFrame(equity_dict).ffill().bfill()
-    drawdown_df = pd.DataFrame(drawdown_dict).ffill().bfill()
-
-    # Winners
-    best_return = summary_df.loc[summary_df["Return (%)"].idxmax()]
-    best_dd = summary_df.loc[summary_df["Max Drawdown (%)"].idxmin()]
-    calmar_scores = summary_df["Return (%)"] / summary_df["Max Drawdown (%)"].replace(0, 0.01)
-    best_calmar = summary_df.loc[calmar_scores.idxmax()]
-    best_winrate = summary_df.loc[summary_df["Win Rate (%)"].idxmax()]
-
-    highlights = {
-        "highest_return": {
-            "strategy": best_return["Strategy"],
-            "return_pct": float(best_return["Return (%)"]),
-            "pnl": float(best_return["Net PnL (₹)"]),
-            "id": int(best_return["ID"])
-        },
-        "lowest_drawdown": {
-            "strategy": best_dd["Strategy"],
-            "max_dd_pct": float(best_dd["Max Drawdown (%)"]),
-            "id": int(best_dd["ID"])
-        },
-        "best_risk_adjusted": {
-            "strategy": best_calmar["Strategy"],
-            "score": float(calmar_scores.max()),
-            "id": int(best_calmar["ID"])
-        },
-        "highest_win_rate": {
-            "strategy": best_winrate["Strategy"],
-            "win_rate": float(best_winrate["Win Rate (%)"]),
-            "id": int(best_winrate["ID"])
-        }
-    }
-
-    return summary_df, equity_df, drawdown_df, highlights
-
-
 def explain_pnl(book: List[Dict], capital: float, final_val: float, cost_pct: float,
                 stock_name: str, strategy_name: str) -> Dict[str, Any]:
     """
@@ -1228,11 +334,11 @@ def explain_pnl(book: List[Dict], capital: float, final_val: float, cost_pct: fl
             bullets_en.append(f"High Profit Factor ({profit_factor:.2f}): For every ₹1.00 lost across losing trades, the strategy extracted ₹{profit_factor:.2f} on winning trades.")
             bullets_hi.append(f"Profit Factor {profit_factor:.2f}: Har ₹1 ke nuksan par strategy ne ₹{profit_factor:.2f} ka gross munafa kamaya.")
 
-        bullets_en.append(f"Leading Quadrant Momentum: {stock_name} enjoyed strong multi-week trending runs while in the Leading quadrant, allowing momentum to compound before exit signals triggered.")
-        bullets_hi.append(f"Leading quadrant me strong trend: Jab stock Leading quadrant me tha, tab achhi tezi aayi jisse strategy ne bada munafa book kiya.")
+        bullets_en.append(f"Dual-Timeframe Alignment: Both Daily and Weekly timeframes confirmed the uptrend, capturing powerful multi-week momentum moves.")
+        bullets_hi.append(f"Daily aur Weekly dono me tezi: Dono timeframes ne uptrend confirm kiya, jisse mazboot tezi ka pura fayda mila.")
 
-        bullets_en.append(f"Disciplined Risk Management: Fast exits on quadrant deterioration or stop-loss protected accumulated profits from major bear drawdowns.")
-        bullets_hi.append(f"Samay par exit: Jaise hi quadrant kamzor hua ya stop-loss laga, strategy ne exit karke profit ko surakshit rakha.")
+        bullets_en.append(f"Disciplined Risk Management: Fast exits when either Daily or Weekly entered Weakening or Lagging protected gains from bear reversals.")
+        bullets_hi.append(f"Samay par surakshit exit: Jaise hi Daily ya Weekly kamzor hua, turant exit karke munafa surakshit kiya gaya.")
     else:
         headline = f"Strategy Incurred Loss: -₹{abs(net_pnl):,.0f} ({net_pnl_pct:+.1f}%)"
         summary_en = f"{stock_name} experienced a net drawdown of -₹{abs(net_pnl):,.0f} ({net_pnl_pct:+.1f}%) across {total_trades} completed trades, reducing ₹{capital:,.0f} to ₹{final_val:,.0f}."
@@ -1242,15 +348,12 @@ def explain_pnl(book: List[Dict], capital: float, final_val: float, cost_pct: fl
             bullets_en.append(f"Win Rate Drag: {len(losing_trades)} losing trades outnumbered {len(winning_trades)} winning trades (Win Rate: {win_rate:.0f}%).")
             bullets_hi.append(f"Loss trades ki sankhya zyada: {len(losing_trades)} trades me loss hua aur sirf {len(winning_trades)} me profit (Win rate: {win_rate:.0f}%).")
 
-        bullets_en.append("Choppy / Whipsaw Rotation: The stock entered Improving/Leading triggering buys, but lacked institutional follow-through volume and quickly collapsed into Weakening/Lagging.")
-        bullets_hi.append("Whipsaw / False Breakout: Stock ne Improving/Leading me aakar khareedne ka signal diya, par tezi tiki nahi aur turant Weakening me gir gaya jisse loss me exit hua.")
+        bullets_en.append("Choppy / False Breakout: Stock entered Improving/Leading triggering buys, but momentum faded quickly, causing early stops.")
+        bullets_hi.append("Whipsaw / False Breakout: Dono timeframes me tezi aane par khareeda, lekin momentum sustain nahi hua aur exit trigger ho gaya.")
 
         if total_charges > 0.01 * capital:
             bullets_en.append(f"Transaction Cost Friction: High turnover generated ₹{total_charges:,.0f} in charges ({100 * total_charges / capital:.1f}% of starting capital).")
             bullets_hi.append(f"Brokerage aur charges ka bojh: Baar-baar buy/sell karne se ₹{total_charges:,.0f} charges lage.")
-
-        bullets_en.append(f"Relative Benchmark Weakness: {stock_name} spent prolonged stretches lagging NIFTY 50, creating difficult conditions for relative-strength momentum strategies.")
-        bullets_hi.append(f"NIFTY ke mukable kamzori: Stock benchmark NIFTY se kamzor chal raha tha, isliye momentum sustain nahi hua.")
 
     return {
         "is_profit": is_profit,
@@ -1285,27 +388,8 @@ def trade_outcome_reason(trade: Dict, cost_pct: float = 0.12) -> str:
     reason = trade.get("exit_reason", "")
 
     if pnl > 0:
-        if "Profit Target" in reason:
-            return f"✅ Profit (+{pnl_pct:.1f}%): +8% target achieved; locked in gains"
-        elif "Trailing Stop" in reason:
-            return f"✅ Profit (+{pnl_pct:.1f}%): Trailing stop locked in peak gains"
-        elif "Weakening" in reason or "Lagging" in reason or "Drop" in reason:
-            return f"✅ Profit (+{pnl_pct:.1f}%): Trend ran well; exited as quadrant weakened"
-        elif "RS-Momentum" in reason:
-            return f"✅ Profit (+{pnl_pct:.1f}%): Captured momentum surge; exited as momentum slowed"
-        else:
-            return f"✅ Profit (+{pnl_pct:.1f}%): Successful rotation trade ({reason})"
+        return f"✅ Profit (+{pnl_pct:.1f}%): Trend ran well; exited on {reason}"
     elif pnl < 0:
-        if "Stop Loss" in reason:
-            return f"❌ Loss ({pnl_pct:.1f}%): Stop loss cut loss early before larger decline"
-        elif "Weakening" in reason or "Lagging" in reason or "Drop" in reason:
-            return f"❌ Loss ({pnl_pct:.1f}%): False breakout / whipsaw; quadrant reversed quickly"
-        elif "RS-Momentum" in reason:
-            return f"❌ Loss ({pnl_pct:.1f}%): Momentum faded shortly after entry"
-        elif "SMA" in reason:
-            return f"❌ Loss ({pnl_pct:.1f}%): Technical support broke; exited on 50-SMA filter"
-        else:
-            return f"❌ Loss ({pnl_pct:.1f}%): Trade exited on {reason}"
+        return f"❌ Loss ({pnl_pct:.1f}%): Exited on {reason} to prevent larger decline"
     else:
         return "⚖️ Flat (0.0%): Exited near breakeven"
-

@@ -1,5 +1,5 @@
 Multi-Stock Relative Rotation Graph (RRG) App
-NSE Stocks against NIFTY 50 (^NSEI) — Daily, Weekly, Both, All Stocks, Strategy
+NSE Stocks against NIFTY 50 (^NSEI) — Daily, Weekly, Both, All Stocks, Strategy 1
 ================================================================================
 
 1. START THE APP
@@ -109,59 +109,32 @@ Located at the top of the app in an expandable section:
     a clear notice: "Weekly RRG needs more history - <stock> listed on <date>".
   - Daily RRG continues to operate fully. No page crashes.
 
-8. THE 12 RRG TRADING STRATEGIES & COMPARISON DASHBOARD
----------------------------------------------------------
-The app features 12 comprehensive RRG trading strategies, real historical backtesting
-with default ₹10,000 starting capital, whole-share enforcement, 0.12% charges/taxes
-per side, daily mark-to-market portfolio accounting, and zero lookahead bias:
+8. STRATEGY 1 — DAILY + WEEKLY RRG CONFIRMATION
+-----------------------------------------------
+The app has one strategy, run per stock on the Strategy page (amount, start date and
+charges in the sidebar; whole shares; 0.12% charges per side by default; fills at the
+signal day's close; daily mark-to-market value; no look-ahead):
 
-  1. Basic Quadrant Rotation Strategy:
-     - Single-timeframe rotation (Daily). Buys on entry into Improving/Leading; exits on Weakening/Lagging.
-  2. Leading Profit Booking Strategy:
-     - Enters on Leading. Exits on profit target (+8%), trailing stop (5% from peak), or Weakening.
-  3. Daily + Weekly Confirmation Strategy (Baseline):
-     - BUY when BOTH Daily and Weekly are Improving/Leading; SELL when EITHER enters Weakening/Lagging.
-     - One position at a time; re-entry only when both qualify again. Weekly = as-of reading (no look-ahead).
-     - PVR INOX baseline (data to 16 Oct 2026, Rs 1,00,000 from 1 Jan 2024): 14 trades, first buy
-       24 May 2024 (Rs 1339.05), open position from 12 Oct 2026 (Rs 1401.30). Tests: tests/test_strategy_3_rules.py
-  4. Early Rotation Catcher (Lagging to Improving):
-     - Early bottoming rotation: Buys on Lagging-to-Improving with RS-Mom >= 100 & price recovery. 5% stop-loss.
-  5. Leading-Only Momentum Strategy:
-     - Trend-following confluence: Daily Leading + Weekly Leading + Close > 50-day SMA.
-  6. Partial Profit Booking Strategy:
-     - Scales out: Sells 50% at +8% profit target; trails remainder to breakeven stop or RRG exit.
-  7. Improving-to-Leading Crossover Strategy:
-     - Classic sweet spot: Buys at the exact vertical boundary crossing (RS-Ratio >= 100 with RS-Mom >= 100).
-  8. Leading Pullback Entry Strategy:
-     - Buy the dip: Weekly Leading primary trend; buys when temporary Daily pullback turns back up.
-  9. Weakening Early Exit Strategy:
-     - Capital preservation: Exits on the very first session Daily enters Weakening without waiting for Lagging.
-  10. Price + RRG Confirmation Strategy:
-     - Triple confluence: Daily+Weekly RRG UP + Close > 50-SMA + 20-day SMA sloping upward.
-  11. RS-Momentum Reversal Strategy:
-     - Pure oscillator: Buys when RS-Momentum crosses above 100; exits when it crosses below 100.
-  12. Portfolio Rotation Strategy (Multi-Stock):
-     - Cross-sectional allocation across all 6 stocks from a single ₹10,000 capital pool.
-     - Ranks all stocks daily by relative strength; dynamically rotates into leaders and out of laggards.
-
-Strategy View Modes:
-  - Single Strategy View: Deep dive into any selected strategy with live signals (BUY/HOLD/SELL/WAIT),
-    key metrics, interactive 3-row charts, and complete trade ledger with CSV export.
-  - Strategy Comparison Dashboard: Overlaid equity curves, drawdown curves, sortable scorecard table,
-    and winner callouts (Highest Return, Lowest Drawdown, Best Risk-Adjusted, Highest Win Rate).
-  - Portfolio Rotation View: Dedicated Strategy 12 multi-stock tracker with current allocations,
-    equity vs NIFTY 50, and full multi-stock transaction log.
+  - BUY  when Daily is Improving/Leading AND Weekly is Improving/Leading (both must qualify).
+  - SELL when Daily OR Weekly enters Weakening/Lagging (either one triggers the exit).
+  - Otherwise HOLD. One position at a time; after a sale it re-enters only when both qualify again.
+  - Weekly = the weekly reading as it stood that day (week so far), so no future data is used.
+  - Each trade records buy/sell dates and prices, daily and weekly quadrant at buy and sell,
+    exit reason and charges (CSV download on the page).
+  - PVR INOX baseline (data to 16 Oct 2026, Rs 1,00,000 from 1 Jan 2024): 14 trades, first buy
+    24 May 2024 (Rs 1339.05), open position from 12 Oct 2026 (Rs 1401.30), value Rs 98,785.
 
 9. AUTOMATED TESTING
 --------------------
 Run test suite:
   python -m pytest tests/ -v -p no:cacheprovider
 
-Test coverage (23 automated tests):
-  - tests/test_12_strategies.py           · 7 tests: all 12 strategies, ₹10k execution, whole shares,
-                                            PVR INOX baseline, Strategy 6 scaling, Strategy 12 portfolio,
-                                            and multi-stock comparison engine across all 6 stocks.
-  - tests/test_pvrinox_baseline.py        · Baseline regression checks (108.75/101.71, 11 trades)
+Test coverage:
+  - tests/test_strategy_1.py              · Strategy 1 on every stock, whole shares, PVR INOX baseline,
+                                            P&L explanation and trade reasons
+  - tests/test_strategy_1_rules.py        · All 16 Daily x Weekly quadrant combinations, re-entry,
+                                            no look-ahead, PVR INOX baseline
+  - tests/test_pvrinox_baseline.py        · Baseline regression checks (108.75/101.71, Strategy 1: 14 trades)
   - tests/test_independent_rrg.py         · Independent pandas formula verification (1e-6 tol)
   - tests/test_reliance_bonus.py          · Reliance 1:1 bonus split sanity check (no fake crash)
   - tests/test_waaree_history.py          · Waaree listing date and graceful weekly handling

@@ -3,7 +3,7 @@ Test 1: PVR INOX Baseline Regression.
 Verifies untouched baseline metrics on data truncated to <= 2026-10-16:
 - Daily: RS-Ratio = 108.75, RS-Momentum = 101.71, Leading
 - Weekly: RS-Ratio = 116.37, RS-Momentum = 105.33, Leading
-- Strategy: 11 trades from 24 May 2024 (Rs 1339.05) to 12 Oct 2026 (Rs 1401.30)
+- Strategy 1: 14 trades from 24 May 2024 (Rs 1339.05) to 12 Oct 2026 (Rs 1401.30)
 """
 import os
 import sys
@@ -15,6 +15,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 import config as cfg
 import data_pipeline as dp
 import rrg_app as app
+import strategies as strat
 
 
 def test_pvrinox_baseline():
@@ -54,18 +55,18 @@ def test_pvrinox_baseline():
     start = pd.Timestamp("2024-01-01")
     cost = 0.12
     capital = 100000
-    trades, skipped, equity, hold, held = app.backtest(daily_df, asof, start, cost)
+    trades, skipped = strat.gen_strat_1(daily_df, asof, start, cost)
     book, cash, value, bh_value, bh_shares = app.simulate(daily_df, trades, start, capital, cost)
 
-    assert len(book) >= 11
-    # Trade 1 check
+    # Strategy 1: buy when daily AND weekly are Improving/Leading, sell when EITHER drops
+    assert len(book) == 14
     t1 = book[0]
     assert t1["buy"].strftime("%Y-%m-%d") == "2024-05-24"
     assert round(t1["buy_px"], 2) == 1339.05
     assert t1["sell"].strftime("%Y-%m-%d") == "2024-07-11"
     assert round(t1["sell_px"], 2) == 1460.20
 
-    # Trade 11 check
-    t11 = book[10]
-    assert t11["buy"].strftime("%Y-%m-%d") == "2024-10-12" or t11["buy"].strftime("%Y-%m-%d") == "2026-10-12"
-    assert round(t11["buy_px"], 2) == 1401.30
+    t_last = book[-1]
+    assert t_last["buy"].strftime("%Y-%m-%d") == "2026-10-12"
+    assert round(t_last["buy_px"], 2) == 1401.30
+    assert round(float(value.iloc[-1]), 2) == 98784.96

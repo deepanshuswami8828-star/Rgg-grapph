@@ -929,52 +929,6 @@ def pct(v):
     return f"{v:+.1f}%" if abs(v) >= 0.05 else "0.0%"
 
 
-def backtest(daily, asof, start, cost_pct):
-    q = daily["Quadrant"]
-    up = q.isin(UP)
-    prev_q = q.shift(1)
-    prev_up = prev_q.isin(UP)
-    w_q = asof["Quadrant"].reindex(daily.index)
-    w_up = w_q.isin(UP)
-    close = daily["Close"]
-    c = cost_pct / 100.0
-
-    trades, skipped, pos = [], [], None
-    for d in daily.index[daily.index >= start]:
-        if pos is None and up[d] and not prev_up[d] and pd.notna(prev_q[d]):
-            if w_up[d]:
-                pos = dict(buy=d, buy_px=close[d], weekly=w_q[d], frm=prev_q[d], into=q[d])
-            else:
-                skipped.append(dict(date=d, weekly=w_q[d], frm=prev_q[d], into=q[d]))
-        elif pos is not None and not up[d] and prev_up[d]:
-            trades.append(dict(pos, sell=d, sell_px=close[d], exit_into=q[d], open=False,
-                               exit_reason=f"Daily Drop to {q[d]}"))
-            pos = None
-    if pos is not None:
-        trades.append(dict(pos, sell=None, sell_px=close.iloc[-1], exit_into=None, open=True,
-                           exit_reason="Open Position"))
-
-    for t in trades:
-        t["ret"] = 100 * ((t["sell_px"] * (1 - c)) / (t["buy_px"] * (1 + c)) - 1)
-        end = t["sell"] if t["sell"] is not None else daily.index[-1]
-        t["held"] = int(((daily.index > t["buy"]) & (daily.index <= end)).sum())
-
-    seg = close[close.index >= start]
-    ret = seg.pct_change().fillna(0.0)
-    held = pd.Series(False, index=seg.index)
-    for t in trades:
-        end = t["sell"] if t["sell"] is not None else seg.index[-1]
-        held[(seg.index > t["buy"]) & (seg.index <= end)] = True
-    factor = 1 + ret.where(held, 0.0)
-    for t in trades:
-        factor[t["buy"]] *= 1 / (1 + c)
-        if t["sell"] is not None:
-            factor[t["sell"]] *= 1 - c
-    equity = 100 * factor.cumprod()
-    hold = 100 * seg / seg.iloc[0]
-    return trades, skipped, equity, hold, held
-
-
 def simulate(daily, trades, start, capital, cost_pct):
     c = cost_pct / 100.0
     close = daily["Close"][daily.index >= start]
@@ -1074,109 +1028,6 @@ def strategy_figure(daily, asof, book, value, bh_value, start, capital, stock_na
     return fig
 
 
-STRAT_COLORS = [
-    "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
-    "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf",
-    "#00838f", "#2e7d32"
-]
-
-
-@st.cache_data(ttl=600, show_spinner=False)
-def get_all_stocks_rrg():
-    clean_bench = dp.load_clean_data(cfg.BENCHMARK_TICKER)
-    stocks_rrg = {}
-    for ticker, meta in cfg.STOCKS.items():
-        clean_df = dp.load_clean_data(ticker)
-        if clean_df is not None:
-            al = dp.align_stock_with_benchmark(clean_df, clean_bench, meta["name"], cfg.BENCHMARK_NAME)
-            d, _ = compute_rrg(al, meta["name"], "Daily")
-            stocks_rrg[ticker] = {"name": meta["name"], "daily": d, "aligned": al}
-    return stocks_rrg, clean_bench
-
-
-def comparison_equity_figure(equity_df: pd.DataFrame, capital: float, stock_name: str) -> go.Figure:
-    fig = go.Figure()
-    for i, col in enumerate(equity_df.columns):
-        if col == "Buy & Hold":
-            fig.add_trace(go.Scatter(
-                x=equity_df.index, y=equity_df[col], name=f"Buy & Hold ({stock_name})",
-                line=dict(color=INK_3, width=2, dash="dot"),
-                hovertemplate="%{x|%d %b %Y}<br>B&H: ₹%{y:,.0f}<extra></extra>"
-            ))
-        else:
-            color = STRAT_COLORS[i % len(STRAT_COLORS)]
-            fig.add_trace(go.Scatter(
-                x=equity_df.index, y=equity_df[col], name=col,
-                line=dict(width=1.8, color=color),
-                hovertemplate=f"%{{x|%d %b %Y}}<br>{col}: ₹%{{y:,.0f}}<extra></extra>"
-            ))
-    fig.add_hline(y=capital, line_color=INK_3, line_width=1, line_dash="dash",
-                  annotation_text=f"Initial Capital ({inr(capital)})", annotation_position="bottom left",
-                  annotation_font=dict(size=11, color=INK_3))
-    fig.update_layout(
-        title=f"All 12 RRG Trading Strategies Equity Curves vs Buy & Hold — {stock_name}",
-        height=540, margin=dict(l=75, r=20, t=60, b=10), hovermode="x unified",
-        plot_bgcolor=SURFACE, paper_bgcolor=SURFACE, font=dict(color=INK_2),
-        legend=dict(orientation="h", y=1.02, yanchor="bottom", x=0)
-    )
-    fig.update_xaxes(gridcolor=GRID, dtick="M3", tickformat="%b %Y")
-    fig.update_yaxes(gridcolor=GRID, tickprefix="₹", tickformat=",.0f")
-    return fig
-
-
-def comparison_drawdown_figure(drawdown_df: pd.DataFrame) -> go.Figure:
-    fig = go.Figure()
-    for i, col in enumerate(drawdown_df.columns):
-        if col == "Buy & Hold":
-            fig.add_trace(go.Scatter(
-                x=drawdown_df.index, y=-drawdown_df[col], name="Buy & Hold",
-                line=dict(color=INK_3, width=1.5, dash="dot"),
-                hovertemplate="%{x|%d %b %Y}<br>B&H Drawdown: -%{y:.1f}%<extra></extra>"
-            ))
-        else:
-            color = STRAT_COLORS[i % len(STRAT_COLORS)]
-            fig.add_trace(go.Scatter(
-                x=drawdown_df.index, y=-drawdown_df[col], name=col,
-                line=dict(width=1.5, color=color),
-                hovertemplate=f"%{{x|%d %b %Y}}<br>{col} Drawdown: -%{{y:.1f}}%<extra></extra>"
-            ))
-    fig.update_layout(
-        title="Drawdown Curves (% from Peak Equity)",
-        height=360, margin=dict(l=75, r=20, t=50, b=10), hovermode="x unified",
-        plot_bgcolor=SURFACE, paper_bgcolor=SURFACE, font=dict(color=INK_2),
-        legend=dict(orientation="h", y=1.02, yanchor="bottom", x=0)
-    )
-    fig.update_xaxes(gridcolor=GRID, dtick="M3", tickformat="%b %Y")
-    fig.update_yaxes(gridcolor=GRID, ticksuffix="%", ticks="inside")
-    return fig
-
-
-def portfolio_equity_figure(portfolio_equity: pd.Series, bh_nifty: pd.Series, capital: float) -> go.Figure:
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=portfolio_equity.index, y=portfolio_equity, name="Multi-Stock RRG Portfolio",
-        line=dict(color=QUAD_FG["Leading"], width=2.4),
-        hovertemplate="%{x|%d %b %Y}<br>Portfolio: ₹%{y:,.0f}<extra></extra>"
-    ))
-    fig.add_trace(go.Scatter(
-        x=bh_nifty.index, y=bh_nifty, name="NIFTY 50 (Buy & Hold)",
-        line=dict(color=INK_3, width=1.8, dash="dot"),
-        hovertemplate="%{x|%d %b %Y}<br>NIFTY 50: ₹%{y:,.0f}<extra></extra>"
-    ))
-    fig.add_hline(y=capital, line_color=INK_3, line_width=1, line_dash="dash",
-                  annotation_text=f"Starting Capital ({inr(capital)})", annotation_position="bottom left",
-                  annotation_font=dict(size=11, color=INK_3))
-    fig.update_layout(
-        title="Strategy 12: Multi-Stock Portfolio Value Over Time vs NIFTY 50 Benchmark",
-        height=480, margin=dict(l=75, r=20, t=50, b=10), hovermode="x unified",
-        plot_bgcolor=SURFACE, paper_bgcolor=SURFACE, font=dict(color=INK_2),
-        legend=dict(orientation="h", y=1.02, yanchor="bottom", x=0)
-    )
-    fig.update_xaxes(gridcolor=GRID, dtick="M3", tickformat="%b %Y")
-    fig.update_yaxes(gridcolor=GRID, tickprefix="₹", tickformat=",.0f")
-    return fig
-
-
 def status_box(color, title, lines, big=None):
     st.markdown(
         f"<div style='border-left:6px solid {color};background:{SURFACE if color == INK_3 else color + '14'};padding:14px 18px;border-radius:6px'>"
@@ -1186,7 +1037,7 @@ def status_box(color, title, lines, big=None):
         unsafe_allow_html=True)
 
 
-def strategy_page(stock_ticker: str, default_strategy_id: int = 3):
+def strategy_page(stock_ticker: str):
     stock_info = cfg.STOCKS.get(stock_ticker, {"name": stock_ticker, "sector": ""})
     stock_name = stock_info["name"]
 
@@ -1206,330 +1057,175 @@ def strategy_page(stock_ticker: str, default_strategy_id: int = 3):
     asof = weekly_asof(aligned, stock_name)
     now = datetime.now(cfg.IST)
     start = max(pd.Timestamp(bt_from), daily.index[1], asof.index[0])
-    stocks_rrg, bench_clean = get_all_stocks_rrg()
 
     header("strategy", stock_name, source, fetched, now, "signals are final")
 
-    tab_single, tab_comp, tab_port = st.tabs([
-        "🎯 Single Strategy View",
-        "📊 Strategy Comparison Dashboard",
-        "🔄 Portfolio Rotation (Strategy 12)"
-    ])
+    selected_s_id = 1
+    meta = strat.STRATEGY_REGISTRY[selected_s_id]
 
-    with tab_single:
-        # Synchronize sidebar selection with tab selection
-        key_name = f"strat_selector_{stock_ticker}"
-        if key_name not in st.session_state:
-            st.session_state[key_name] = default_strategy_id
-        elif "sidebar_strat_select" in st.session_state and st.session_state.get("_applied_sidebar_strat") != st.session_state["sidebar_strat_select"]:
-            st.session_state[key_name] = st.session_state["sidebar_strat_select"]
-            st.session_state["_applied_sidebar_strat"] = st.session_state["sidebar_strat_select"]
+    # Prominent Strategy Explanation Card
+    st.markdown(
+        f"""
+        <div style='background:{SURFACE};border:1px solid {GRID};border-left:5px solid {QUAD_FG["Leading"]};padding:14px 18px;border-radius:8px;margin-top:6px;margin-bottom:14px'>
+            <div style='display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px'>
+                <span style='font-size:1.25rem;font-weight:700;color:{INK_1}'>Strategy {selected_s_id}: {meta['name']}</span>
+                <span style='background:#e8f5e9;color:#2e7d32;padding:3px 10px;border-radius:12px;font-size:0.82rem;font-weight:600;border:1px solid #c8e6c9'>{meta['tag']}</span>
+            </div>
+            <div style='margin-top:6px;color:{INK_2};font-size:0.95rem;line-height:1.5'>
+                <b>Kiya karti hai (Concept):</b> {meta['full_desc']} · Charges of {cost:.2f}% per side.
+            </div>
+            <div style='margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px'>
+                <div style='background:#f1f8e9;padding:10px 14px;border-radius:6px;border:1px solid #c8e6c9'>
+                    <b style='color:#2e7d32;font-size:0.95rem'>🟢 Kharidne ka Niyam (Entry Rule):</b>
+                    <div style='font-size:0.9rem;color:{INK_1};margin-top:4px;line-height:1.4'>{meta.get('entry_rule', '')}</div>
+                </div>
+                <div style='background:#fbe9e7;padding:10px 14px;border-radius:6px;border:1px solid #ffccbc'>
+                    <b style='color:#c62828;font-size:0.95rem'>🔴 Bechne ka Niyam (Exit Rule):</b>
+                    <div style='font-size:0.9rem;color:{INK_1};margin-top:4px;line-height:1.4'>{meta.get('exit_rule', '')}</div>
+                </div>
+            </div>
+            <div style='margin-top:10px;padding:8px 12px;background:#f8f9fa;border-radius:6px;font-size:0.88rem;color:{INK_2};line-height:1.5'>
+                🎯 <b>Kab sabse accha kaam karegi:</b> {meta.get('best_market', '')}<br>
+                ⚠️ <b>Khatra / Savdhani:</b> {meta.get('risk_watch', '')}
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
-        selected_s_id = st.selectbox(
-            "🎯 Select Strategy to Analyze (Choose from all 12 Strategies)",
-            options=list(strat.STRATEGY_REGISTRY.keys()),
-            format_func=lambda i: f"Strategy {i}: {strat.STRATEGY_REGISTRY[i]['name']} ({strat.STRATEGY_REGISTRY[i]['tag']})",
-            key=key_name,
-            help="Choose which of the 12 RRG strategies to analyze for this stock."
-        )
-        meta = strat.STRATEGY_REGISTRY[selected_s_id]
+    trades, skipped = strat.gen_strat_1(daily, asof, start, cost)
+    book, final_cash, value, bh_value, bh_shares = simulate(daily, trades, start, capital, cost)
 
-        # Prominent Strategy Explanation Card
+    final, bh_final = float(value.iloc[-1]), float(bh_value.iloc[-1])
+    pnl, bh_pnl = final - capital, bh_final - capital
+    last_px = daily["Close"].iloc[-1]
+
+    if book and book[0]["shares"] == 0:
+        st.warning(f"{inr(capital)} is less than one share (₹{book[0]['buy_px'] * (1 + cost / 100):.2f} with charges). Enter a larger amount.")
+
+    made = pnl >= 0
+    status_box(UP_FG if made else DOWN_FG,
+               f"{'PROFIT' if made else 'LOSS'} {inr(pnl, sign=True)}",
+               [f"You put in <b>{inr(capital)}</b> on {start.strftime('%d %b %Y')} → worth <b>{inr(final)}</b> on {daily.index[-1].strftime('%d %b %Y')} ({pct(100 * pnl / capital)}).",
+                f"Buying {bh_shares} shares on {start.strftime('%d %b %Y')} and holding would be worth <b>{inr(bh_final)}</b> ({inr(bh_pnl, sign=True)}, {pct(100 * bh_pnl / capital)}).",
+                f"The strategy did <b>{'better' if final >= bh_final else 'worse'}</b> than buy & hold by {inr(abs(final - bh_final))}."])
+    st.write("")
+
+    closed = [b for b in book if b.get("sell") is not None]
+    wins = [b for b in closed if b.get("pnl", 0.0) > 0]
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Money now", inr(final), f"{inr(pnl, sign=True)} on {inr(capital)}")
+    c2.metric("Total charges paid", inr(sum(b.get("charges", 0.0) for b in book)), f"{cost:.2f}% per buy/sell", delta_color="off")
+    c3.metric("Trades won / lost", f"{len(wins)} / {len(closed) - len(wins)}",
+              f"{len(closed)} closed{' + 1 open' if book and book[-1].get('sell') is None else ''}", delta_color="off")
+    tot_held_days = sum(b.get("held", 0) for b in book)
+    c4.metric("Money in the stock", f"{100 * tot_held_days / max(1, len(daily[daily.index >= start])):.0f}% of days",
+              f"best {inr(max((b['pnl'] for b in closed), default=0), sign=True)} · worst {inr(min((b['pnl'] for b in closed), default=0), sign=True)}" if closed else "", delta_color="off")
+
+    # Comprehensive P&L Attribution & Market Analysis Section (Why Profit / Loss Happened)
+    pnl_info = strat.explain_pnl(book, capital, final, cost, stock_name, meta["name"])
+    pnl_bg = "#f1f8e9" if pnl_info["is_profit"] else "#fff3e0"
+    pnl_border = "#81c784" if pnl_info["is_profit"] else "#ffb74d"
+    pnl_header_color = UP_FG if pnl_info["is_profit"] else DOWN_FG
+
+    with st.expander(f"🔍 **Why Profit / Loss Happened (Kyo Profit ya Loss Hua?) — {pnl_info['headline']}**", expanded=True):
         st.markdown(
             f"""
-            <div style='background:{SURFACE};border:1px solid {GRID};border-left:5px solid {QUAD_FG["Leading"]};padding:14px 18px;border-radius:8px;margin-top:6px;margin-bottom:14px'>
-                <div style='display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px'>
-                    <span style='font-size:1.25rem;font-weight:700;color:{INK_1}'>Strategy {selected_s_id}: {meta['name']}</span>
-                    <span style='background:#e8f5e9;color:#2e7d32;padding:3px 10px;border-radius:12px;font-size:0.82rem;font-weight:600;border:1px solid #c8e6c9'>{meta['tag']}</span>
-                </div>
-                <div style='margin-top:6px;color:{INK_2};font-size:0.95rem;line-height:1.5'>
-                    <b>Kiya karti hai (Concept):</b> {meta['full_desc']} · Charges of {cost:.2f}% per side.
-                </div>
-                <div style='margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px'>
-                    <div style='background:#f1f8e9;padding:10px 14px;border-radius:6px;border:1px solid #c8e6c9'>
-                        <b style='color:#2e7d32;font-size:0.95rem'>🟢 Kharidne ka Niyam (Entry Rule):</b>
-                        <div style='font-size:0.9rem;color:{INK_1};margin-top:4px;line-height:1.4'>{meta.get('entry_rule', '')}</div>
-                    </div>
-                    <div style='background:#fbe9e7;padding:10px 14px;border-radius:6px;border:1px solid #ffccbc'>
-                        <b style='color:#c62828;font-size:0.95rem'>🔴 Bechne ka Niyam (Exit Rule):</b>
-                        <div style='font-size:0.9rem;color:{INK_1};margin-top:4px;line-height:1.4'>{meta.get('exit_rule', '')}</div>
-                    </div>
-                </div>
-                <div style='margin-top:10px;padding:8px 12px;background:#f8f9fa;border-radius:6px;font-size:0.88rem;color:{INK_2};line-height:1.5'>
-                    🎯 <b>Kab sabse accha kaam karegi:</b> {meta.get('best_market', '')}<br>
-                    ⚠️ <b>Khatra / Savdhani:</b> {meta.get('risk_watch', '')}
-                </div>
+            <div style='background:{pnl_bg};border-left:5px solid {pnl_header_color};border:1px solid {pnl_border};padding:12px 16px;border-radius:6px;margin-bottom:12px'>
+                <div style='font-size:1.1rem;font-weight:700;color:{pnl_header_color}'>{pnl_info['headline']}</div>
+                <div style='font-size:0.95rem;color:{INK_1};margin-top:4px'><b>English:</b> {pnl_info['summary_en']}</div>
+                <div style='font-size:0.95rem;color:{INK_2};margin-top:4px'><b>Hindi:</b> {pnl_info['summary_hi']}</div>
             </div>
             """,
             unsafe_allow_html=True
         )
 
-        if selected_s_id == 3:
-            trades, skipped = strat.gen_strat_3(daily, asof, start, cost)
-            book, final_cash, value, bh_value, bh_shares = simulate(daily, trades, start, capital, cost)
-        elif selected_s_id == 6:
-            book, final_cash, value, bh_value, bh_shares = strat.simulate_partial_strategy(daily, asof, start, capital, cost)
-            skipped = []
-        elif selected_s_id == 12:
-            st.info("Strategy 12 is a multi-stock strategy across all 6 configured stocks. See the 'Portfolio Rotation (Strategy 12)' tab for the full multi-stock simulation.")
-            trades, skipped, _, _, held = backtest(daily, asof, start, cost)
-            book, final_cash, value, bh_value, bh_shares = simulate(daily, trades, start, capital, cost)
-        else:
-            book, final_cash, value, bh_value, bh_shares, _ = strat.run_strategy(
-                selected_s_id, daily, asof, start, capital, cost, stocks_rrg, bench_clean
-            )
-            skipped = []
+        # 4 Key Financial Attribution Drivers
+        k1, k2, k3, k4 = st.columns(4)
+        k1.metric("Gross Profit from Wins", inr(pnl_info["gross_profit"]), f"{pnl_info['winning_trades']} wins (avg {pct(pnl_info['avg_win_pct'])})", delta_color="normal")
+        k2.metric("Gross Loss from Losers", f"-{inr(pnl_info['gross_loss'])}", f"{pnl_info['losing_trades']} losses (avg {pct(pnl_info['avg_loss_pct'])})", delta_color="inverse")
+        k3.metric("Profit Factor", f"{pnl_info['profit_factor']:.2f}x", "Gross Win / Gross Loss", delta_color="off")
+        k4.metric("Total Brokerage & Fees", inr(pnl_info["total_charges"]), f"{cost:.2f}% per order", delta_color="off")
 
-        final, bh_final = float(value.iloc[-1]), float(bh_value.iloc[-1])
-        pnl, bh_pnl = final - capital, bh_final - capital
-        last_px = daily["Close"].iloc[-1]
+        st.markdown(f"**Key Drivers & Market Behavior (Asal Wajah):**")
+        for b_en, b_hi in zip(pnl_info["bullets_en"], pnl_info["bullets_hi"]):
+            st.markdown(f"• **{b_en}**<br>&nbsp;&nbsp;↳ *Hindi:* {b_hi}", unsafe_allow_html=True)
 
-        if book and book[0]["shares"] == 0:
-            st.warning(f"{inr(capital)} is less than one share (₹{book[0]['buy_px'] * (1 + cost / 100):.2f} with charges). Enter a larger amount.")
+    dq, wq = daily["Quadrant"].iloc[-1], asof["Quadrant"].iloc[-1]
+    ok_sym = lambda q: "✅" if q in UP else "❌"
+    state = [f"Weekly now: {ok_sym(wq)} <b style='color:{QUAD_FG[wq]}'>{wq}</b>  ·  Daily now: {ok_sym(dq)} <b style='color:{QUAD_FG[dq]}'>{dq}</b>"]
+    open_b = book[-1] if book and book[-1].get("sell") is None else None
+    st.write("")
+    if open_b and open_b["buy"] == daily.index[-1]:
+        status_box(QUAD_FG["Leading"], "▲ BUY signal today",
+                   [f"Buy {open_b['shares']} shares at about ₹{open_b['buy_px']:.2f} ({inr(open_b['paid'])} with charges)."] + state)
+    elif open_b:
+        status_box(QUAD_FG["Leading"], f"HOLD — {open_b['shares']} shares since {open_b['buy'].strftime('%a %d %b %Y')}",
+                   [f"Bought at ₹{open_b['buy_px']:.2f} (paid {inr(open_b['paid'])}). Today ₹{last_px:.2f} — selling now would give {inr(open_b['got'])}: {inr(open_b['pnl'], sign=True)}.",
+                    f"Current status: {open_b.get('exit_reason', 'Open Position')}. Daily RS-Momentum: {daily['RS_Momentum'].iloc[-1]:.2f}."] + state)
+    elif closed and closed[-1]["sell"] == daily.index[-1]:
+        b = closed[-1]
+        status_box(QUAD_FG["Lagging"], "▼ SELL signal today",
+                   [f"Sell all {b['shares']} shares at about ₹{b['sell_px']:.2f} → {inr(b['got'])} ({inr(b['pnl'], sign=True)}). Reason: {b.get('exit_reason', '')}"] + state)
+    else:
+        status_box(INK_3, f"WAIT — all {inr(final_cash)} is in cash",
+                   [f"Awaiting next entry signal for {meta['name']}."] + state)
 
-        made = pnl >= 0
-        status_box(UP_FG if made else DOWN_FG,
-                   f"{'PROFIT' if made else 'LOSS'} {inr(pnl, sign=True)}",
-                   [f"You put in <b>{inr(capital)}</b> on {start.strftime('%d %b %Y')} → worth <b>{inr(final)}</b> on {daily.index[-1].strftime('%d %b %Y')} ({pct(100 * pnl / capital)}).",
-                    f"Buying {bh_shares} shares on {start.strftime('%d %b %Y')} and holding would be worth <b>{inr(bh_final)}</b> ({inr(bh_pnl, sign=True)}, {pct(100 * bh_pnl / capital)}).",
-                    f"The strategy did <b>{'better' if final >= bh_final else 'worse'}</b> than buy & hold by {inr(abs(final - bh_final))}."])
-        st.write("")
+    st.plotly_chart(strategy_figure(daily, asof, book, value, bh_value, start, capital, stock_name),
+                    width="stretch", theme=None, config={"displaylogo": False})
 
-        closed = [b for b in book if b.get("sell") is not None]
-        wins = [b for b in closed if b.get("pnl", 0.0) > 0]
-        c1, c2, c3, c4 = st.columns(4)
-        c1.metric("Money now", inr(final), f"{inr(pnl, sign=True)} on {inr(capital)}")
-        c2.metric("Total charges paid", inr(sum(b.get("charges", 0.0) for b in book)), f"{cost:.2f}% per buy/sell", delta_color="off")
-        c3.metric("Trades won / lost", f"{len(wins)} / {len(closed) - len(wins)}",
-                  f"{len(closed)} closed{' + 1 open' if book and book[-1].get('sell') is None else ''}", delta_color="off")
-        tot_held_days = sum(b.get("held", 0) for b in book)
-        c4.metric("Money in the stock", f"{100 * tot_held_days / max(1, len(daily[daily.index >= start])):.0f}% of days",
-                  f"best {inr(max((b['pnl'] for b in closed), default=0), sign=True)} · worst {inr(min((b['pnl'] for b in closed), default=0), sign=True)}" if closed else "", delta_color="off")
+    st.subheader("Every trade in rupees, oldest first")
+    if book:
+        table = pd.DataFrame([{
+            "#": i + 1,
+            "Buy date": b["buy"].strftime("%d %b %Y"),
+            "Buy price": f"₹{b['buy_px']:.2f}",
+            "Shares": b["shares"],
+            "You paid": inr(b["paid"]),
+            "Sell date": b["sell"].strftime("%d %b %Y") if b["sell"] is not None else "still holding",
+            "Sell price": f"₹{b['sell_px']:.2f}" + ("" if b["sell"] is not None else " (today)"),
+            "You got": inr(b["got"]) + ("" if b["sell"] is not None else " (if sold)"),
+            "Profit / loss": inr(b["pnl"], sign=True),
+            "%": pct(b["pnl_pct"]),
+            "Outcome / Reason (Kyo Profit ya Loss)": strat.trade_outcome_reason(b, cost),
+            "Charges": inr(b["charges"]),
+            "Exit Reason": b.get("exit_reason", ""),
+            "Money after": inr(b["cash_after"]),
+        } for i, b in enumerate(book)])
 
-        # Comprehensive P&L Attribution & Market Analysis Section (Why Profit / Loss Happened)
-        pnl_info = strat.explain_pnl(book, capital, final, cost, stock_name, meta["name"])
-        pnl_bg = "#f1f8e9" if pnl_info["is_profit"] else "#fff3e0"
-        pnl_border = "#81c784" if pnl_info["is_profit"] else "#ffb74d"
-        pnl_header_color = UP_FG if pnl_info["is_profit"] else DOWN_FG
+        def money_style(col):
+            return ["color: %s; font-weight: bold" % (UP_FG if v.startswith("+") else
+                                                      DOWN_FG if v.startswith("-") else INK_2) for v in col]
 
-        with st.expander(f"🔍 **Why Profit / Loss Happened (Kyo Profit ya Loss Hua?) — {pnl_info['headline']}**", expanded=True):
-            st.markdown(
-                f"""
-                <div style='background:{pnl_bg};border-left:5px solid {pnl_header_color};border:1px solid {pnl_border};padding:12px 16px;border-radius:6px;margin-bottom:12px'>
-                    <div style='font-size:1.1rem;font-weight:700;color:{pnl_header_color}'>{pnl_info['headline']}</div>
-                    <div style='font-size:0.95rem;color:{INK_1};margin-top:4px'><b>English:</b> {pnl_info['summary_en']}</div>
-                    <div style='font-size:0.95rem;color:{INK_2};margin-top:4px'><b>Hindi:</b> {pnl_info['summary_hi']}</div>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-            # 4 Key Financial Attribution Drivers
-            k1, k2, k3, k4 = st.columns(4)
-            k1.metric("Gross Profit from Wins", inr(pnl_info["gross_profit"]), f"{pnl_info['winning_trades']} wins (avg {pct(pnl_info['avg_win_pct'])})", delta_color="normal")
-            k2.metric("Gross Loss from Losers", f"-{inr(pnl_info['gross_loss'])}", f"{pnl_info['losing_trades']} losses (avg {pct(pnl_info['avg_loss_pct'])})", delta_color="inverse")
-            k3.metric("Profit Factor", f"{pnl_info['profit_factor']:.2f}x", "Gross Win / Gross Loss", delta_color="off")
-            k4.metric("Total Brokerage & Fees", inr(pnl_info["total_charges"]), f"{cost:.2f}% per order", delta_color="off")
-
-            st.markdown(f"**Key Drivers & Market Behavior (Asal Wajah):**")
-            for b_en, b_hi in zip(pnl_info["bullets_en"], pnl_info["bullets_hi"]):
-                st.markdown(f"• **{b_en}**<br>&nbsp;&nbsp;↳ *Hindi:* {b_hi}", unsafe_allow_html=True)
-
-        dq, wq = daily["Quadrant"].iloc[-1], asof["Quadrant"].iloc[-1]
-        ok_sym = lambda q: "✅" if q in UP else "❌"
-        state = [f"Weekly now: {ok_sym(wq)} <b style='color:{QUAD_FG[wq]}'>{wq}</b>  ·  Daily now: {ok_sym(dq)} <b style='color:{QUAD_FG[dq]}'>{dq}</b>"]
-        open_b = book[-1] if book and book[-1].get("sell") is None else None
-        st.write("")
-        if open_b and open_b["buy"] == daily.index[-1]:
-            status_box(QUAD_FG["Leading"], "▲ BUY signal today",
-                       [f"Buy {open_b['shares']} shares at about ₹{open_b['buy_px']:.2f} ({inr(open_b['paid'])} with charges)."] + state)
-        elif open_b:
-            status_box(QUAD_FG["Leading"], f"HOLD — {open_b['shares']} shares since {open_b['buy'].strftime('%a %d %b %Y')}",
-                       [f"Bought at ₹{open_b['buy_px']:.2f} (paid {inr(open_b['paid'])}). Today ₹{last_px:.2f} — selling now would give {inr(open_b['got'])}: {inr(open_b['pnl'], sign=True)}.",
-                        f"Current status: {open_b.get('exit_reason', 'Open Position')}. Daily RS-Momentum: {daily['RS_Momentum'].iloc[-1]:.2f}."] + state)
-        elif closed and closed[-1]["sell"] == daily.index[-1]:
-            b = closed[-1]
-            status_box(QUAD_FG["Lagging"], "▼ SELL signal today",
-                       [f"Sell all {b['shares']} shares at about ₹{b['sell_px']:.2f} → {inr(b['got'])} ({inr(b['pnl'], sign=True)}). Reason: {b.get('exit_reason', '')}"] + state)
-        else:
-            status_box(INK_3, f"WAIT — all {inr(final_cash)} is in cash",
-                       [f"Awaiting next entry signal for {meta['name']}."] + state)
-
-        st.plotly_chart(strategy_figure(daily, asof, book, value, bh_value, start, capital, stock_name),
-                        width="stretch", theme=None, config={"displaylogo": False})
-
-        st.subheader("Every trade in rupees, oldest first")
-        if book:
-            table = pd.DataFrame([{
-                "#": i + 1,
-                "Buy date": b["buy"].strftime("%d %b %Y"),
-                "Buy price": f"₹{b['buy_px']:.2f}",
-                "Shares": b["shares"],
-                "You paid": inr(b["paid"]),
-                "Sell date": b["sell"].strftime("%d %b %Y") if b["sell"] is not None else "still holding",
-                "Sell price": f"₹{b['sell_px']:.2f}" + ("" if b["sell"] is not None else " (today)"),
-                "You got": inr(b["got"]) + ("" if b["sell"] is not None else " (if sold)"),
-                "Profit / loss": inr(b["pnl"], sign=True),
-                "%": pct(b["pnl_pct"]),
-                "Outcome / Reason (Kyo Profit ya Loss)": strat.trade_outcome_reason(b, cost),
-                "Charges": inr(b["charges"]),
-                "Exit Reason": b.get("exit_reason", ""),
-                "Money after": inr(b["cash_after"]),
-            } for i, b in enumerate(book)])
-
-            def money_style(col):
-                return ["color: %s; font-weight: bold" % (UP_FG if v.startswith("+") else
-                                                          DOWN_FG if v.startswith("-") else INK_2) for v in col]
-
-            st.dataframe(table.style.apply(money_style, subset=["Profit / loss", "%"]),
-                         hide_index=True, width="stretch", height=38 + 35 * min(15, len(table)))
-            clean_name = dp.sanitize_ticker(stock_ticker).lower()
-            full = pd.DataFrame([{
-                "strategy": meta["name"],
-                "buy_date": b["buy"].date(), "buy_price": round(b["buy_px"], 2), "shares": b["shares"],
-                "paid": round(b["paid"], 2), "weekly_at_buy": b.get("weekly", ""),
-                "daily_move": f"{b.get('frm', '')} -> {b.get('into', '')}",
-                "daily_at_sell": b.get("daily_at_sell", ""), "weekly_at_sell": b.get("weekly_at_sell", ""),
-                "sell_date": b["sell"].date() if b["sell"] is not None else "open",
-                "sell_price": round(b["sell_px"], 2), "got": round(b["got"], 2),
-                "profit_loss": round(b["pnl"], 2), "charges": round(b["charges"], 2),
-                "exit_reason": b.get("exit_reason", ""),
-                "outcome_reason": strat.trade_outcome_reason(b, cost),
-                "money_after": round(b["cash_after"], 2),
-            } for b in book])
-            st.download_button("Download trades as CSV", full.to_csv(index=False),
-                               file_name=f"{clean_name}_strategy_{selected_s_id}_trades.csv", mime="text/csv",
-                               key=f"dl_trades_{stock_ticker}_{selected_s_id}")
-        else:
-            st.info(f"No buy signal since {start.strftime('%d %b %Y')}, so money stayed in cash.")
-
-        if skipped:
-            with st.expander(f"Daily turned up but weekly was down — no buy ({len(skipped)} times)"):
-                st.dataframe(pd.DataFrame([{"Date": s["date"].strftime("%a %d %b %Y"),
-                                            "Daily moved": f"{s['frm']} → {s['into']}",
-                                            "Weekly that day": s["weekly"]} for s in skipped])
-                             .style.apply(quad_style, subset=["Weekly that day"]),
-                             hide_index=True, width="stretch")
-
-    with tab_comp:
-        st.subheader(f"All 12 RRG Strategies Performance Comparison — {stock_name}")
-        st.caption(f"Comprehensive comparison on ₹{capital:,.0f} starting capital from {start.strftime('%d %b %Y')} to {daily.index[-1].strftime('%d %b %Y')} with {cost:.2f}% charges per side.")
-
-        summary_df, eq_df, dd_df, hi = strat.compare_all_strategies(
-            daily, asof, start, capital, cost, stocks_rrg, bench_clean
-        )
-
-        h1, h2, h3, h4 = st.columns(4)
-        h1.metric("🏆 Highest Return", hi["highest_return"]["strategy"],
-                  f"{hi['highest_return']['return_pct']:+.1f}% ({inr(hi['highest_return']['pnl'], sign=True)})")
-        h2.metric("🛡️ Lowest Drawdown", hi["lowest_drawdown"]["strategy"],
-                  f"-{hi['lowest_drawdown']['max_dd_pct']:.1f}% peak dip", delta_color="inverse")
-        h3.metric("⚖️ Best Risk-Adjusted", hi["best_risk_adjusted"]["strategy"],
-                  f"{hi['best_risk_adjusted']['score']:.2f} Ret/DD ratio")
-        h4.metric("🎯 Highest Win Rate", hi["highest_win_rate"]["strategy"],
-                  f"{hi['highest_win_rate']['win_rate']:.1f}% profitable")
-
-        st.plotly_chart(comparison_equity_figure(eq_df, capital, stock_name),
-                        width="stretch", theme=None, config={"displaylogo": False})
-
-        st.plotly_chart(comparison_drawdown_figure(dd_df),
-                        width="stretch", theme=None, config={"displaylogo": False})
-
-        st.subheader("Comparison Scorecard (All 12 Strategies)")
-        disp_df = summary_df.copy()
-        disp_df["Final Value"] = disp_df["Final Value (₹)"].apply(lambda v: inr(v))
-        disp_df["Net PnL"] = disp_df["Net PnL (₹)"].apply(lambda v: inr(v, sign=True))
-        disp_df["Return"] = disp_df["Return (%)"].apply(pct)
-        disp_df["CAGR"] = disp_df["CAGR (%)"].apply(pct)
-        disp_df["Max DD"] = disp_df["Max Drawdown (%)"].apply(lambda v: f"-{v:.1f}%")
-        disp_df["Win Rate"] = disp_df["Win Rate (%)"].apply(lambda v: f"{v:.1f}%")
-        disp_df["Alpha vs B&H"] = disp_df["Alpha vs B&H (%p)"].apply(lambda v: f"{v:+.1f}%p")
-        disp_df["Charges"] = disp_df["Charges (₹)"].apply(lambda v: inr(v))
-
-        show_cols = ["ID", "Strategy", "Tag", "Final Value", "Net PnL", "Return", "CAGR", "Max DD", "Win Rate", "Total Trades", "Profit Factor", "Charges", "Alpha vs B&H"]
-        disp_table = disp_df[show_cols]
-
-        def comp_style(col):
-            if col.name in ["Net PnL", "Return", "CAGR", "Alpha vs B&H"]:
-                return ["color: %s; font-weight: bold" % (UP_FG if str(v).startswith("+") else
-                                                          DOWN_FG if str(v).startswith("-") else INK_2) for v in col]
-            return ["color: %s" % INK_2 for _ in col]
-
-        st.dataframe(disp_table.style.apply(comp_style), hide_index=True, width="stretch", height=460)
-
+        st.dataframe(table.style.apply(money_style, subset=["Profit / loss", "%"]),
+                     hide_index=True, width="stretch", height=38 + 35 * min(15, len(table)))
         clean_name = dp.sanitize_ticker(stock_ticker).lower()
-        st.download_button("Download Strategy Comparison as CSV", summary_df.to_csv(index=False),
-                           file_name=f"{clean_name}_all_strategies_comparison.csv", mime="text/csv",
-                           key=f"dl_comp_{stock_ticker}")
+        full = pd.DataFrame([{
+            "strategy": meta["name"],
+            "buy_date": b["buy"].date(), "buy_price": round(b["buy_px"], 2), "shares": b["shares"],
+            "paid": round(b["paid"], 2), "weekly_at_buy": b.get("weekly", ""),
+            "daily_move": f"{b.get('frm', '')} -> {b.get('into', '')}",
+            "daily_at_sell": b.get("daily_at_sell", ""), "weekly_at_sell": b.get("weekly_at_sell", ""),
+            "sell_date": b["sell"].date() if b["sell"] is not None else "open",
+            "sell_price": round(b["sell_px"], 2), "got": round(b["got"], 2),
+            "profit_loss": round(b["pnl"], 2), "charges": round(b["charges"], 2),
+            "exit_reason": b.get("exit_reason", ""),
+            "outcome_reason": strat.trade_outcome_reason(b, cost),
+            "money_after": round(b["cash_after"], 2),
+        } for b in book])
+        st.download_button("Download trades as CSV", full.to_csv(index=False),
+                           file_name=f"{clean_name}_strategy_{selected_s_id}_trades.csv", mime="text/csv",
+                           key=f"dl_trades_{stock_ticker}_{selected_s_id}")
+    else:
+        st.info(f"No buy signal since {start.strftime('%d %b %Y')}, so money stayed in cash.")
 
-        with st.expander("📖 Strategy Definitions and Rules Reference"):
-            for s_id, s_meta in strat.STRATEGY_REGISTRY.items():
-                st.markdown(f"**Strategy {s_id}: {s_meta['name']}** (`{s_meta['tag']}`)\n- {s_meta['full_desc']}")
-
-    with tab_port:
-        st.subheader("Strategy 12 — Multi-Stock Portfolio Rotation")
-        st.caption("Active dynamic rotation across all 6 stocks (PVR INOX, BEL, Suzlon, Waaree Energies, Bharti Airtel, Reliance) using a single ₹10,000 starting pool.")
-
-        port_trades, port_equity, nifty_bh, port_hist = strat.run_portfolio_rotation(
-            stocks_rrg, bench_clean, start, capital, cost, max_positions=2
-        )
-        port_m = strat.compute_metrics(port_trades, port_equity, nifty_bh, capital, start)
-
-        latest_hist = port_hist[-1] if port_hist else {}
-        active_holds = [t for t in port_trades if t.get("open")]
-
-        st.markdown(f"<div style='border-left:6px solid {QUAD_FG['Leading']};background:{SURFACE};padding:14px 18px;border-radius:6px;margin-bottom:15px'>"
-                    f"<div style='font-size:1.25rem;font-weight:700;color:{QUAD_FG['Leading']}'>Current Portfolio Allocation (as of {port_equity.index[-1].strftime('%d %b %Y')})</div>"
-                    f"<div style='margin-top:4px;color:{INK_1};font-size:1.05rem;'><b>Active Holdings:</b> {latest_hist.get('positions', '100% Cash')}</div>"
-                    f"<div style='margin-top:4px;color:{INK_2};font-size:0.95rem;'>Available Cash: <b>{inr(latest_hist.get('cash', capital))}</b> · Invested Value: <b>{inr(latest_hist.get('invested', 0))}</b> · Total Portfolio Value: <b>{inr(latest_hist.get('total', capital))}</b></div>"
-                    f"</div>", unsafe_allow_html=True)
-
-        pc1, pc2, pc3, pc4 = st.columns(4)
-        pc1.metric("Portfolio Value", inr(port_m["final_value"]), f"{inr(port_m['net_pnl'], sign=True)} ({port_m['return_pct']:+.1f}%)")
-        pc2.metric("NIFTY 50 (B&H)", inr(port_m["bh_final"]), f"{port_m['bh_return_pct']:+.1f}% ({inr(port_m['bh_final'] - capital, sign=True)})", delta_color="off")
-        pc3.metric("Alpha vs NIFTY", f"{port_m['alpha_pct']:+.1f}%p", f"{'Outperformed' if port_m['alpha_pct'] >= 0 else 'Underperformed'} NIFTY 50")
-        pc4.metric("Max Drawdown", f"-{port_m['max_dd_pct']:.1f}%", f"{inr(port_m['max_dd_rupees'])} peak dip", delta_color="inverse")
-
-        st.plotly_chart(portfolio_equity_figure(port_equity, nifty_bh, capital),
-                        width="stretch", theme=None, config={"displaylogo": False})
-
-        st.subheader("Portfolio Rotation Trade Ledger (Every Buy & Sell Across All 6 Stocks)")
-        if port_trades:
-            p_table = pd.DataFrame([{
-                "#": i + 1,
-                "Stock": t["name"],
-                "Buy Date": t["buy"].strftime("%d %b %Y"),
-                "Buy Px": f"₹{t['buy_px']:.2f}",
-                "Shares": t["shares"],
-                "Paid": inr(t["paid"]),
-                "Sell Date": t["sell"].strftime("%d %b %Y") if t["sell"] is not None else "HOLDING",
-                "Sell Px": f"₹{t['sell_px']:.2f}" + ("" if t["sell"] is not None else " (current)"),
-                "Got": inr(t["got"]) + ("" if t["sell"] is not None else " (market val)"),
-                "Net PnL": inr(t["pnl"], sign=True),
-                "Return": pct(t["pnl_pct"]),
-                "Charges": inr(t["charges"]),
-                "Exit Reason": t.get("exit_reason", ""),
-            } for i, t in enumerate(port_trades)])
-
-            def pnl_style(col):
-                return ["color: %s; font-weight: bold" % (UP_FG if v.startswith("+") else
-                                                          DOWN_FG if v.startswith("-") else INK_2) for v in col]
-
-            st.dataframe(p_table.style.apply(pnl_style, subset=["Net PnL", "Return"]),
-                         hide_index=True, width="stretch", height=38 + 35 * min(15, len(p_table)))
-
-            p_full = pd.DataFrame([{
-                "ticker": t["ticker"], "stock": t["name"],
-                "buy_date": t["buy"].date(), "buy_px": round(t["buy_px"], 2), "shares": t["shares"],
-                "paid": round(t["paid"], 2),
-                "sell_date": t["sell"].date() if t["sell"] is not None else "open",
-                "sell_px": round(t["sell_px"], 2), "got": round(t["got"], 2),
-                "pnl": round(t["pnl"], 2), "return_pct": round(t["pnl_pct"], 2),
-                "charges": round(t["charges"], 2), "exit_reason": t.get("exit_reason", ""),
-            } for t in port_trades])
-            st.download_button("Download Portfolio Trades as CSV", p_full.to_csv(index=False),
-                               file_name="portfolio_rotation_trades.csv", mime="text/csv",
-                               key=f"dl_port_{stock_ticker}")
+    if skipped:
+        with st.expander(f"Daily turned up but weekly was down — no buy ({len(skipped)} times)"):
+            st.dataframe(pd.DataFrame([{"Date": s["date"].strftime("%a %d %b %Y"),
+                                        "Daily moved": f"{s['frm']} → {s['into']}",
+                                        "Weekly that day": s["weekly"]} for s in skipped])
+                         .style.apply(quad_style, subset=["Weekly that day"]),
+                         hide_index=True, width="stretch")
 
 
 # ---- Sidebar & Main Execution -----------------------------------------------
@@ -1559,16 +1255,8 @@ with st.sidebar:
 
     if page_choice == "Strategy":
         with st.form("strategy_inputs"):
-            strategy_choice = st.selectbox(
-                "🎯 Select Strategy (1 to 12)",
-                options=list(strat.STRATEGY_REGISTRY.keys()),
-                format_func=lambda i: f"Strategy {i}: {strat.STRATEGY_REGISTRY[i]['name']}",
-                index=2,
-                key="sidebar_strat_select",
-                help="Choose which of the 12 RRG strategies to backtest and simulate."
-            )
-            s_brief = strat.STRATEGY_REGISTRY[strategy_choice]["short_desc"]
-            st.caption(f"💡 *{s_brief}*")
+            st.markdown(f"**Strategy 1: {strat.STRATEGY_REGISTRY[1]['name']}**")
+            st.caption(f"💡 *{strat.STRATEGY_REGISTRY[1]['short_desc']}*")
             capital = st.number_input("Amount to invest (₹)", min_value=1000, max_value=10**9,
                                       value=10000, step=1000, format="%d")
             bt_from = st.date_input("Start date", value=CYCLES_FROM.date(),
@@ -1596,7 +1284,7 @@ with st.sidebar:
 render_status_panel(selected_stock)
 
 if page_choice == "Strategy":
-    strategy_page(selected_stock, default_strategy_id=strategy_choice)
+    strategy_page(selected_stock)
 elif page_choice == "All stocks":
     all_stocks_page(all_tf)
 elif page_choice == "Both":
