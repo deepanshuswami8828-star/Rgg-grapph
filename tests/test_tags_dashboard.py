@@ -16,6 +16,7 @@ import config as cfg
 import strategies as strat
 
 APP_PATH = os.path.join(cfg.ROOT_DIR, "rrg_app.py")
+TAGS_PATH = os.path.join(cfg.ROOT_DIR, "tags_analysis.py")
 T = pd.Timestamp
 
 
@@ -51,15 +52,23 @@ def test_profit_uses_whole_shares_of_one_lakh():
     assert round(strat.trade_profit_pct(trade("2023-01-02", "2023-02-01", 300.0, 330.0)), 6) == 10.0
 
 
+def test_rrg_tab_has_no_tags_analysis_mixed_in():
+    at = AppTest.from_file(APP_PATH)
+    at.run(timeout=60)
+    assert len(at.exception) == 0
+    assert "Tags" not in at.sidebar.radio(key="page").options
+    assert not any("Daily profit %" in df.value.columns for df in at.dataframe)
+
+
 def test_tags_page_loads_and_matches_direct_calculation():
     for tag in cfg.TAGS:
-        at = AppTest.from_file(APP_PATH)
-        at.run(timeout=60)
-        at.sidebar.radio(key="tag").set_value(tag)
-        at.sidebar.radio(key="page").set_value("Tags")
+        at = AppTest.from_file(TAGS_PATH)          # the Tags analysis tab is its own page script
+        at.run(timeout=300)
+        at.selectbox(key="tags_page_tag").set_value(tag)
         at.run(timeout=300)
         assert len(at.exception) == 0, f"Tags page failed for {tag}: {[e.message for e in at.exception]}"
         assert any(f"Tag: {tag}" in m.value for m in at.markdown)
+        assert len(at.sidebar.radio) == 0          # the RRG sidebar is not shown on this tab
         period_tables = [df.value for df in at.dataframe if "Daily profit %" in df.value.columns]
         assert len(period_tables) == 2
 

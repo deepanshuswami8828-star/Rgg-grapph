@@ -84,6 +84,15 @@ div[data-testid="stMetricValue"] {font-size: 1.45rem;}
 </style>
 """, unsafe_allow_html=True)
 
+# Top navigation: two separate tabs. "RRG charts" is the rest of this script; "Tags analysis" is its own page.
+nav = st.navigation([
+    st.Page(lambda: None, title="RRG charts", icon="📈", url_path="rrg", default=True),
+    st.Page("tags_analysis.py", title="Tags analysis", icon="🏷️", url_path="tags"),
+], position="top")
+nav.run()
+if nav.url_path == "tags":
+    st.stop()
+
 
 # ---- Data Loading & Caching -------------------------------------------------
 @st.cache_data(show_spinner=False)
@@ -1055,77 +1064,6 @@ def status_box(color, title, lines, big=None):
         unsafe_allow_html=True)
 
 
-@st.cache_data(show_spinner=False)
-def tag_trades(ticker: str, manifest_version: str):
-    """(first data date, Strategy 2 v3 trades run from the start of Period 1) for one ticker."""
-    aligned = get_cached_aligned_data(ticker, manifest_version)
-    if aligned is None or len(aligned) == 0:
-        return None, []
-    name = cfg.STOCKS[ticker]["name"]
-    daily, _ = compute_rrg(aligned, name, tf="Daily")
-    asof = weekly_asof(aligned, name)
-    if len(daily) < 2 or asof.empty:
-        return aligned.index[0], []
-    start = max(strat.TAG_PERIODS[0][1], daily.index[1], asof.index[0])
-    trades, _ = strat.gen_strat_2_v3(daily, asof, start, strat.TAG_COST_PCT)
-    return aligned.index[0], trades
-
-
-def tags_page(default_tag: str):
-    st.subheader("Tags dashboard · profitability of Strategy 2 · Version 3")
-    tag = st.selectbox("Tag", cfg.TAGS, index=cfg.TAGS.index(default_tag), key="tags_page_tag",
-                       format_func=lambda g: f"{g} ({len(cfg.stocks_for_tag(g))} stocks)")
-    st.markdown(f"### Tag: {tag}")
-    st.caption(f"Strategy 2 · Version 3 (weekly RRG, 10% stop-loss) run from {strat.TAG_PERIODS[0][1]:%d %b %Y}. "
-               f"Each trade assumes ₹{strat.TAG_TRADE_AMOUNT:,.0f} invested, charges {strat.TAG_COST_PCT:g}% per side. "
-               f"A trade counts in a period only if it was bought and sold inside it (a trade spanning both periods, "
-               f"or still open, is left out). A ticker counts only if its data starts by April 2022.")
-
-    m_ver = dp.load_manifest().get("version_id", "none")
-    with st.spinner("Running the strategy for every stock in the tag..."):
-        data = {t: tag_trades(t, m_ver) for t in cfg.stocks_for_tag(tag)}
-    qualified = [t for t, (first, _) in data.items() if first is not None and first <= strat.TAG_DATA_FROM]
-    left_out = [t for t in data if t not in qualified]
-    if left_out:
-        st.caption("Not included (data starts after April 2022): " + ", ".join(
-            f"{t.replace('.NS', '')} (from {data[t][0]:%d %b %Y})" if data[t][0] is not None else t.replace('.NS', '')
-            for t in left_out))
-
-    for label, p_start, p_end in strat.TAG_PERIODS:
-        rows = []
-        for t in qualified:
-            s = strat.ticker_period_summary(strat.period_trades(data[t][1], p_start, p_end))
-            rows.append({
-                "Ticker": t.replace(".NS", ""),
-                "Number of trades": s["trades"],
-                "Profit % per trade": ", ".join(f"{p:.2f}" for p in s["profits"]) or "—",
-                "Days held per trade": ", ".join(str(x) for x in s["days"]) or "—",
-                "Sum of profit %": round(s["profit_sum"], 2),
-                "Sum of days held": s["days_sum"],
-                "Daily profit %": round(s["daily_profit"], 4) if s["daily_profit"] is not None else None,
-            })
-        daily_vals = [r["Daily profit %"] for r in rows if r["Daily profit %"] is not None]
-        avg = sum(daily_vals) / len(daily_vals) if daily_vals else None
-
-        st.markdown(f"#### {label}: {p_start:%b %Y} to {p_end:%b %Y}")
-        c1, c2, c3 = st.columns(3)
-        c1.metric("Tickers in period", len(qualified))
-        c2.metric("Closed trades in period", sum(r["Number of trades"] for r in rows))
-        c3.metric("Average daily profit % (simple)", f"{avg:.4f}%" if avg is not None else "—",
-                  help="Simple average of 'Daily profit %' over the tickers that had at least one closed trade.")
-        if len(rows) > strat.TAG_MAX_ROWS:
-            st.caption(f"Showing {strat.TAG_MAX_ROWS} of {len(rows)} tickers.")
-        shown = rows[:strat.TAG_MAX_ROWS]
-        st.dataframe(pd.DataFrame(shown), hide_index=True, width="stretch", height=38 + 35 * max(1, len(shown)),
-                     column_config={"Profit % per trade": st.column_config.TextColumn(width="large"),
-                                    "Days held per trade": st.column_config.TextColumn(width="medium"),
-                                    "Daily profit %": st.column_config.NumberColumn(format="%.4f"),
-                                    "Sum of profit %": st.column_config.NumberColumn(format="%.2f")})
-        if len(daily_vals) < len(rows):
-            st.caption(f"{len(rows) - len(daily_vals)} ticker(s) had no closed trade in this period, "
-                       f"so they have no daily profit % and are left out of the average.")
-
-
 def strategy_page(stock_ticker: str, strategy_id: int = 1):
     stock_info = cfg.STOCKS.get(stock_ticker, {"name": stock_ticker, "sector": ""})
     stock_name = stock_info["name"]
@@ -1347,7 +1285,7 @@ with st.sidebar:
     stock_meta = cfg.STOCKS[selected_stock]
     st.caption(f"**Selected:** {stock_meta['name']} · Sector: *{stock_meta['sector']}*")
 
-    page_choice = st.radio("Timeframe / Page", ["Daily", "Weekly", "Both", "All stocks", "Strategy", "Tags"],
+    page_choice = st.radio("Timeframe / Page", ["Daily", "Weekly", "Both", "All stocks", "Strategy"],
                            horizontal=False, key="page")
 
     st.markdown("---")
@@ -1376,8 +1314,6 @@ with st.sidebar:
             st.form_submit_button("▶ Run strategy", type="primary", width="stretch")
     elif page_choice == "All stocks":
         all_tf = st.radio("Comparison Timeframe", ["Daily", "Weekly"], horizontal=True)
-    elif page_choice == "Tags":
-        pass
     else:
         active_tf = "Daily" if page_choice == "Both" else page_choice
         cfg_tf = TF_CONFIG[active_tf]
@@ -1399,8 +1335,6 @@ if page_choice == "Strategy":
     strategy_page(selected_stock, strategy_choice)
 elif page_choice == "All stocks":
     all_stocks_page(all_tf, tag_stocks, selected_tag)
-elif page_choice == "Tags":
-    tags_page(selected_tag)
 elif page_choice == "Both":
     both_page(selected_stock)
 else:
