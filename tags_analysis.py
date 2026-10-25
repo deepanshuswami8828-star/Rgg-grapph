@@ -12,7 +12,8 @@ import config as cfg
 import data_pipeline as dp
 import strategies as strat
 
-BASE_COLOR, CURVE_COLOR = "#c62828", "#2a78d6"
+# one colour per period in the take-profit chart (solid = with take-profit, dashed = base strategy)
+PERIOD_COLORS = ["#2a78d6", "#e65100", "#2e7d32", "#7b1fa2"]
 
 
 # ---- data (cached per data version) ---------------------------------------------------------
@@ -115,35 +116,45 @@ for label, p_start, p_end in strat.TAG_PERIODS:
 
 # ---- take-profit threshold analysis -------------------------------------------------------------
 st.markdown("---")
-st.markdown("### Take-profit threshold analysis")
-st.caption("Modified Strategy 2 · Version 3: on any day after the buy, if the day's high reaches the buy price + x%, "
-           "the stock is sold that day at exactly buy price + x% (x% profit booked). After such an exit it is bought again "
-           "only once the weekly has dropped into Weakening/Lagging and come back up, as after a stop-loss. "
-           "Everything else (weekly exits, 10% stop-loss, periods, ₹1,00,000 per trade) is unchanged. "
-           "The red dashed line is the base strategy without take-profit.")
+st.markdown(f"### Take-profit threshold analysis (with {strat.STOP_LOSS_V3:g}% stop-loss)")
+st.caption(f"Modified Strategy 2 · Version 3 with its {strat.STOP_LOSS_V3:g}% stop-loss: on any day after the buy, if the day's "
+           "high reaches the buy price + x%, the stock is sold that day at exactly buy price + x% (x% profit booked). "
+           "After such an exit it is bought again only once the weekly has dropped into Weakening/Lagging and come back up, "
+           f"as after a stop-loss. Everything else (weekly exits, {strat.STOP_LOSS_V3:g}% stop-loss, periods, ₹1,00,000 per "
+           "trade) is unchanged. One colour per period: solid line = with take-profit, dashed line = base strategy "
+           "without take-profit. Hover a point to see the average number of days a stock was held per trade.")
 
 with st.spinner(f"Testing {len(strat.TAKE_PROFIT_THRESHOLDS)} take-profit thresholds for every stock in the tag..."):
     curve = {x: tag_reports(tag, m_ver, float(x)) for x in strat.TAKE_PROFIT_THRESHOLDS}
 
-chart_cols = st.columns(len(strat.TAG_PERIODS))
-for col, (label, p_start, p_end) in zip(chart_cols, strat.TAG_PERIODS):
-    pts = [(curve[x][label]["avg_daily_profit"], x) for x in strat.TAKE_PROFIT_THRESHOLDS
-           if curve[x][label]["avg_daily_profit"] is not None]
-    base_avg = base[label]["avg_daily_profit"]
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=[p[0] for p in pts], y=[p[1] for p in pts], mode="lines+markers",
-                             name="With take-profit x%", line=dict(color=CURVE_COLOR, width=2), marker=dict(size=6),
-                             hovertemplate="Take-profit %{y}%<br>Avg daily profit %{x:.4f}%<extra></extra>"))
+fig = go.Figure()
+for color, (label, p_start, p_end) in zip(PERIOD_COLORS, strat.TAG_PERIODS):
+    name = f"{label} ({p_start:%b %Y} to {p_end:%b %Y})"
+    pts = [(x, curve[x][label]["avg_daily_profit"], curve[x][label]["avg_days_held"], curve[x][label]["trades"])
+           for x in strat.TAKE_PROFIT_THRESHOLDS if curve[x][label]["avg_daily_profit"] is not None]
+    fig.add_trace(go.Scatter(x=[p[0] for p in pts], y=[p[1] for p in pts], customdata=[[p[2], p[3]] for p in pts],
+                             mode="lines+markers", name=f"{name}: with take-profit x%",
+                             line=dict(color=color, width=2), marker=dict(size=6),
+                             hovertemplate=f"<b>{label}</b><br>Take-profit %{{x}}%<br>Avg daily profit %{{y:.4f}}%<br>"
+                                           "Avg days held per trade %{customdata[0]:.1f}<br>"
+                                           "Closed trades %{customdata[1]}<extra></extra>"))
+    base_avg, base_days = base[label]["avg_daily_profit"], base[label]["avg_days_held"]
     if base_avg is not None:
-        fig.add_trace(go.Scatter(x=[base_avg, base_avg], y=[0, 100], mode="lines",
-                                 name=f"Base strategy (no take-profit): {base_avg:.4f}%",
-                                 line=dict(color=BASE_COLOR, width=2, dash="dash"), hoverinfo="name"))
-    fig.update_layout(title=f"{label}: {p_start:%b %Y} to {p_end:%b %Y}", height=520, margin=dict(l=10, r=10, t=50, b=10),
-                      xaxis_title="Simple average of daily profit % (all tickers)",
-                      yaxis_title="Take-profit threshold x (% over buy price)",
-                      yaxis=dict(range=[0, 102], dtick=10), legend=dict(orientation="h", y=-0.18),
-                      plot_bgcolor="#fcfcfb", paper_bgcolor="#fcfcfb")
-    col.plotly_chart(fig, width="stretch", key=f"tp_chart_{label}")
+        fig.add_trace(go.Scatter(x=[0, 100], y=[base_avg, base_avg], mode="lines",
+                                 name=f"{label}: base strategy, no take-profit ({base_avg:.4f}%)",
+                                 line=dict(color=color, width=2, dash="dash"),
+                                 customdata=[[base_days, base[label]["trades"]]] * 2,
+                                 hovertemplate=f"<b>{label}: base strategy (no take-profit)</b><br>"
+                                               "Avg daily profit %{y:.4f}%<br>"
+                                               "Avg days held per trade %{customdata[0]:.1f}<br>"
+                                               "Closed trades %{customdata[1]}<extra></extra>"))
+fig.update_layout(title=f"Take-profit threshold vs average daily profit % · {strat.STOP_LOSS_V3:g}% stop-loss · Tag: {tag}",
+                  height=560, margin=dict(l=10, r=10, t=50, b=10),
+                  xaxis_title="Take-profit threshold x (% over buy price)",
+                  yaxis_title="Simple average of daily profit % (all tickers)",
+                  xaxis=dict(range=[0, 102], dtick=10), legend=dict(orientation="h", y=-0.2),
+                  plot_bgcolor="#fcfcfb", paper_bgcolor="#fcfcfb")
+st.plotly_chart(fig, width="stretch", key="tp_chart")
 
 with st.expander("Numbers behind the charts"):
     table = []
@@ -154,5 +165,7 @@ with st.expander("Numbers behind the charts"):
             a = reps[label]["avg_daily_profit"]
             row[f"{label}: avg daily profit %"] = round(a, 4) if a is not None else None
             row[f"{label}: closed trades"] = reps[label]["trades"]
+            d = reps[label]["avg_days_held"]
+            row[f"{label}: avg days held"] = round(d, 1) if d is not None else None
         table.append(row)
     st.dataframe(pd.DataFrame(table), hide_index=True, width="stretch")

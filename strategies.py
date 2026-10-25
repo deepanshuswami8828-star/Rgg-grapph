@@ -386,10 +386,12 @@ def period_report(trades_by_ticker: Dict[str, List[Dict]], start: pd.Timestamp, 
     """
     rows = {t: ticker_period_summary(period_trades(tr, start, end)) for t, tr in trades_by_ticker.items()}
     daily = [s["daily_profit"] for s in rows.values() if s["daily_profit"] is not None]
+    n_trades = sum(s["trades"] for s in rows.values())
     return {
         "rows": rows,
         "tickers": len(rows),
-        "trades": sum(s["trades"] for s in rows.values()),
+        "trades": n_trades,
+        "avg_days_held": sum(s["days_sum"] for s in rows.values()) / n_trades if n_trades else None,
         "avg_daily_profit": sum(daily) / len(daily) if daily else None,
         "tickers_with_trades": len(daily),
     }

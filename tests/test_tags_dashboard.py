@@ -125,6 +125,7 @@ def test_thresholds_and_period_report():
                                "B": [trade("2023-02-01", "2023-03-03", 100, 95)],           # -5% in 30 days
                                "C": []}, p1s, p1e)                                          # no trade
     assert rep["tickers"] == 3 and rep["trades"] == 2 and rep["tickers_with_trades"] == 2
+    assert rep["avg_days_held"] == (10 + 30) / 2
     assert abs(rep["avg_daily_profit"] - (1.0 + (-5 / 30)) / 2) < 1e-9
 
 
@@ -134,4 +135,4 @@ def test_tags_page_shows_take_profit_charts():
     assert len(at.exception) == 0
     numbers = [df.value for df in at.dataframe if "Take-profit threshold" in df.value.columns]
     assert len(numbers) == 1 and len(numbers[0]) == 1 + len(strat.TAKE_PROFIT_THRESHOLDS)
-    assert len(at.get("plotly_chart")) == len(strat.TAG_PERIODS)
+    assert len(at.get("plotly_chart")) == 1          # one chart, one line per period
