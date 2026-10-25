@@ -4,6 +4,8 @@ and how it changes when a take-profit threshold is added.
 Runs as its own page (top navigation in rrg_app.py), separate from the RRG chart pages.
 Everything is driven by config.TAGS / config.stocks_for_tag, so new tags appear here automatically.
 """
+import hashlib
+
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
@@ -16,7 +18,15 @@ import strategies as strat
 PERIOD_COLORS = ["#2a78d6", "#e65100", "#2e7d32", "#7b1fa2"]
 
 
-# ---- data (cached per data version) ---------------------------------------------------------
+# ---- data (cached per data version and strategy code) ---------------------------------------
+def cache_key() -> str:
+    """Data version + fingerprint of strategies.py. st.cache_data only hashes the cached function's own code,
+    so without the fingerprint a change in strategies.py would keep serving results built by the old code."""
+    with open(strat.__file__, "rb") as f:
+        code = hashlib.sha256(f.read()).hexdigest()[:12]
+    return f"{dp.load_manifest().get('version_id', 'none')}-{code}"
+
+
 @st.cache_data(show_spinner=False)
 def ticker_inputs(ticker: str, manifest_version: str):
     """(first data date, daily RRG frame, weekly as-of frame, daily highs, strategy start) for one ticker."""
@@ -75,7 +85,7 @@ st.caption(f"Strategy run from {strat.TAG_PERIODS[0][1]:%d %b %Y}. Each trade as
            f"charges {strat.TAG_COST_PCT:g}% per side. A trade counts in a period only if it was bought and sold inside it "
            f"(a trade spanning both periods, or still open, is left out). A ticker counts only if its data starts by April 2022.")
 
-m_ver = dp.load_manifest().get("version_id", "none")
+m_ver = cache_key()
 with st.spinner("Running the strategy for every stock in the tag..."):
     qualified, left_out = tag_members(tag, m_ver)
     base = tag_reports(tag, m_ver)
