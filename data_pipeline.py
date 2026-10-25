@@ -327,6 +327,52 @@ def fetch_ticker_series(ticker: str, retries: int = 3, backoff: float = 2.0) -> 
     raise ValueError(f"Failed downloading {ticker}: {last_err}")
 
 
+# ---- Daily highs (used by take-profit analysis) -------------------------------
+# Kept apart from the verified close files so the close pipeline, its manifest and checks stay unchanged.
+HIGHS_DIR = os.path.join(DATA_DIR, "highs")
+
+
+def get_high_csv_path(ticker: str) -> str:
+    return os.path.join(HIGHS_DIR, f"{sanitize_ticker(ticker)}_high.csv")
+
+
+def load_high_data(ticker: str) -> Optional[pd.Series]:
+    """Daily high (same Yahoo adjustment as the close files) as a Series, or None if not stored."""
+    path = get_high_csv_path(ticker)
+    if not os.path.exists(path):
+        return None
+    try:
+        df = pd.read_csv(path, parse_dates=["Date"], index_col="Date")
+        df.index = pd.to_datetime(df.index).tz_localize(None)
+        return df["High"].sort_index()
+    except Exception as e:
+        logger.error("Error loading highs for %s: %s", ticker, e)
+        return None
+
+
+def refresh_highs(tickers=None, retries: int = 3, backoff: float = 2.0) -> Dict[str, str]:
+    """Download and store daily highs for every stock (auto-adjusted like the close files). Returns status per ticker."""
+    os.makedirs(HIGHS_DIR, exist_ok=True)
+    status = {}
+    for ticker in (tickers or list(STOCKS.keys())):
+        for attempt in range(1, retries + 1):
+            try:
+                raw = yf.download(ticker, period="max", interval="1d", auto_adjust=True, progress=False)
+                high = raw["High"]
+                high = high.iloc[:, 0] if isinstance(high, pd.DataFrame) else high
+                s = clean_price_series(high, ticker).rename("High")
+                if len(s) == 0:
+                    raise ValueError("no highs")
+                s.to_csv(get_high_csv_path(ticker), index_label="Date", date_format="%Y-%m-%d")
+                status[ticker] = f"OK {len(s)} rows"
+                break
+            except Exception as e:
+                status[ticker] = f"FAILED: {e}"
+                if attempt < retries:
+                    pytime.sleep(backoff * attempt)
+    return status
+
+
 def fetch_and_clean_all(
     retry_count: int = 3,
     backoff_sec: float = 2.0

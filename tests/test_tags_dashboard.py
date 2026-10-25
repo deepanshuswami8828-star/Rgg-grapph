@@ -87,3 +87,51 @@ def check_rows(table):
             assert abs(sum(profits) - r["Sum of profit %"]) < 0.05
             assert sum(days) == r["Sum of days held"]
             assert abs(r["Sum of profit %"] / r["Sum of days held"] - r["Daily profit %"]) < 1e-3
+
+
+def _toy_market(highs_after_buy):
+    """Daily closes / weekly readings: weekly Leading for 6 days, Weakening day 7, Leading again from day 9."""
+    idx = pd.bdate_range("2023-01-02", periods=12)
+    daily = pd.DataFrame({"Close": [100, 101, 102, 103, 104, 105, 104, 103, 102, 103, 104, 105.0]}, index=idx)
+    quads = ["Leading"] * 6 + ["Weakening", "Weakening", "Leading", "Leading", "Leading", "Leading"]
+    asof = pd.DataFrame({"Quadrant": quads, "RS_Momentum": 101.0}, index=idx)
+    highs = daily["Close"] + 0.5
+    for day, h in highs_after_buy.items():
+        highs.iloc[day] = h
+    return daily, asof, highs
+
+
+def test_take_profit_sells_at_target_on_the_first_day_the_high_reaches_it():
+    daily, asof, highs = _toy_market({0: 200.0, 3: 105.5})   # day 0 is the buy day: its high is ignored
+    trades, _ = strat.gen_strat_2_v3(daily, asof, daily.index[0], 0.0, take_profit_pct=5.0, highs=highs)
+    first = trades[0]
+    assert first["buy"] == daily.index[0] and first["sell"] == daily.index[3]
+    assert first["sell_px"] == 105.0 and first["exit_reason"].startswith("Take-profit 5%")
+    # no re-buy while the weekly stays Leading after the take-profit; next buy only after Weakening -> Leading
+    assert trades[1]["buy"] == daily.index[8]
+
+
+def test_take_profit_never_reached_matches_base_strategy():
+    daily, asof, highs = _toy_market({})
+    base, _ = strat.gen_strat_2_v3(daily, asof, daily.index[0], 0.0)
+    huge, _ = strat.gen_strat_2_v3(daily, asof, daily.index[0], 0.0, take_profit_pct=1000.0, highs=highs)
+    assert [(t["buy"], t["sell"], t["sell_px"]) for t in base] == [(t["buy"], t["sell"], t["sell_px"]) for t in huge]
+
+
+def test_thresholds_and_period_report():
+    assert strat.TAKE_PROFIT_THRESHOLDS == list(range(1, 21)) + list(range(25, 101, 5))
+    (_, p1s, p1e), _ = strat.TAG_PERIODS
+    rep = strat.period_report({"A": [trade("2023-01-02", "2023-01-12", 100, 110)],          # +10% in 10 days
+                               "B": [trade("2023-02-01", "2023-03-03", 100, 95)],           # -5% in 30 days
+                               "C": []}, p1s, p1e)                                          # no trade
+    assert rep["tickers"] == 3 and rep["trades"] == 2 and rep["tickers_with_trades"] == 2
+    assert abs(rep["avg_daily_profit"] - (1.0 + (-5 / 30)) / 2) < 1e-9
+
+
+def test_tags_page_shows_take_profit_charts():
+    at = AppTest.from_file(TAGS_PATH)
+    at.run(timeout=600)
+    assert len(at.exception) == 0
+    numbers = [df.value for df in at.dataframe if "Take-profit threshold" in df.value.columns]
+    assert len(numbers) == 1 and len(numbers[0]) == 1 + len(strat.TAKE_PROFIT_THRESHOLDS)
+    assert len(at.get("plotly_chart")) == len(strat.TAG_PERIODS)

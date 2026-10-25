@@ -30,6 +30,11 @@ def main():
     print(f"Status:  {status}")
     print(f"Message: {message}")
 
+    if status == "SUCCESS":
+        # daily highs for the take-profit analysis; a failure here never fails the close refresh
+        failed = {t: s for t, s in dp.refresh_highs().items() if not s.startswith("OK")}
+        print("Highs:   " + ("all stocks updated" if not failed else f"not updated for {failed}"))
+
     if status in ("SUCCESS", "NO_NEW_SESSION", "SKIPPED"):
         print("Refresh completed cleanly (Exit 0).")
         sys.exit(0)

@@ -292,7 +292,8 @@ def gen_strat_2_v2(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp,
 STOP_LOSS_V3 = 10.0   # Strategy 2 version 3: stop-loss, % below the buy price
 
 
-def gen_strat_2_v3(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, cost_pct: float = 0.12) -> Tuple[List[Dict], List[Dict]]:
+def gen_strat_2_v3(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, cost_pct: float = 0.12,
+                   take_profit_pct: Optional[float] = None, highs: Optional[pd.Series] = None) -> Tuple[List[Dict], List[Dict]]:
     """Strategy 2, version 3: Weekly RRG only (version 1) plus a 10% stop-loss on price.
 
     Every trading day's close:
@@ -301,6 +302,10 @@ def gen_strat_2_v3(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp,
       BUY  (flat):          Weekly (as of that day) in {Leading, Improving}, provided the weekly
                             has been in Weakening/Lagging since the last stop-loss (fresh entry).
     The Daily RRG is never used - the daily check looks only at the price. Fills at that day's close.
+
+    Optional take-profit (take_profit_pct with daily highs): from the day after the buy, the first day
+    whose high reaches the buy price + take_profit_pct sells that day at exactly that price. Like a
+    stop-loss, it then waits for the weekly to drop into Weakening/Lagging and come back up before buying.
     """
     days = _weekly_days(daily, asof, start)
     prev_w = asof["Quadrant"].reindex(daily.index).shift(1)
@@ -310,6 +315,16 @@ def gen_strat_2_v3(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp,
         wq, px = r["Quadrant"], close[d]
         if pos is not None:
             stop_px = pos["buy_px"] * (1 - STOP_LOSS_V3 / 100.0)
+            if take_profit_pct is not None and highs is not None:
+                tp_px = pos["buy_px"] * (1 + take_profit_pct / 100.0)
+                hi = highs.get(d, np.nan)
+                if pd.notna(hi) and hi >= tp_px:
+                    trades.append(dict(pos, sell=d, sell_px=tp_px, exit_into=wq, open=False,
+                                       exit_reason=f"Take-profit {take_profit_pct:g}%: high ₹{hi:.2f} ≥ ₹{tp_px:.2f}",
+                                       daily_at_sell="", weekly_at_sell=wq, stop_px=stop_px))
+                    pos = None
+                    armed = wq in DOWN      # like a stop-loss: re-buy only after a weekly down-and-up
+                    continue
             if px <= stop_px:
                 reason = f"Stop-loss {STOP_LOSS_V3:.0f}%: close ₹{px:.2f} ≤ ₹{stop_px:.2f} (Weekly {wq})"
             elif wq in DOWN:
@@ -358,6 +373,26 @@ def trade_profit_pct(t: Dict, amount: float = TAG_TRADE_AMOUNT, cost_pct: float 
     paid = shares * t["buy_px"] * (1 + c)
     got = shares * t["sell_px"] * (1 - c)
     return 100.0 * (got - paid) / paid
+
+
+# take-profit thresholds (%) analysed on the Tags page: 1-20 in steps of 1, then 25-100 in steps of 5
+TAKE_PROFIT_THRESHOLDS = list(range(1, 21)) + list(range(25, 101, 5))
+
+
+def period_report(trades_by_ticker: Dict[str, List[Dict]], start: pd.Timestamp, end: pd.Timestamp) -> Dict[str, Any]:
+    """Tag-level report for one period: per-ticker summaries and the simple average of daily profit %.
+
+    trades_by_ticker holds the qualifying tickers only. The average skips tickers without a closed trade.
+    """
+    rows = {t: ticker_period_summary(period_trades(tr, start, end)) for t, tr in trades_by_ticker.items()}
+    daily = [s["daily_profit"] for s in rows.values() if s["daily_profit"] is not None]
+    return {
+        "rows": rows,
+        "tickers": len(rows),
+        "trades": sum(s["trades"] for s in rows.values()),
+        "avg_daily_profit": sum(daily) / len(daily) if daily else None,
+        "tickers_with_trades": len(daily),
+    }
 
 
 def ticker_period_summary(trades: List[Dict]) -> Dict[str, Any]:
