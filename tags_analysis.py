@@ -44,7 +44,7 @@ def ticker_inputs(ticker: str, manifest_version: str):
     if len(daily) < 2 or asof.empty:
         return aligned.index[0], None
     start = max(strat.TAG_PERIODS[0][1], daily.index[1], asof.index[0])
-    return aligned.index[0], strat.v3_inputs(daily, asof, start, dp.load_high_data(ticker))
+    return aligned.index[0], strat.v3_inputs(daily, asof, start, dp.load_high_data(ticker), dp.load_open_data(ticker))
 
 
 def tag_members(tag: str, manifest_version: str):
@@ -73,7 +73,7 @@ st.caption("Profitability of Strategy 2 · Version 3 (weekly RRG, 10% stop-loss)
 tag = st.selectbox("Tag", cfg.TAGS, key="tags_page_tag",
                    format_func=lambda g: f"{g} ({len(cfg.stocks_for_tag(g))} stocks)")
 st.markdown(f"### Tag: {tag}")
-st.caption(f"Strategy run from {strat.TAG_PERIODS[0][1]:%d %b %Y}. Each trade assumes ₹{strat.TAG_TRADE_AMOUNT:,.0f} invested, "
+st.caption(f"Strategy run from {strat.TAG_PERIODS[0][1]:%d %b %Y}. {strat.ENTRY_TEXT} Each trade assumes ₹{strat.TAG_TRADE_AMOUNT:,.0f} invested, "
            f"charges {strat.TAG_COST_PCT:g}% per side. A trade counts in a period only if it was bought and sold inside it "
            f"(a trade spanning both periods, or still open, is left out). A ticker counts only if its data starts by April 2022.")
 

@@ -76,11 +76,6 @@ div[data-testid="stMetricValue"] {font-size: 1.45rem;}
 .status-live {background: #e8f5e9; color: #2e7d32;}
 .status-cached {background: #e3f2fd; color: #1565c0;}
 .status-stale {background: #fff3e0; color: #e65100;}
-.st-key-tag_box {background: #fdf3f7; border: 1px solid #f0c6d8; border-left: 4px solid #c2185b;
-                 border-radius: 8px; padding: 10px 12px 4px;}
-.st-key-tag_box details {background: #ffffff; border-color: #f0c6d8;}
-.tag-chip {display: inline-block; margin: 2px 4px 2px 0; padding: 1px 7px; border-radius: 10px;
-           background: #fce4ec; color: #880e4f; font-size: 0.78rem;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -1120,7 +1115,7 @@ def strategy_page(stock_ticker: str, strategy_id: int = 1):
         unsafe_allow_html=True
     )
 
-    trades, skipped = strat.SIGNALS[selected_s_id](daily, asof, start, cost)
+    trades, skipped = strat.SIGNALS[selected_s_id](daily, asof, start, cost, opens=dp.load_open_data(stock_ticker))
     book, final_cash, value, bh_value, bh_shares = simulate(daily, trades, start, capital, cost)
 
     final, bh_final = float(value.iloc[-1]), float(bh_value.iloc[-1])
@@ -1264,16 +1259,9 @@ def strategy_page(stock_ticker: str, strategy_id: int = 1):
 
 # ---- Sidebar & Main Execution -----------------------------------------------
 with st.sidebar:
-    # Tag section: its own box above stock selection; picks which stocks the rest of the app shows
-    with st.container(key="tag_box"):
-        _tag_now = st.session_state.get("tag", cfg.TAG_ALL)
-        st.markdown(f"**🏷️ Tag:** {_tag_now} · {len(cfg.stocks_for_tag(_tag_now))} stocks")
-        with st.expander("Change tag / see its stocks", expanded=False):
-            selected_tag = st.radio("Show stocks from", cfg.TAGS, horizontal=True, key="tag",
-                                    format_func=lambda g: f"{g} ({len(cfg.stocks_for_tag(g))})")
-            tag_stocks = cfg.stocks_for_tag(selected_tag)
-            st.markdown("".join(f"<span class='tag-chip'>{cfg.STOCKS[t]['name']}</span>" for t in tag_stocks),
-                        unsafe_allow_html=True)
+    # the RRG pages always show every stock; tags are used on the Tags analysis tab
+    selected_tag = cfg.TAG_ALL
+    tag_stocks = cfg.stocks_for_tag(selected_tag)
 
     st.header("Stock & View Selection")
     selected_stock = st.selectbox(

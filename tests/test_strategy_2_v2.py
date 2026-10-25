@@ -31,7 +31,7 @@ def run(rows, daily_q=None):
     idx = pd.bdate_range("2024-01-01", periods=len(rows))
     asof = pd.DataFrame({"Quadrant": [q for q, _ in rows], "RS_Momentum": [m for _, m in rows]}, index=idx)
     daily = pd.DataFrame({"Quadrant": daily_q or ["Lagging"] * len(idx), "Close": 100.0}, index=idx)
-    trades, _ = strat.gen_strat_2_v2(daily, asof, idx[0])
+    trades, _ = strat.gen_strat_2_v2(daily, asof, idx[0], entry="close")
     pos = list(idx)
     return [(pos.index(t["buy"]), pos.index(t["sell"]) if t["sell"] is not None else None, t["exit_reason"])
             for t in trades]
@@ -103,7 +103,7 @@ def test_every_stock_matches_a_plain_replay(stocks):
         asof = strat.weekly_asof(al, name)
         if daily.empty or asof.empty:
             continue
-        trades, _ = strat.gen_strat_2_v2(daily, asof, start)
+        trades, _ = strat.gen_strat_2_v2(daily, asof, start, entry="close")
         mine, held, can_buy, hit101 = [], None, True, False
         for d in daily.index[daily.index >= start]:
             if d not in asof.index:
@@ -128,7 +128,7 @@ def test_pvr_examples(stocks):
     name, al = stocks["PVRINOX.NS"]
     al = al[al.index <= "2026-10-16"]
     daily, _ = strat.compute_rrg(al, name, "Daily")
-    trades, _ = strat.gen_strat_2_v2(daily, strat.weekly_asof(al, name), pd.Timestamp("2024-01-01"))
+    trades, _ = strat.gen_strat_2_v2(daily, strat.weekly_asof(al, name), pd.Timestamp("2024-01-01"), entry="close")
     got = [(t["buy"].strftime("%Y-%m-%d"), t["sell"].strftime("%Y-%m-%d") if t["sell"] is not None else None)
            for t in trades]
     assert got == [("2024-05-13", "2024-12-02"), ("2025-05-26", "2025-12-01"),

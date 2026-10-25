@@ -38,14 +38,14 @@ def days_frames(weekly_q, daily_q=None, close=None):
 @pytest.mark.parametrize("wq", QUADS)
 def test_buy_only_when_weekly_up(wq):
     daily, asof, idx = days_frames(["Lagging", wq])
-    trades, _ = strat.gen_strat_2(daily, asof, idx[0])
+    trades, _ = strat.gen_strat_2(daily, asof, idx[0], entry="close")
     assert any(t["buy"] == idx[1] for t in trades) == (wq in UP)
 
 
 @pytest.mark.parametrize("wq", QUADS)
 def test_sell_only_when_weekly_down(wq):
     daily, asof, idx = days_frames(["Leading", wq])
-    trades, _ = strat.gen_strat_2(daily, asof, idx[0])
+    trades, _ = strat.gen_strat_2(daily, asof, idx[0], entry="close")
     assert trades[0]["buy"] == idx[0]
     assert (trades[0]["sell"] == idx[1]) == (wq in DOWN)
 
@@ -53,17 +53,17 @@ def test_sell_only_when_weekly_down(wq):
 def test_acts_on_the_first_valid_day_not_the_week_end():
     # Mon 1 Jan 2024 .. : weekly turns Improving on Wednesday -> buy Wednesday, not Friday
     daily, asof, idx = days_frames(["Lagging", "Lagging", "Improving", "Improving", "Improving"])
-    trades, _ = strat.gen_strat_2(daily, asof, idx[0])
+    trades, _ = strat.gen_strat_2(daily, asof, idx[0], entry="close")
     assert trades[0]["buy"] == idx[2] and idx[2].weekday() == 2
 
 
 def test_daily_is_ignored():
     w = ["Lagging", "Improving", "Leading", "Weakening", "Lagging", "Improving"]
-    base, _ = strat.gen_strat_2(*days_frames(w)[:2], pd.Timestamp("2024-01-01"))
+    base, _ = strat.gen_strat_2(*days_frames(w)[:2], pd.Timestamp("2024-01-01"), entry="close")
     rng = np.random.default_rng(7)
     for _ in range(5):
         dq = list(rng.choice(QUADS, len(w)))
-        other, _ = strat.gen_strat_2(*days_frames(w, dq)[:2], pd.Timestamp("2024-01-01"))
+        other, _ = strat.gen_strat_2(*days_frames(w, dq)[:2], pd.Timestamp("2024-01-01"), entry="close")
         assert [(t["buy"], t["sell"]) for t in other] == [(t["buy"], t["sell"]) for t in base]
 
 
@@ -90,7 +90,7 @@ def test_every_stock_first_valid_day_and_no_lookahead(stocks):
         asof = strat.weekly_asof(al, name)
         if daily.empty or asof.empty:
             continue
-        trades, _ = strat.gen_strat_2(daily, asof, start)
+        trades, _ = strat.gen_strat_2(daily, asof, start, entry="close")
         w = asof["Quadrant"]
         mine, held = [], None
         for d in daily.index[daily.index >= start]:
@@ -114,7 +114,7 @@ def test_pvr_baseline_buys_on_13_may_2024(stocks):
     daily, _ = strat.compute_rrg(al, name, "Daily")
     asof = strat.weekly_asof(al, name)
     start = pd.Timestamp("2024-01-01")
-    raw, _ = strat.gen_strat_2(daily, asof, start, 0.12)
+    raw, _ = strat.gen_strat_2(daily, asof, start, 0.12, entry="close")
     book, cash, val, bh, _ = strat.simulate_single_strategy(daily, raw, start, 100000.0, 0.12)
     assert [(b["buy"].strftime("%Y-%m-%d"), b["sell"].strftime("%Y-%m-%d") if b["sell"] is not None else None)
             for b in book] == [("2024-05-13", "2024-12-23"), ("2025-05-26", "2025-12-08"),

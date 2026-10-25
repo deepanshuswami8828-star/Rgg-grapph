@@ -55,7 +55,7 @@ def test_pvrinox_baseline():
     start = pd.Timestamp("2024-01-01")
     cost = 0.12
     capital = 100000
-    trades, skipped = strat.gen_strat_1(daily_df, asof, start, cost)
+    trades, skipped = strat.gen_strat_1(daily_df, asof, start, cost, entry="close")
     book, cash, value, bh_value, bh_shares = app.simulate(daily_df, trades, start, capital, cost)
 
     # Strategy 1: buy when daily AND weekly are Improving/Leading, sell when EITHER drops

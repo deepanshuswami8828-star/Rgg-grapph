@@ -31,9 +31,9 @@ def main():
     print(f"Message: {message}")
 
     if status == "SUCCESS":
-        # daily highs for the take-profit analysis; a failure here never fails the close refresh
-        failed = {t: s for t, s in dp.refresh_highs().items() if not s.startswith("OK")}
-        print("Highs:   " + ("all stocks updated" if not failed else f"not updated for {failed}"))
+        # daily open (next-day entry price) and high (take-profit); a failure here never fails the close refresh
+        failed = {t: s for t, s in dp.refresh_open_high().items() if not s.startswith("OK")}
+        print("Open/high: " + ("all stocks updated" if not failed else f"not updated for {failed}"))
 
     if status in ("SUCCESS", "NO_NEW_SESSION", "SKIPPED"):
         print("Refresh completed cleanly (Exit 0).")

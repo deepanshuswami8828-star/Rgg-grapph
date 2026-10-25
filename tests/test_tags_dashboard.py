@@ -103,7 +103,7 @@ def _toy_market(highs_after_buy):
 
 def test_take_profit_sells_at_target_on_the_first_day_the_high_reaches_it():
     daily, asof, highs = _toy_market({0: 200.0, 3: 105.5})   # day 0 is the buy day: its high is ignored
-    trades, _ = strat.gen_strat_2_v3(daily, asof, daily.index[0], 0.0, take_profit_pct=5.0, highs=highs)
+    trades, _ = strat.gen_strat_2_v3(daily, asof, daily.index[0], 0.0, take_profit_pct=5.0, highs=highs, entry="close")
     first = trades[0]
     assert first["buy"] == daily.index[0] and first["sell"] == daily.index[3]
     assert first["sell_px"] == 105.0 and first["exit_reason"].startswith("Take-profit 5%")
@@ -113,8 +113,8 @@ def test_take_profit_sells_at_target_on_the_first_day_the_high_reaches_it():
 
 def test_take_profit_never_reached_matches_base_strategy():
     daily, asof, highs = _toy_market({})
-    base, _ = strat.gen_strat_2_v3(daily, asof, daily.index[0], 0.0)
-    huge, _ = strat.gen_strat_2_v3(daily, asof, daily.index[0], 0.0, take_profit_pct=1000.0, highs=highs)
+    base, _ = strat.gen_strat_2_v3(daily, asof, daily.index[0], 0.0, entry="close")
+    huge, _ = strat.gen_strat_2_v3(daily, asof, daily.index[0], 0.0, take_profit_pct=1000.0, highs=highs, entry="close")
     assert [(t["buy"], t["sell"], t["sell_px"]) for t in base] == [(t["buy"], t["sell"], t["sell_px"]) for t in huge]
 
 
@@ -145,7 +145,7 @@ def test_tags_page_shows_take_profit_charts():
 def test_stop_loss_level_changes_exits():
     daily, asof, highs = _toy_market({})
     daily.iloc[3, 0] = 92.0                      # close 8% below the 100 buy price
-    tight, _ = strat.gen_strat_2_v3(daily, asof, daily.index[0], 0.0, stop_loss_pct=6.0)
-    loose, _ = strat.gen_strat_2_v3(daily, asof, daily.index[0], 0.0, stop_loss_pct=10.0)
+    tight, _ = strat.gen_strat_2_v3(daily, asof, daily.index[0], 0.0, stop_loss_pct=6.0, entry="close")
+    loose, _ = strat.gen_strat_2_v3(daily, asof, daily.index[0], 0.0, stop_loss_pct=10.0, entry="close")
     assert tight[0]["sell"] == daily.index[3] and tight[0]["exit_reason"].startswith("Stop-loss 6%")
     assert loose[0]["sell"] != daily.index[3]

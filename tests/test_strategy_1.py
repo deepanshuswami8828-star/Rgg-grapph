@@ -49,7 +49,7 @@ def test_runs_on_every_stock(stocks):
         asof = strat.weekly_asof(s["aligned"], s["name"])
         if s["daily"].empty or asof.empty:
             continue
-        book, cash, val, bh_val, bh_sh, m = strat.run_strategy(1, s["daily"], asof, start, 10000.0, 0.12)
+        book, cash, val, bh_val, bh_sh, m = strat.run_strategy(1, s["daily"], asof, start, 10000.0, 0.12, entry="close")
         assert len(val) > 0, ticker
         assert cash >= 0.0, ticker
         assert m["capital"] == 10000.0
@@ -64,7 +64,7 @@ def test_pvr_baseline(stocks):
     daily = s["daily"][s["daily"].index <= "2026-10-16"]
     asof = strat.weekly_asof(s["aligned"][s["aligned"].index <= "2026-10-16"], "PVR INOX")
     start = pd.Timestamp("2024-01-01")
-    raw, _ = strat.gen_strat_1(daily, asof, start, cost_pct=0.12)
+    raw, _ = strat.gen_strat_1(daily, asof, start, cost_pct=0.12, entry="close")
     book, cash, val, bh_val, bh_sh = strat.simulate_single_strategy(daily, raw, start, 100000.0, 0.12)
     assert len(book) == 14
     assert (book[0]["buy"].strftime("%Y-%m-%d"), round(book[0]["buy_px"], 2)) == ("2024-05-24", 1339.05)
@@ -77,7 +77,7 @@ def test_explain_pnl_and_trade_outcome_reason(stocks):
     s = stocks["PVRINOX.NS"]
     asof = strat.weekly_asof(s["aligned"], "PVR INOX")
     book, cash, val, bh_val, bh_sh, _ = strat.run_strategy(1, s["daily"], asof,
-                                                           pd.Timestamp("2024-01-01"), 10000.0, 0.12)
+                                                           pd.Timestamp("2024-01-01"), 10000.0, 0.12, entry="close")
     info = strat.explain_pnl(book, 10000.0, float(val.iloc[-1]), 0.12, "PVR INOX",
                              strat.STRATEGY_REGISTRY[1]["name"])
     for key in ("is_profit", "headline", "summary_en", "summary_hi", "profit_factor", "win_rate"):
