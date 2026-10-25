@@ -333,6 +333,48 @@ def gen_strat_2_v3(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp,
 SIGNALS = {1: gen_strat_1, 2: gen_strat_2, 3: gen_strat_2_v2, 4: gen_strat_2_v3}
 
 
+# ---- Tag dashboard: Strategy 2 version 3 profitability per period ------------
+TAG_PERIODS = [
+    ("Period 1", pd.Timestamp("2022-10-01"), pd.Timestamp("2024-09-30")),
+    ("Period 2", pd.Timestamp("2024-10-01"), pd.Timestamp("2026-09-30")),
+]
+TAG_DATA_FROM = pd.Timestamp("2022-04-30")   # a ticker counts only if its data starts by April 2022
+TAG_TRADE_AMOUNT = 100000.0                  # standard investment per trade (Rs)
+TAG_COST_PCT = 0.0                           # charges per buy / sell (%)
+TAG_MAX_ROWS = 50                            # sample tickers shown per period table
+
+
+def period_trades(trades: List[Dict], start: pd.Timestamp, end: pd.Timestamp) -> List[Dict]:
+    """Closed trades bought and sold inside [start, end]; a trade spanning two periods counts in neither."""
+    return [t for t in trades if t.get("sell") is not None and t["buy"] >= start and t["sell"] <= end]
+
+
+def trade_profit_pct(t: Dict, amount: float = TAG_TRADE_AMOUNT, cost_pct: float = TAG_COST_PCT) -> float:
+    """Profit % of one trade with a fixed investment: whole shares bought at the buy close, sold at the sell close."""
+    c = cost_pct / 100.0
+    shares = int(amount // (t["buy_px"] * (1 + c)))
+    if shares == 0:
+        return 0.0
+    paid = shares * t["buy_px"] * (1 + c)
+    got = shares * t["sell_px"] * (1 - c)
+    return 100.0 * (got - paid) / paid
+
+
+def ticker_period_summary(trades: List[Dict]) -> Dict[str, Any]:
+    """Per-ticker row of the tag dashboard for one period's closed trades."""
+    profits = [trade_profit_pct(t) for t in trades]
+    days = [int((t["sell"] - t["buy"]).days) for t in trades]
+    total_days = sum(days)
+    return {
+        "trades": len(trades),
+        "profits": profits,
+        "days": days,
+        "profit_sum": sum(profits),
+        "days_sum": total_days,
+        "daily_profit": sum(profits) / total_days if total_days > 0 else None,
+    }
+
+
 # ---- Execution Simulator -----------------------------------------------------
 def simulate_single_strategy(daily: pd.DataFrame, raw_trades: List[Dict], start: pd.Timestamp,
                              capital: float = 10000.0, cost_pct: float = 0.12) -> Tuple[List[Dict], float, pd.Series, pd.Series, int]:
