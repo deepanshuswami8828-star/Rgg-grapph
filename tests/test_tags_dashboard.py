@@ -134,5 +134,18 @@ def test_tags_page_shows_take_profit_charts():
     at.run(timeout=600)
     assert len(at.exception) == 0
     numbers = [df.value for df in at.dataframe if "Take-profit threshold" in df.value.columns]
-    assert len(numbers) == 1 and len(numbers[0]) == 1 + len(strat.TAKE_PROFIT_THRESHOLDS)
-    assert len(at.get("plotly_chart")) == 1          # one chart, one line per period
+    assert len(numbers) == len(strat.TAG_STOP_LOSSES)                 # one table per stop-loss level
+    assert all(len(n) == 1 + len(strat.TAKE_PROFIT_THRESHOLDS) for n in numbers)
+    assert len(at.get("plotly_chart")) == len(strat.TAG_STOP_LOSSES)  # one chart per stop-loss, both periods in each
+    # the 10% chart is the base strategy's own stop-loss: its "no take-profit" row matches the period tables
+    ten = numbers[strat.TAG_STOP_LOSSES.index(10.0)].iloc[0]
+    assert ten["Period 1: closed trades"] == int(at.metric[1].value)
+
+
+def test_stop_loss_level_changes_exits():
+    daily, asof, highs = _toy_market({})
+    daily.iloc[3, 0] = 92.0                      # close 8% below the 100 buy price
+    tight, _ = strat.gen_strat_2_v3(daily, asof, daily.index[0], 0.0, stop_loss_pct=6.0)
+    loose, _ = strat.gen_strat_2_v3(daily, asof, daily.index[0], 0.0, stop_loss_pct=10.0)
+    assert tight[0]["sell"] == daily.index[3] and tight[0]["exit_reason"].startswith("Stop-loss 6%")
+    assert loose[0]["sell"] != daily.index[3]

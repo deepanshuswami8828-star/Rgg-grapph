@@ -217,7 +217,7 @@ def _finish(trades, pos, daily, days, cost_pct, extra_open=None):
     for t in trades:
         t["ret"] = 100.0 * ((t["sell_px"] * (1 - c)) / (t["buy_px"] * (1 + c)) - 1)
         end = t["sell"] if t["sell"] is not None else daily.index[-1]
-        t["held"] = int(((daily.index > t["buy"]) & (daily.index <= end)).sum())
+        t["held"] = int(daily.index.searchsorted(end, side="right") - daily.index.searchsorted(t["buy"], side="right"))
     return trades, []
 
 
@@ -293,8 +293,10 @@ STOP_LOSS_V3 = 10.0   # Strategy 2 version 3: stop-loss, % below the buy price
 
 
 def gen_strat_2_v3(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp, cost_pct: float = 0.12,
-                   take_profit_pct: Optional[float] = None, highs: Optional[pd.Series] = None) -> Tuple[List[Dict], List[Dict]]:
-    """Strategy 2, version 3: Weekly RRG only (version 1) plus a 10% stop-loss on price.
+                   take_profit_pct: Optional[float] = None, highs: Optional[pd.Series] = None,
+                   stop_loss_pct: float = STOP_LOSS_V3) -> Tuple[List[Dict], List[Dict]]:
+    """Strategy 2, version 3: Weekly RRG only (version 1) plus a 10% stop-loss on price
+    (stop_loss_pct; 10 unless an analysis asks for another level).
 
     Every trading day's close:
       SELL (open position): close <= 90% of the buy price               -> stop-loss, loss booked
@@ -307,18 +309,40 @@ def gen_strat_2_v3(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp,
     whose high reaches the buy price + take_profit_pct sells that day at exactly that price. Like a
     stop-loss, it then waits for the weekly to drop into Weakening/Lagging and come back up before buying.
     """
+    tp_highs = highs if take_profit_pct is not None else None
+    return v3_trades(v3_inputs(daily, asof, start, tp_highs), cost_pct, take_profit_pct, stop_loss_pct)
+
+
+def v3_inputs(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp,
+              highs: Optional[pd.Series] = None) -> Dict[str, Any]:
+    """Day-by-day arrays Strategy 2 v3 walks through. Built once per stock, they can be reused for any
+    stop-loss / take-profit setting (the Tags analysis runs hundreds of settings per stock)."""
     days = _weekly_days(daily, asof, start)
-    prev_w = asof["Quadrant"].reindex(daily.index).shift(1)
-    close = daily["Close"]
+    dates = days.index
+    return {
+        "daily": daily, "days": days, "dates": dates,
+        "quads": days["Quadrant"].to_numpy(),
+        "closes": daily["Close"].reindex(dates).to_numpy(),
+        "prevs": asof["Quadrant"].reindex(daily.index).shift(1).reindex(dates).to_numpy(),
+        "highs": highs.reindex(dates).to_numpy() if highs is not None else None,
+    }
+
+
+def v3_trades(inp: Dict[str, Any], cost_pct: float = 0.12, take_profit_pct: Optional[float] = None,
+              stop_loss_pct: float = STOP_LOSS_V3) -> Tuple[List[Dict], List[Dict]]:
+    """Strategy 2 v3 rules (see gen_strat_2_v3) on inputs from v3_inputs."""
+    dates, quads, closes, prevs = inp["dates"], inp["quads"], inp["closes"], inp["prevs"]
+    use_tp = take_profit_pct is not None and inp["highs"] is not None
+    day_highs = inp["highs"]
     trades, pos, armed = [], None, True
-    for d, r in days.iterrows():
-        wq, px = r["Quadrant"], close[d]
+    for i, d in enumerate(dates):
+        wq, px = quads[i], closes[i]
         if pos is not None:
-            stop_px = pos["buy_px"] * (1 - STOP_LOSS_V3 / 100.0)
-            if take_profit_pct is not None and highs is not None:
+            stop_px = pos["buy_px"] * (1 - stop_loss_pct / 100.0)
+            if use_tp:
                 tp_px = pos["buy_px"] * (1 + take_profit_pct / 100.0)
-                hi = highs.get(d, np.nan)
-                if pd.notna(hi) and hi >= tp_px:
+                hi = day_highs[i]
+                if hi == hi and hi >= tp_px:          # hi == hi: not NaN
                     trades.append(dict(pos, sell=d, sell_px=tp_px, exit_into=wq, open=False,
                                        exit_reason=f"Take-profit {take_profit_pct:g}%: high ₹{hi:.2f} ≥ ₹{tp_px:.2f}",
                                        daily_at_sell="", weekly_at_sell=wq, stop_px=stop_px))
@@ -326,7 +350,7 @@ def gen_strat_2_v3(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp,
                     armed = wq in DOWN      # like a stop-loss: re-buy only after a weekly down-and-up
                     continue
             if px <= stop_px:
-                reason = f"Stop-loss {STOP_LOSS_V3:.0f}%: close ₹{px:.2f} ≤ ₹{stop_px:.2f} (Weekly {wq})"
+                reason = f"Stop-loss {stop_loss_pct:g}%: close ₹{px:.2f} ≤ ₹{stop_px:.2f} (Weekly {wq})"
             elif wq in DOWN:
                 reason = f"Weekly → {wq}"
             else:
@@ -339,10 +363,10 @@ def gen_strat_2_v3(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp,
         if wq in DOWN:
             armed = True
         elif armed and wq in UP:
-            pos = dict(buy=d, buy_px=px, weekly=wq, frm=prev_w[d], into=wq,
+            pos = dict(buy=d, buy_px=px, weekly=wq, frm=prevs[i], into=wq,
                        daily_at_buy="", weekly_at_buy=wq)
-    stop_open = {"stop_px": pos["buy_px"] * (1 - STOP_LOSS_V3 / 100.0)} if pos is not None else None
-    return _finish(trades, pos, daily, days, cost_pct, stop_open)
+    stop_open = {"stop_px": pos["buy_px"] * (1 - stop_loss_pct / 100.0)} if pos is not None else None
+    return _finish(trades, pos, inp["daily"], inp["days"], cost_pct, stop_open)
 
 
 SIGNALS = {1: gen_strat_1, 2: gen_strat_2, 3: gen_strat_2_v2, 4: gen_strat_2_v3}
@@ -357,6 +381,7 @@ TAG_DATA_FROM = pd.Timestamp("2022-04-30")   # a ticker counts only if its data 
 TAG_TRADE_AMOUNT = 100000.0                  # standard investment per trade (Rs)
 TAG_COST_PCT = 0.0                           # charges per buy / sell (%)
 TAG_MAX_ROWS = 50                            # sample tickers shown per period table
+TAG_STOP_LOSSES = [6.0, 8.0, 10.0, 12.0, 14.0]   # stop-loss levels compared, one take-profit chart each
 
 
 def period_trades(trades: List[Dict], start: pd.Timestamp, end: pd.Timestamp) -> List[Dict]:
