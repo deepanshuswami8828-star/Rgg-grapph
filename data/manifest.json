@@ -1,28 +1,28 @@
 {
-  "version_id": "v20261022_232309",
-  "updated_at": "2026-10-22T23:23:09.345563+05:30",
+  "version_id": "v20261025_203138",
+  "updated_at": "2026-10-25T20:31:38.803349+05:30",
   "status": "SUCCESS",
   "provider": "Yahoo Finance (yfinance)",
   "tickers": {
     "PVRINOX.NS": {
       "first_date": "2006-01-04",
-      "last_date": "2026-10-22",
-      "rows": 5127,
-      "sha256": "37b62ed4496709dfeb7ec043b66f85dd8bd5c463845d2e3ba0d4ef0290bb0454",
-      "fetched_at": "2026-10-22T23:23:09.345563+05:30",
+      "last_date": "2026-10-23",
+      "rows": 5128,
+      "sha256": "573198f38a1317ea2c3a06348555a8d30c2c0acac06f29e63b11c12b41d3346f",
+      "fetched_at": "2026-10-25T20:31:38.803349+05:30",
       "status": "VALID",
-      "benchmark_version": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
+      "benchmark_version": "361642a211603d259979d1109b21ca91f4d365564e4768269bf2f7bdd144fc6a",
       "warnings": [],
       "flagged_moves": []
     },
     "BEL.NS": {
       "first_date": "2002-07-01",
-      "last_date": "2026-10-22",
-      "rows": 6031,
-      "sha256": "ab78a3e6fdfc939752bc186ce2a17f3df3a8be34160f6853e77c99b1db8a3cc0",
-      "fetched_at": "2026-10-22T23:23:09.345563+05:30",
+      "last_date": "2026-10-23",
+      "rows": 6032,
+      "sha256": "9442d7673eac4bfdaa726c8bc8cc173f086a8a5f6a8ffa75e8f2df78eb336e26",
+      "fetched_at": "2026-10-25T20:31:38.803349+05:30",
       "status": "VALID",
-      "benchmark_version": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
+      "benchmark_version": "361642a211603d259979d1109b21ca91f4d365564e4768269bf2f7bdd144fc6a",
       "warnings": [
         "Flagged move of +3200.0% on 2005-07-28",
         "Flagged move of -97.1% on 2005-07-29"
@@ -42,12 +42,12 @@
     },
     "SUZLON.NS": {
       "first_date": "2005-10-19",
-      "last_date": "2026-10-22",
-      "rows": 5179,
-      "sha256": "5c7a3e2c370626e370694e2126bcf3e8e756a9ae5ef5e968a8348c92cbff64df",
-      "fetched_at": "2026-10-22T23:23:09.345563+05:30",
+      "last_date": "2026-10-23",
+      "rows": 5180,
+      "sha256": "e6985587c5453ded1f8cc8f6c06a55c0ed475778cf784631e5a0f3cc86b2e071",
+      "fetched_at": "2026-10-25T20:31:38.803349+05:30",
       "status": "VALID",
-      "benchmark_version": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
+      "benchmark_version": "361642a211603d259979d1109b21ca91f4d365564e4768269bf2f7bdd144fc6a",
       "warnings": [
         "Flagged move of -40.3% on 2008-10-24",
         "Flagged move of -34.0% on 2013-02-28",
@@ -79,23 +79,23 @@
     },
     "WAAREEENER.NS": {
       "first_date": "2024-10-28",
-      "last_date": "2026-10-22",
-      "rows": 491,
-      "sha256": "27cb0f6f2bb094205683659d95a7906276468e4759bf0bb00af2653f337dea89",
-      "fetched_at": "2026-10-22T23:23:09.345563+05:30",
+      "last_date": "2026-10-23",
+      "rows": 492,
+      "sha256": "42f79db63fe136f4320905758656a96e945f947cb9f9f41a987bb3434d55368a",
+      "fetched_at": "2026-10-25T20:31:38.803349+05:30",
       "status": "VALID",
-      "benchmark_version": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
+      "benchmark_version": "361642a211603d259979d1109b21ca91f4d365564e4768269bf2f7bdd144fc6a",
       "warnings": [],
       "flagged_moves": []
     },
     "BHARTIARTL.NS": {
       "first_date": "2002-07-01",
-      "last_date": "2026-10-22",
-      "rows": 6031,
-      "sha256": "5812bd36eb838e53550057588b51945c74243a904390a4d703ebdb688c23a3d3",
-      "fetched_at": "2026-10-22T23:23:09.345563+05:30",
+      "last_date": "2026-10-23",
+      "rows": 6032,
+      "sha256": "86787aca88dd2007a47d96ee3b40cb4964b274ddb3bc7b56bebec55a7a441c31",
+      "fetched_at": "2026-10-25T20:31:38.803349+05:30",
       "status": "VALID",
-      "benchmark_version": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
+      "benchmark_version": "361642a211603d259979d1109b21ca91f4d365564e4768269bf2f7bdd144fc6a",
       "warnings": [
         "Flagged move of +25.4% on 2009-05-18"
       ],
@@ -109,12 +109,12 @@
     },
     "RELIANCE.NS": {
       "first_date": "1996-01-01",
-      "last_date": "2026-10-22",
-      "rows": 7726,
-      "sha256": "da718a48c48758fb030f4a63b7dc2d01e39e00063008a4d308afd57253ac63fc",
-      "fetched_at": "2026-10-22T23:23:09.345563+05:30",
+      "last_date": "2026-10-23",
+      "rows": 7727,
+      "sha256": "99de1544c94dcdf9757db011f50fc67c2da5c4aafdf8d2b8d3b4bdf2ab266a1f",
+      "fetched_at": "2026-10-25T20:31:38.803349+05:30",
       "status": "VALID",
-      "benchmark_version": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
+      "benchmark_version": "361642a211603d259979d1109b21ca91f4d365564e4768269bf2f7bdd144fc6a",
       "warnings": [
         "Flagged move of +91.1% on 1997-10-27",
         "Flagged move of -48.4% on 1997-11-05",
@@ -144,20 +144,31 @@
         }
       ]
     },
+    "PAYTM.NS": {
+      "first_date": "2021-11-18",
+      "last_date": "2026-10-23",
+      "rows": 1218,
+      "sha256": "9c82d0e8ec809d043f4c25783b74dc4cc6084b99cabd2f5bd01ada890a703401",
+      "fetched_at": "2026-10-25T20:31:38.803349+05:30",
+      "status": "VALID",
+      "benchmark_version": "361642a211603d259979d1109b21ca91f4d365564e4768269bf2f7bdd144fc6a",
+      "warnings": [],
+      "flagged_moves": []
+    },
     "^NSEI": {
       "first_date": "2007-09-17",
-      "last_date": "2026-10-22",
-      "rows": 4683,
-      "sha256": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
-      "fetched_at": "2026-10-22T23:23:09.345563+05:30",
+      "last_date": "2026-10-23",
+      "rows": 4685,
+      "sha256": "361642a211603d259979d1109b21ca91f4d365564e4768269bf2f7bdd144fc6a",
+      "fetched_at": "2026-10-25T20:31:38.803349+05:30",
       "status": "VALID",
-      "benchmark_version": "e078be28e8a43cc0601b94d4a78d5a2b423c3a517c1160eecbc6e19c96765000",
+      "benchmark_version": "361642a211603d259979d1109b21ca91f4d365564e4768269bf2f7bdd144fc6a",
       "warnings": [],
       "flagged_moves": []
     }
   },
   "last_attempt": {
-    "time": "2026-10-24T12:00:00+05:30",
+    "time": "2026-10-25T20:31:42.366725+05:30",
     "result": "NO_NEW_SESSION",
     "message": "Weekend: NSE closed; skipping fetch/publish."
   }

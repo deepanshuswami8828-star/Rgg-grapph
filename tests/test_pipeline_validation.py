@@ -75,7 +75,8 @@ def test_good_refresh_with_new_session_updates_data():
     pvr_clean = dp.load_clean_data("PVRINOX.NS")
     bench_clean = dp.load_clean_data(cfg.BENCHMARK_TICKER)
     assert pvr_clean is not None and bench_clean is not None
-    assert pvr_clean.index[-1].strftime("%Y-%m-%d") == "2026-10-22"
+    latest = pvr_clean.index[-1].strftime("%Y-%m-%d")    # latest stored session (moves forward with each data refresh)
+    assert latest > "2026-10-16"
 
     try:
         # Step 1: Temporarily truncate PVRINOX and BENCHMARK to 2026-10-16
@@ -100,9 +101,9 @@ def test_good_refresh_with_new_session_updates_data():
             res = dp.refresh_data(force=True)
             assert res["status"] == "SUCCESS"
 
-            # Check updated clean CSV has advanced to 2026-10-22
+            # Check updated clean CSV has advanced to the latest session
             new_pvr = dp.load_clean_data("PVRINOX.NS")
-            assert new_pvr.index[-1].strftime("%Y-%m-%d") == "2026-10-22"
+            assert new_pvr.index[-1].strftime("%Y-%m-%d") == latest
             assert len(new_pvr) > initial_rows
     finally:
         # Always restore full clean files

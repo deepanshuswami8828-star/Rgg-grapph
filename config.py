@@ -50,6 +50,11 @@ STOCKS = {
         "sector": "Energy / conglomerate",
         "notes": "1:1 bonus Oct 2024 must NOT appear as a crash",
     },
+    "PAYTM.NS": {
+        "name": "Paytm (One 97 Communications)",
+        "sector": "Fintech / Payments",
+        "notes": "listed 18 Nov 2021; show its real first date, never invent pre-listing data",
+    },
 }
 
 DATA_START_DISPLAY = "2023-01-01"

@@ -41,6 +41,7 @@ STOCK_COLORS = {
     "WAAREEENER.NS": "#ef6c00",   # Amber Orange
     "BHARTIARTL.NS": "#7b1fa2",   # Purple
     "RELIANCE.NS": "#00838f",     # Deep Cyan
+    "PAYTM.NS": "#c2185b",        # Magenta
 }
 
 TF_CONFIG = {
