@@ -43,6 +43,17 @@ STOCK_COLORS = {
     "RELIANCE.NS": "#00838f",     # Deep Cyan
     "PAYTM.NS": "#c2185b",        # Magenta
 }
+# stocks without a fixed colour above take one from this list, in config order
+EXTRA_COLORS = ["#1565c0", "#558b2f", "#ad1457", "#6a1b9a", "#ff8f00", "#00695c", "#4e342e", "#c62828",
+                "#283593", "#9e9d24", "#0277bd", "#d84315", "#37474f", "#7cb342", "#5e35b1", "#f9a825",
+                "#00897b", "#8d6e63", "#e53935", "#3949ab", "#43a047", "#fb8c00", "#039be5", "#8e24aa"]
+
+
+def stock_color(ticker: str) -> str:
+    if ticker in STOCK_COLORS:
+        return STOCK_COLORS[ticker]
+    extra = [t for t in cfg.STOCKS if t not in STOCK_COLORS]
+    return EXTRA_COLORS[extra.index(ticker) % len(EXTRA_COLORS)] if ticker in extra else SERIES
 
 TF_CONFIG = {
     "Daily": dict(unit="session", units="sessions", warmup=cfg.WARMUP_DAILY, tail=cfg.TAIL_DAYS_DAILY,
@@ -65,6 +76,11 @@ div[data-testid="stMetricValue"] {font-size: 1.45rem;}
 .status-live {background: #e8f5e9; color: #2e7d32;}
 .status-cached {background: #e3f2fd; color: #1565c0;}
 .status-stale {background: #fff3e0; color: #e65100;}
+.st-key-tag_box {background: #fdf3f7; border: 1px solid #f0c6d8; border-left: 4px solid #c2185b;
+                 border-radius: 8px; padding: 10px 12px 4px;}
+.st-key-tag_box details {background: #ffffff; border-color: #f0c6d8;}
+.tag-chip {display: inline-block; margin: 2px 4px 2px 0; padding: 1px 7px; border-radius: 10px;
+           background: #fce4ec; color: #880e4f; font-size: 0.78rem;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -608,9 +624,9 @@ def formula_note(extra: str):
 
 
 # ---- All Stocks Page --------------------------------------------------------
-def all_stocks_page(timeframe: str):
-    st.subheader(f"All Stocks Comparison ({timeframe} RRG)")
-    st.caption("Rotating relative strength of all configured NSE stocks plotted simultaneously against NIFTY 50.")
+def all_stocks_page(timeframe: str, tickers: list, tag: str):
+    st.subheader(f"All Stocks Comparison ({timeframe} RRG) · Tag: {tag}")
+    st.caption(f"Rotating relative strength of the {len(tickers)} NSE stocks in tag {tag} plotted simultaneously against NIFTY 50.")
 
     manifest = dp.load_manifest()
     m_ver = manifest.get("version_id", "none")
@@ -618,7 +634,8 @@ def all_stocks_page(timeframe: str):
     table_rows = []
     earliest_dates = []
 
-    for ticker, s_info in cfg.STOCKS.items():
+    for ticker in tickers:
+        s_info = cfg.STOCKS[ticker]
         aligned = get_cached_aligned_data(ticker, m_ver)
         if aligned is None:
             table_rows.append({
@@ -675,7 +692,7 @@ def all_stocks_page(timeframe: str):
     for target_d in shared_dates:
         traces = []
         for ticker, (df, s_name) in valid_stocks.items():
-            color = STOCK_COLORS.get(ticker, SERIES)
+            color = stock_color(ticker)
             hist = df.loc[:target_d]
             if len(hist) < 2:
                 continue
@@ -1238,25 +1255,36 @@ def strategy_page(stock_ticker: str, strategy_id: int = 1):
 
 # ---- Sidebar & Main Execution -----------------------------------------------
 with st.sidebar:
+    # Tag section: its own box above stock selection; picks which stocks the rest of the app shows
+    with st.container(key="tag_box"):
+        _tag_now = st.session_state.get("tag", cfg.TAG_ALL)
+        st.markdown(f"**🏷️ Tag:** {_tag_now} · {len(cfg.stocks_for_tag(_tag_now))} stocks")
+        with st.expander("Change tag / see its stocks", expanded=False):
+            selected_tag = st.radio("Show stocks from", cfg.TAGS, horizontal=True, key="tag",
+                                    format_func=lambda g: f"{g} ({len(cfg.stocks_for_tag(g))})")
+            tag_stocks = cfg.stocks_for_tag(selected_tag)
+            st.markdown("".join(f"<span class='tag-chip'>{cfg.STOCKS[t]['name']}</span>" for t in tag_stocks),
+                        unsafe_allow_html=True)
+
     st.header("Stock & View Selection")
     selected_stock = st.selectbox(
         "Select Stock",
-        options=list(cfg.STOCKS.keys()),
+        options=tag_stocks,
         format_func=lambda t: f"{cfg.STOCKS[t]['name']} ({cfg.STOCKS[t]['sector']})",
-        index=0
+        index=0, key="stock"
     )
     stock_meta = cfg.STOCKS[selected_stock]
     st.caption(f"**Selected:** {stock_meta['name']} · Sector: *{stock_meta['sector']}*")
 
     page_choice = st.radio("Timeframe / Page", ["Daily", "Weekly", "Both", "All stocks", "Strategy"],
-                           horizontal=False)
+                           horizontal=False, key="page")
 
     st.markdown("---")
-    if st.button("🔄 Refresh All Data", help="Fetch and validate latest data for all 6 stocks + NIFTY from Yahoo Finance"):
+    if st.button("🔄 Refresh All Data", help=f"Fetch and validate latest data for all {len(cfg.STOCKS)} stocks + NIFTY from Yahoo Finance"):
         with st.spinner("Downloading and validating all tickers..."):
             res = dp.refresh_data(force=True)
             if res["status"] == "SUCCESS":
-                st.success("All 6 stocks + NIFTY refreshed and validated!")
+                st.success(f"All {len(cfg.STOCKS)} stocks + NIFTY refreshed and validated!")
                 st.rerun()
             else:
                 st.error(f"Refresh failed: {res.get('message')}")
@@ -1297,7 +1325,7 @@ render_status_panel(selected_stock)
 if page_choice == "Strategy":
     strategy_page(selected_stock, strategy_choice)
 elif page_choice == "All stocks":
-    all_stocks_page(all_tf)
+    all_stocks_page(all_tf, tag_stocks, selected_tag)
 elif page_choice == "Both":
     both_page(selected_stock)
 else:

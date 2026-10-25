@@ -22,14 +22,14 @@ APP_PATH = os.path.join(cfg.ROOT_DIR, "rrg_app.py")
 
 
 def test_apptest_all_stocks_all_pages():
-    """Test 12: 6 stocks x 5 pages = 30 combinations with 0 exceptions."""
+    """Test 12: every configured stock x 5 pages with 0 exceptions."""
     pages = ["Daily", "Weekly", "Both", "All stocks", "Strategy"]
     for ticker in cfg.STOCKS.keys():
         for page in pages:
             at = AppTest.from_file(APP_PATH)
             at.run(timeout=30)
-            at.sidebar.selectbox[0].set_value(ticker)
-            at.sidebar.radio[0].set_value(page)
+            at.sidebar.selectbox(key="stock").set_value(ticker)
+            at.sidebar.radio(key="page").set_value(page)
             at.run(timeout=30)
 
             if page == "Strategy":
@@ -61,7 +61,7 @@ def test_offline_mode_resilient_when_internet_disconnected():
         for ticker in cfg.STOCKS.keys():
             at = AppTest.from_file(APP_PATH)
             at.run(timeout=30)
-            at.sidebar.selectbox[0].set_value(ticker)
+            at.sidebar.selectbox(key="stock").set_value(ticker)
             at.run(timeout=30)
             assert len(at.exception) == 0
             # Data still loaded from data/ clean CSVs

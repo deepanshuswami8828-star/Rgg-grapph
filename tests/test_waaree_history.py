@@ -31,8 +31,8 @@ def test_waaree_every_page_loads():
     for page in pages:
         at = AppTest.from_file(app_path)
         at.run(timeout=60)
-        at.sidebar.selectbox[0].set_value("WAAREEENER.NS")
-        at.sidebar.radio[0].set_value(page)
+        at.sidebar.selectbox(key="stock").set_value("WAAREEENER.NS")
+        at.sidebar.radio(key="page").set_value(page)
         at.run(timeout=60)
 
         if page == "Strategy":
