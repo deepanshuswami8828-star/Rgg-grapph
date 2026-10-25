@@ -22,6 +22,10 @@ import config as cfg
 import data_pipeline as dp
 import importlib
 import strategies as strat
+# The cloud server keeps imported modules in memory between deploys; reload our own modules
+# (config first, the others import from it) so a new deploy never runs with stale code.
+importlib.reload(cfg)
+importlib.reload(dp)
 importlib.reload(strat)
 from make_rrg_pvrinox import (
     calc_rs_ratio, calc_rs_momentum, quadrant,
