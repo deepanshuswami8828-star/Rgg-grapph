@@ -1,13 +1,16 @@
 """
-Test: realistic entry rule for every strategy.
+Test: realistic entry and RRG-exit fills for every strategy.
 A buy signal appears at a day's close; the buy happens on the NEXT trading day at the average of
 that day's open and close. Exits are checked from the day after the buy (stop-loss / take-profit
-measured from the new buy price). Signal and exit rules are unchanged.
+measured from the new buy price). An exit triggered by the RRG (weekly quadrant / momentum, or
+Strategy 1's daily quadrant) also sells on the next trading day at the average of open and close;
+the stop-loss still sells at that day's close and the take-profit at its target. Signal rules are unchanged.
 Verifies:
 1. Toy data: next-day fill, price = (open + close) / 2, close used when the open is missing.
 2. Toy data: no exit on the fill day; stop-loss measured from the fill price; signal on the last day -> no trade.
 3. Real data, all strategies and stocks: every trade is bought on the trading day after its signal, at the
    average of that day's open and close, and the signals are the ones the original rule produces.
+4. RRG exits sell the next day at the average of open and close; stop-loss stays a same-day close sale.
 """
 import os
 import sys
@@ -105,3 +108,77 @@ def test_first_signal_matches_the_original_rule():
             old, _ = fn(daily, asof, start, 0.0, entry=strat.ENTRY_CLOSE)
             if old and new and old[0]["buy"] < daily.index[-1]:
                 assert new[0]["signal"] == old[0]["buy"], (t, sid)
+
+
+# ---- RRG exits on the next day ------------------------------------------------------------------
+def test_default_rrg_exit_is_next_day_average():
+    assert strat.DEFAULT_RRG_EXIT == strat.ENTRY_NEXT_AVG
+
+
+@pytest.mark.parametrize("fn", [strat.gen_strat_2, strat.gen_strat_2_v2, strat.gen_strat_2_v3])
+def test_weekly_exit_sells_next_day_at_average(fn):
+    # signal d0 -> buy d1 at (100+102)/2 = 101; weekly turns Lagging d3 -> sell d4 at (103+105)/2 = 104
+    idx, daily, asof, opens = frames(["Leading", "Leading", "Leading", "Lagging", "Lagging"],
+                                     [100.0, 102.0, 104.0, 104.0, 105.0], opens=[99.0, 100.0, 103.0, 104.0, 103.0])
+    t = fn(daily, asof, idx[0], 0.0, opens=opens)[0][0]
+    assert t["buy"] == idx[1] and t["buy_px"] == 101.0
+    assert t["exit_signal"] == idx[3] and t["sell"] == idx[4] and t["sell_px"] == 104.0
+    assert t["exit_reason"].startswith("Weekly")
+
+
+def test_strategy_1_rrg_exit_sells_next_day():
+    idx, daily, asof, opens = frames(["Leading"] * 5, [100.0, 102.0, 104.0, 103.0, 101.0],
+                                     opens=[99.0, 100.0, 103.0, 104.0, 99.0],
+                                     daily_q=["Leading", "Leading", "Leading", "Weakening", "Weakening"])
+    t = strat.gen_strat_1(daily, asof, idx[0], 0.0, opens=opens)[0][0]
+    assert t["exit_signal"] == idx[3] and t["sell"] == idx[4] and t["sell_px"] == 100.0
+
+
+def test_stop_loss_still_sells_the_same_day_at_the_close():
+    idx, daily, asof, opens = frames(["Leading", "Leading", "Leading", "Lagging"], [100.0, 100.0, 89.0, 88.0],
+                                     opens=[100.0, 100.0, 95.0, 88.0])
+    t = strat.gen_strat_2_v3(daily, asof, idx[0], 0.0, opens=opens)[0][0]
+    assert t["buy_px"] == 100.0 and t["sell"] == idx[2] and t["sell_px"] == 89.0
+    assert t["exit_reason"].startswith("Stop-loss")
+
+
+def test_stop_loss_on_the_weekly_signal_day_wins_over_the_next_day_exit():
+    # d2: weekly Lagging AND close 85 <= 90 stop -> stop-loss sells d2 at the close
+    idx, daily, asof, opens = frames(["Leading", "Leading", "Lagging", "Lagging"], [100.0, 100.0, 85.0, 84.0],
+                                     opens=[100.0, 100.0, 95.0, 84.0])
+    t = strat.gen_strat_2_v3(daily, asof, idx[0], 0.0, opens=opens)[0][0]
+    assert t["sell"] == idx[2] and t["exit_reason"].startswith("Stop-loss")
+
+
+def test_weekly_exit_on_last_day_leaves_trade_open_with_exit_due():
+    idx, daily, asof, opens = frames(["Leading", "Leading", "Leading", "Weakening"], [100.0, 102.0, 104.0, 103.0],
+                                     opens=[99.0, 100.0, 103.0, 104.0])
+    t = strat.gen_strat_2(daily, asof, idx[0], 0.0, opens=opens)[0][-1]
+    assert t["sell"] is None and t["exit_signal_pending"] == idx[3]
+
+
+def test_v2_early_exit_next_day_still_waits_for_a_weekly_down_and_up():
+    # Leading 101+ then momentum < 101 while still Leading -> early exit next day; no re-buy until weekly dips
+    idx = pd.bdate_range("2024-01-01", periods=7)
+    asof = pd.DataFrame({"Quadrant": ["Leading", "Leading", "Leading", "Leading", "Leading", "Lagging", "Leading"],
+                         "RS_Momentum": [101.5, 101.5, 101.2, 100.5, 100.4, 99.0, 100.2]}, index=idx)
+    daily = pd.DataFrame({"Quadrant": "Leading", "Close": [100.0, 101.0, 102.0, 103.0, 104.0, 105.0, 106.0]}, index=idx)
+    opens = pd.Series([100.0, 101.0, 102.0, 103.0, 102.0, 105.0, 106.0], index=idx)
+    trades = strat.gen_strat_2_v2(daily, asof, idx[0], 0.0, opens=opens)[0]
+    assert trades[0]["exit_signal"] == idx[3] and trades[0]["sell"] == idx[4] and trades[0]["sell_px"] == 103.0
+    assert len(trades) == 1                     # d5 Lagging re-arms, d6 Leading signals, fill would be d7 (no data)
+
+
+def test_every_stock_weekly_exits_sell_next_day_at_average():
+    checked = 0
+    for t, daily, asof, opens, start in _stock_inputs():
+        for sid, fn in strat.SIGNALS.items():
+            for x in fn(daily, asof, start, 0.0, opens=opens)[0]:
+                if x["sell"] is None or x["exit_reason"].startswith("Stop-loss"):
+                    continue
+                nxt = daily.index[daily.index.get_loc(x["exit_signal"]) + 1]
+                assert x["sell"] == nxt, (t, sid, x["exit_signal"], x["sell"])
+                o, c = opens.get(nxt, np.nan), daily.at[nxt, "Close"]
+                assert abs(x["sell_px"] - ((o + c) / 2 if o == o else c)) < 1e-9, (t, sid, x["sell"])
+                checked += 1
+    assert checked > 100

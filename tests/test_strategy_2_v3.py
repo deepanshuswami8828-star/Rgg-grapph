@@ -31,7 +31,7 @@ def run(rows, daily_q=None):
     asof = pd.DataFrame({"Quadrant": [q for q, _ in rows], "RS_Momentum": 100.5}, index=idx)
     daily = pd.DataFrame({"Quadrant": daily_q or ["Lagging"] * len(idx),
                           "Close": [p for _, p in rows]}, index=idx)
-    trades, _ = strat.gen_strat_2_v3(daily, asof, idx[0], entry="close")
+    trades, _ = strat.gen_strat_2_v3(daily, asof, idx[0], entry="close", rrg_exit="close")
     pos = list(idx)
     return [(pos.index(t["buy"]), pos.index(t["sell"]) if t["sell"] is not None else None, t["exit_reason"])
             for t in trades]
@@ -100,7 +100,7 @@ def test_every_stock_matches_a_plain_replay(stocks):
         asof = strat.weekly_asof(al, name)
         if daily.empty or asof.empty:
             continue
-        trades, _ = strat.gen_strat_2_v3(daily, asof, start, entry="close")
+        trades, _ = strat.gen_strat_2_v3(daily, asof, start, entry="close", rrg_exit="close")
         mine, held, held_px, can_buy = [], None, None, True
         for d in daily.index[daily.index >= start]:
             if d not in asof.index:
@@ -122,7 +122,7 @@ def test_suzlon_stop_loss_example(stocks):
     name, al = stocks["SUZLON.NS"]
     al = al[al.index <= "2026-10-16"]
     daily, _ = strat.compute_rrg(al, name, "Daily")
-    trades, _ = strat.gen_strat_2_v3(daily, strat.weekly_asof(al, name), pd.Timestamp("2024-01-01"), entry="close")
+    trades, _ = strat.gen_strat_2_v3(daily, strat.weekly_asof(al, name), pd.Timestamp("2024-01-01"), entry="close", rrg_exit="close")
     stops = [t for t in trades if t["exit_reason"].startswith("Stop-loss")]
     assert [(t["buy"].strftime("%Y-%m-%d"), t["sell"].strftime("%Y-%m-%d")) for t in stops] == \
         [("2025-05-27", "2025-08-18")]
