@@ -1,0 +1,42 @@
+# Daily data refresh: downloads the latest closes (plus daily open/high) for every stock and NIFTY 50
+# after the NSE close, saves them in data/ and pushes, so the Streamlit app shows the new session.
+name: Daily data refresh
+
+on:
+  schedule:
+    - cron: "45 12 * * 1-5"      # 18:15 IST, Monday-Friday (after the NSE close)
+  workflow_dispatch:              # "Run workflow" button on GitHub
+
+permissions:
+  contents: write                # to commit the refreshed data files
+
+concurrency:
+  group: data-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install packages
+        run: pip install -r requirements.txt
+      - name: Download and validate the latest data
+        run: python tools/refresh_data.py --force
+      - name: Save new data
+        run: |
+          if git diff --quiet -- 'data/*_clean.csv' data/open_high; then
+            echo "No new session in the data (holiday or not yet published); nothing to save."
+            exit 0
+          fi
+          LAST=$(python -c "import json; print(json.load(open('data/manifest.json'))['tickers']['^NSEI']['last_date'])")
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          git commit -m "Data refresh: prices up to $LAST"
+          git push
