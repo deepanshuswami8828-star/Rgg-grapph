@@ -182,3 +182,12 @@ def test_every_stock_weekly_exits_sell_next_day_at_average():
                 assert abs(x["sell_px"] - ((o + c) / 2 if o == o else c)) < 1e-9, (t, sid, x["sell"])
                 checked += 1
     assert checked > 100
+
+
+def test_v3_run_reports_a_buy_signal_on_the_last_day():
+    # weekly turns Leading on the last day: no trade yet, the buy is due the next trading day
+    idx, daily, asof, opens = frames(["Lagging", "Lagging", "Leading"], [100.0, 101.0, 102.0], opens=[100.0, 101.0, 102.0])
+    inp = strat.v3_inputs(daily, asof, idx[0], None, opens)
+    trades, buy_due, exit_due = strat.v3_run(inp, 0.0)
+    assert trades == [] and buy_due["signal"] == idx[2] and buy_due["weekly"] == "Leading" and exit_due is None
+    assert strat.v3_trades(inp, 0.0)[0] == trades

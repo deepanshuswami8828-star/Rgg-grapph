@@ -425,6 +425,15 @@ def v3_trades(inp: Dict[str, Any], cost_pct: float = 0.12, take_profit_pct: Opti
               stop_loss_pct: float = STOP_LOSS_V3, entry: str = DEFAULT_ENTRY,
               rrg_exit: str = DEFAULT_RRG_EXIT) -> Tuple[List[Dict], List[Dict]]:
     """Strategy 2 v3 rules (see gen_strat_2_v3) on inputs from v3_inputs."""
+    trades, _, _ = v3_run(inp, cost_pct, take_profit_pct, stop_loss_pct, entry, rrg_exit)
+    return trades, []
+
+
+def v3_run(inp: Dict[str, Any], cost_pct: float = 0.12, take_profit_pct: Optional[float] = None,
+           stop_loss_pct: float = STOP_LOSS_V3, entry: str = DEFAULT_ENTRY,
+           rrg_exit: str = DEFAULT_RRG_EXIT) -> Tuple[List[Dict], Optional[Dict], Optional[Dict]]:
+    """Strategy 2 v3 rules on inputs from v3_inputs. Returns (trades, buy signal still to be filled, exit
+    signal still to be sold): the last two are signals from the last day, executed on the next trading day."""
     dates, quads, closes, prevs = inp["dates"], inp["quads"], inp["closes"], inp["prevs"]
     use_tp = take_profit_pct is not None and inp["highs"] is not None
     day_highs, day_opens = inp["highs"], inp["opens"]
@@ -475,7 +484,8 @@ def v3_trades(inp: Dict[str, Any], cost_pct: float = 0.12, take_profit_pct: Opti
             else:
                 pending = sig
     stop_open = {"stop_px": pos["buy_px"] * (1 - stop_loss_pct / 100.0)} if pos is not None else None
-    return _finish(trades, pos, inp["daily"], inp["days"], cost_pct, stop_open, pending_exit)
+    trades, _ = _finish(trades, pos, inp["daily"], inp["days"], cost_pct, stop_open, pending_exit)
+    return trades, pending, pending_exit
 
 
 SIGNALS = {1: gen_strat_1, 2: gen_strat_2, 3: gen_strat_2_v2, 4: gen_strat_2_v3}
