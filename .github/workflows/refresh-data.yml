@@ -4,8 +4,18 @@ name: Daily data refresh
 
 on:
   schedule:
-    - cron: "45 12 * * 1-5"      # 18:15 IST, Monday-Friday (after the NSE close)
-  workflow_dispatch:              # "Run workflow" button on GitHub
+    # GitHub can delay scheduled runs by hours, or skip them, most often at :00 / :30. So the refresh is
+    # scheduled several times each weekday evening at odd minutes: the first run that finds the day's prices
+    # saves them, every later run sees the data is already up to date and stops. All before midnight IST.
+    - cron: "22 12 * * 1-5"      # 17:52 IST, Monday-Friday (after the NSE close)
+    - cron: "52 12 * * 1-5"      # 18:22 IST
+    - cron: "22 13 * * 1-5"      # 18:52 IST
+    - cron: "52 13 * * 1-5"      # 19:22 IST
+    - cron: "22 14 * * 1-5"      # 19:52 IST
+    - cron: "22 15 * * 1-5"      # 20:52 IST
+    - cron: "22 16 * * 1-5"      # 21:52 IST
+    - cron: "22 17 * * 1-5"      # 22:52 IST
+  workflow_dispatch:              # "Run workflow" button on GitHub (or an exact-time trigger from cron-job.org)
 
 permissions:
   contents: write                # to commit the refreshed data files
@@ -27,7 +37,9 @@ jobs:
       - name: Install packages
         run: pip install -r requirements.txt
       - name: Download and validate the latest data
-        run: python tools/refresh_data.py --force
+        # no --force: when the data already has the last completed session (an earlier run saved it, or a
+        # delayed run starts after midnight) nothing is downloaded, so a late run cannot fail on half-published data
+        run: python tools/refresh_data.py
       - name: Save new data
         run: |
           if git diff --quiet -- 'data/*_clean.csv' data/open_high; then
