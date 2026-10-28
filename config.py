@@ -200,13 +200,68 @@ STOCKS = {
         "notes": "listed 13 Nov 2024; show its real first date, never invent pre-listing data",
         "tags": ["Midselect"],
     },
+    # Nifty Smallcap 50 stocks that passed all 3 data checks (price break, repricing, missing data) on 28 Oct 2026
+    "REDINGTON.NS": {
+        "name": "Redington",
+        "sector": "IT hardware distribution",
+        "notes": "listed 15 Feb 2007",
+        "tags": ["Smallcap"],
+    },
+    "CUB.NS": {
+        "name": "City Union Bank",
+        "sector": "Banking - private",
+        "notes": "long history",
+        "tags": ["Smallcap"],
+    },
+    "KPITTECH.NS": {
+        "name": "KPIT Technologies",
+        "sector": "IT - automotive software",
+        "notes": "listed 22 Apr 2019",
+        "tags": ["Smallcap"],
+    },
+    "TATAELXSI.NS": {
+        "name": "Tata Elxsi",
+        "sector": "IT - design & technology services",
+        "notes": "long history",
+        "tags": ["Smallcap"],
+    },
+    "IGL.NS": {
+        "name": "Indraprastha Gas (IGL)",
+        "sector": "City gas distribution",
+        "notes": "listed 26 Dec 2003",
+        "tags": ["Smallcap"],
+    },
+    "ATHERENERG.NS": {
+        "name": "Ather Energy",
+        "sector": "Automobile - electric two-wheelers",
+        "notes": "listed 6 May 2025; show its real first date, never invent pre-listing data",
+        "tags": ["Smallcap"],
+    },
+    "GLAND.NS": {
+        "name": "Gland Pharma",
+        "sector": "Pharmaceuticals - injectables",
+        "notes": "listed 20 Nov 2020",
+        "tags": ["Smallcap"],
+    },
+    "SAILIFE.NS": {
+        "name": "Sai Life Sciences",
+        "sector": "Pharmaceuticals - CRDMO",
+        "notes": "listed 18 Dec 2024; show its real first date, never invent pre-listing data",
+        "tags": ["Smallcap"],
+    },
+    "SONACOMS.NS": {
+        "name": "Sona BLW Precision Forgings",
+        "sector": "Auto components",
+        "notes": "listed 24 Jun 2021",
+        "tags": ["Smallcap"],
+    },
 }
 
 
 # Stock tags: the sidebar Tag option shows "ALL" (every stock above) or one tag's stocks.
 # A stock belongs to a tag when the tag's name is in its "tags" list.
 TAG_ALL = "ALL"
-TAGS = [TAG_ALL, "Midselect"]
+TAGS = [TAG_ALL, "Midselect", "Smallcap"]
 
 
 def stocks_for_tag(tag: str) -> list:

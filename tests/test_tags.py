@@ -18,11 +18,14 @@ APP_PATH = os.path.join(cfg.ROOT_DIR, "rrg_app.py")
 MIDSELECT = ["PAYTM", "MCX", "PERSISTENT", "INDHOTEL", "HEROMOTOCO", "INDIANB", "ASHOKLEY", "INDUSTOWER",
              "NAUKRI", "BHEL", "AUROPHARMA", "DIXON", "FEDERALBNK", "INDUSINDBK", "AUBANK", "MARICO", "LICI",
              "SUZLON", "POLICYBZR", "LUPIN", "YESBANK", "BHARATFORG", "GVT&D", "SRF", "SWIGGY"]
+# Nifty Smallcap 50 stocks that passed all 3 data checks
+SMALLCAP = ["REDINGTON", "CUB", "KPITTECH", "TATAELXSI", "IGL", "ATHERENERG", "GLAND", "SAILIFE", "SONACOMS"]
 
 
 def test_tag_membership():
     assert cfg.stocks_for_tag(cfg.TAG_ALL) == list(cfg.STOCKS)
     assert sorted(cfg.stocks_for_tag("Midselect")) == sorted(t + ".NS" for t in MIDSELECT)
+    assert sorted(cfg.stocks_for_tag("Smallcap")) == sorted(t + ".NS" for t in SMALLCAP)
 
 
 def test_every_tagged_stock_has_data():
