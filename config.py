@@ -36,7 +36,7 @@ STOCKS = {
         "name": "Suzlon Energy",
         "sector": "Energy - wind",
         "notes": "long history",
-        "tags": ["Midselect"],
+        "tags": ["Midselect", "Energy"],
     },
     "WAAREEENER.NS": {
         "name": "Waaree Energies",
@@ -54,7 +54,7 @@ STOCKS = {
         "name": "Reliance Industries",
         "sector": "Energy / conglomerate",
         "notes": "1:1 bonus Oct 2024 must NOT appear as a crash",
-        "tags": [],
+        "tags": ["Energy"],
     },
     "PAYTM.NS": {
         "name": "Paytm (One 97 Communications)",
@@ -114,7 +114,7 @@ STOCKS = {
         "name": "Bharat Heavy Electricals (BHEL)",
         "sector": "Capital Goods - Heavy Electrical Equipment",
         "notes": "long history",
-        "tags": ["Midselect"],
+        "tags": ["Midselect", "Energy"],
     },
     "AUROPHARMA.NS": {
         "name": "Aurobindo Pharma",
@@ -186,7 +186,7 @@ STOCKS = {
         "name": "GE Vernova T&D India",
         "sector": "Capital Goods - Power Transmission Equipment",
         "notes": "continuous NSE trading from 30 Jun 2008",
-        "tags": ["Midselect"],
+        "tags": ["Midselect", "Energy"],
     },
     "SRF.NS": {
         "name": "SRF",
@@ -229,7 +229,7 @@ STOCKS = {
         "name": "Indraprastha Gas (IGL)",
         "sector": "City gas distribution",
         "notes": "listed 26 Dec 2003",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "Energy"],
     },
     "ATHERENERG.NS": {
         "name": "Ather Energy",
@@ -337,7 +337,7 @@ STOCKS = {
         "name": "Inox Wind",
         "sector": "Capital Goods",
         "notes": "listed 9 Apr 2015",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "Energy"],
     },
     "KAYNES.NS": {
         "name": "Kaynes Technology India",
@@ -433,13 +433,13 @@ STOCKS = {
         "name": "Coal India",
         "sector": "Oil Gas & Consumable Fuels",
         "notes": "listed 4 Nov 2010",
-        "tags": ["AlphaQVLowVol"],
+        "tags": ["AlphaQVLowVol", "Energy"],
     },
     "NTPC.NS": {
         "name": "NTPC",
         "sector": "Power",
         "notes": "listed 5 Nov 2004",
-        "tags": ["AlphaQVLowVol"],
+        "tags": ["AlphaQVLowVol", "Energy"],
     },
     "ICICIBANK.NS": {
         "name": "ICICI Bank",
@@ -627,13 +627,163 @@ STOCKS = {
         "notes": "long history",
         "tags": ["Hospitals"],
     },
+    "PETRONET.NS": {
+        "name": "Petronet LNG",
+        "sector": "Energy",
+        "notes": "listed 26 Mar 2004",
+        "tags": ["Energy"],
+    },
+    "OIL.NS": {
+        "name": "Oil India",
+        "sector": "Energy",
+        "notes": "listed 30 Sep 2009",
+        "tags": ["Energy"],
+    },
+    "POWERGRID.NS": {
+        "name": "Power Grid Corporation of India",
+        "sector": "Utilities",
+        "notes": "listed 5 Oct 2007",
+        "tags": ["Energy"],
+    },
+    "TATAPOWER.NS": {
+        "name": "Tata Power Company",
+        "sector": "Utilities",
+        "notes": "long history",
+        "tags": ["Energy"],
+    },
+    "NTPCGREEN.NS": {
+        "name": "NTPC Green Energy",
+        "sector": "Utilities",
+        "notes": "listed 27 Nov 2024; show its real first date, never invent pre-listing data",
+        "tags": ["Energy"],
+    },
+    "IOC.NS": {
+        "name": "Indian Oil Corporation",
+        "sector": "Energy",
+        "notes": "long history",
+        "tags": ["Energy"],
+    },
+    "NHPC.NS": {
+        "name": "NHPC",
+        "sector": "Utilities",
+        "notes": "listed 1 Sep 2009",
+        "tags": ["Energy"],
+    },
+    "SIEMENS.NS": {
+        "name": "Siemens",
+        "sector": "Industrials",
+        "notes": "long history",
+        "tags": ["Energy"],
+    },
+    "GAIL.NS": {
+        "name": "GAIL (India)",
+        "sector": "Utilities",
+        "notes": "long history",
+        "tags": ["Energy"],
+    },
+    "ABB.NS": {
+        "name": "ABB India",
+        "sector": "Industrials",
+        "notes": "long history",
+        "tags": ["Energy"],
+    },
+    "CGPOWER.NS": {
+        "name": "CG Power and Industrial Solutions",
+        "sector": "Industrials",
+        "notes": "long history",
+        "tags": ["Energy"],
+    },
+    "BPCL.NS": {
+        "name": "Bharat Petroleum Corporation",
+        "sector": "Energy",
+        "notes": "long history",
+        "tags": ["Energy"],
+    },
+    "RPOWER.NS": {
+        "name": "Reliance Power",
+        "sector": "Utilities",
+        "notes": "listed 11 Feb 2008",
+        "tags": ["Energy"],
+    },
+    "CESC.NS": {
+        "name": "CESC",
+        "sector": "Utilities",
+        "notes": "long history",
+        "tags": ["Energy"],
+    },
+    "NLCINDIA.NS": {
+        "name": "NLC India",
+        "sector": "Utilities",
+        "notes": "long history",
+        "tags": ["Energy"],
+    },
+    "ADANIENSOL.NS": {
+        "name": "Adani Energy Solutions",
+        "sector": "Utilities",
+        "notes": "listed 31 Jul 2015",
+        "tags": ["Energy"],
+    },
+    "TORNTPOWER.NS": {
+        "name": "Torrent Power",
+        "sector": "Utilities",
+        "notes": "listed 28 Nov 2006",
+        "tags": ["Energy"],
+    },
+    "ATGL.NS": {
+        "name": "Adani Total Gas",
+        "sector": "Utilities",
+        "notes": "listed 5 Nov 2018",
+        "tags": ["Energy"],
+    },
+    "ENRIN.NS": {
+        "name": "Siemens Energy India",
+        "sector": "Utilities",
+        "notes": "listed 19 Jun 2025; show its real first date, never invent pre-listing data",
+        "tags": ["Energy"],
+    },
+    "ADANIGREEN.NS": {
+        "name": "Adani Green Energy",
+        "sector": "Utilities",
+        "notes": "listed 18 Jun 2018",
+        "tags": ["Energy"],
+    },
+    "POWERINDIA.NS": {
+        "name": "Hitachi Energy India",
+        "sector": "Industrials",
+        "notes": "listed 30 Mar 2020",
+        "tags": ["Energy"],
+    },
+    "ADANIPOWER.NS": {
+        "name": "Adani Power",
+        "sector": "Utilities",
+        "notes": "listed 20 Aug 2009",
+        "tags": ["Energy"],
+    },
+    "JSWENERGY.NS": {
+        "name": "JSW Energy",
+        "sector": "Utilities",
+        "notes": "listed 4 Jan 2010",
+        "tags": ["Energy"],
+    },
+    "HINDPETRO.NS": {
+        "name": "Hindustan Petroleum Corporation",
+        "sector": "Energy",
+        "notes": "long history",
+        "tags": ["Energy"],
+    },
+    "MGL.NS": {
+        "name": "Mahanagar Gas",
+        "sector": "Utilities",
+        "notes": "listed 1 Jul 2016",
+        "tags": ["Energy"],
+    },
 }
 
 
 # Stock tags: the sidebar Tag option shows "ALL" (every stock above) or one tag's stocks.
 # A stock belongs to a tag when the tag's name is in its "tags" list.
 TAG_ALL = "ALL"
-TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals"]
+TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy"]
 
 
 def stocks_for_tag(tag: str) -> list:
