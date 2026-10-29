@@ -325,7 +325,7 @@ STOCKS = {
         "name": "Dr. Lal PathLabs",
         "sector": "Healthcare",
         "notes": "listed 23 Dec 2015",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "Hospitals"],
     },
     "IIFL.NS": {
         "name": "IIFL Finance",
@@ -525,13 +525,115 @@ STOCKS = {
         "notes": "long history; former NSE symbol COLGATE",
         "tags": ["AlphaQVLowVol"],
     },
+    "SHALBY.NS": {
+        "name": "Shalby",
+        "sector": "Healthcare",
+        "notes": "listed 15 Dec 2017",
+        "tags": ["Hospitals"],
+    },
+    "FORTIS.NS": {
+        "name": "Fortis Healthcare",
+        "sector": "Healthcare",
+        "notes": "listed 9 May 2007",
+        "tags": ["Hospitals"],
+    },
+    "RAINBOW.NS": {
+        "name": "Rainbow Children's Medicare",
+        "sector": "Healthcare",
+        "notes": "listed 10 May 2022; show its real first date, never invent pre-listing data",
+        "tags": ["Hospitals"],
+    },
+    "ASTERDM.NS": {
+        "name": "Aster DM Healthcare",
+        "sector": "Healthcare",
+        "notes": "listed 26 Feb 2018",
+        "tags": ["Hospitals"],
+    },
+    "MAXHEALTH.NS": {
+        "name": "Max Healthcare Institute",
+        "sector": "Healthcare",
+        "notes": "listed 21 Aug 2020",
+        "tags": ["Hospitals"],
+    },
+    "GKSL.NS": {
+        "name": "Gujarat Kidney and Super Speciality",
+        "sector": "Healthcare",
+        "notes": "listed 30 Dec 2025; show its real first date, never invent pre-listing data",
+        "tags": ["Hospitals"],
+    },
+    "NEPHROCARE.NS": {
+        "name": "Nephro Care India",
+        "sector": "Healthcare",
+        "notes": "listed 5 Jul 2024; NSE SME (series SM); show its real first date, never invent pre-listing data",
+        "tags": ["Hospitals"],
+    },
+    "SURAKSHA.NS": {
+        "name": "Suraksha Diagnostic",
+        "sector": "Healthcare",
+        "notes": "listed 6 Dec 2024; show its real first date, never invent pre-listing data",
+        "tags": ["Hospitals"],
+    },
+    "KRSNAA.NS": {
+        "name": "Krsnaa Diagnostics",
+        "sector": "Healthcare",
+        "notes": "listed 16 Aug 2021",
+        "tags": ["Hospitals"],
+    },
+    "VIJAYA.NS": {
+        "name": "Vijaya Diagnostic Centre",
+        "sector": "Healthcare",
+        "notes": "listed 14 Sep 2021",
+        "tags": ["Hospitals"],
+    },
+    "THYROCARE.NS": {
+        "name": "Thyrocare Technologies",
+        "sector": "Healthcare",
+        "notes": "listed 9 May 2016",
+        "tags": ["Hospitals"],
+    },
+    "MEDANTA.NS": {
+        "name": "Global Health (Medanta)",
+        "sector": "Healthcare",
+        "notes": "listed 16 Nov 2022; show its real first date, never invent pre-listing data",
+        "tags": ["Hospitals"],
+    },
+    "METROPOLIS.NS": {
+        "name": "Metropolis Healthcare",
+        "sector": "Healthcare",
+        "notes": "listed 15 Apr 2019",
+        "tags": ["Hospitals"],
+    },
+    "HCG.NS": {
+        "name": "HealthCare Global Enterprises",
+        "sector": "Healthcare",
+        "notes": "listed 30 Mar 2016",
+        "tags": ["Hospitals"],
+    },
+    "AGARWALEYE.NS": {
+        "name": "Dr. Agarwal's Health Care",
+        "sector": "Healthcare",
+        "notes": "listed 4 Feb 2025; show its real first date, never invent pre-listing data",
+        "tags": ["Hospitals"],
+    },
+    "GPTHEALTH.NS": {
+        "name": "GPT Healthcare",
+        "sector": "Healthcare",
+        "notes": "listed 29 Feb 2024; show its real first date, never invent pre-listing data",
+        "tags": ["Hospitals"],
+    },
+    "APOLLOHOSP.NS": {
+        "name": "Apollo Hospitals Enterprise",
+        "sector": "Healthcare",
+        "notes": "long history",
+        "tags": ["Hospitals"],
+    },
 }
 
 
 # Stock tags: the sidebar Tag option shows "ALL" (every stock above) or one tag's stocks.
 # A stock belongs to a tag when the tag's name is in its "tags" list.
 TAG_ALL = "ALL"
-TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol"]
+TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals"]
 
 
 def stocks_for_tag(tag: str) -> list:

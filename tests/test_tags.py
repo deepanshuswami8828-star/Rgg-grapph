@@ -27,6 +27,9 @@ SMALLCAP = ["REDINGTON", "CUB", "KPITTECH", "TATAELXSI", "IGL", "ATHERENERG", "G
 # Nifty Alpha Quality Value Low-Volatility 30 stocks that passed all 3 data checks
 ALPHA_QVLV = ["MARICO", "AUROPHARMA", "FEDERALBNK", "HEROMOTOCO", "LUPIN", "COALINDIA", "NTPC", "ICICIBANK", "ALKEM", "CIPLA",
               "DRREDDY", "EICHERMOT", "GRASIM", "HINDUNILVR", "MARUTI", "NMDC", "PFC", "SBIN", "SUNPHARMA", "HINDALCO", "COLPAL"]
+# Hospitals stocks that passed all 3 data checks (DRAGARWQ and 3BBLACKBIO passed too, but Yahoo has under 60 sessions for them)
+HOSPITALS = ["LALPATHLAB", "SHALBY", "FORTIS", "RAINBOW", "ASTERDM", "MAXHEALTH", "GKSL", "NEPHROCARE", "SURAKSHA", "KRSNAA",
+             "VIJAYA", "THYROCARE", "MEDANTA", "METROPOLIS", "HCG", "AGARWALEYE", "GPTHEALTH", "APOLLOHOSP"]
 
 
 def test_tag_membership():
@@ -34,6 +37,7 @@ def test_tag_membership():
     assert sorted(cfg.stocks_for_tag("Midselect")) == sorted(t + ".NS" for t in MIDSELECT)
     assert sorted(cfg.stocks_for_tag("Smallcap")) == sorted(t + ".NS" for t in SMALLCAP)
     assert sorted(cfg.stocks_for_tag("AlphaQVLowVol")) == sorted(t + ".NS" for t in ALPHA_QVLV)
+    assert sorted(cfg.stocks_for_tag("Hospitals")) == sorted(t + ".NS" for t in HOSPITALS)
 
 
 def test_every_tagged_stock_has_data():
