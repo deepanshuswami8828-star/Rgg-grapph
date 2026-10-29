@@ -1360,6 +1360,332 @@
       "benchmark_version": "43a1062f2137f719d5aa50e47e31b05cc3b98e1e1914d946de29fa2c866f9727",
       "warnings": [],
       "flagged_moves": []
+    },
+    "COALINDIA.NS": {
+      "first_date": "2010-11-04",
+      "last_date": "2026-10-28",
+      "rows": 3938,
+      "sha256": "4992c0a7739f0b3e8c3ace03f0469dfac1eb95c75641f7e8b7018f2928db49a7",
+      "fetched_at": "2026-10-29T04:18:18.393397+05:30",
+      "status": "VALID",
+      "benchmark_version": "43a1062f2137f719d5aa50e47e31b05cc3b98e1e1914d946de29fa2c866f9727",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "NTPC.NS": {
+      "first_date": "2004-11-05",
+      "last_date": "2026-10-28",
+      "rows": 5424,
+      "sha256": "cdce889609c37a60ed28eca7edde487e12b94f78df22c062700ee2563a9c62f8",
+      "fetched_at": "2026-10-29T04:18:18.393397+05:30",
+      "status": "VALID",
+      "benchmark_version": "43a1062f2137f719d5aa50e47e31b05cc3b98e1e1914d946de29fa2c866f9727",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "ICICIBANK.NS": {
+      "first_date": "2002-07-01",
+      "last_date": "2026-10-28",
+      "rows": 6035,
+      "sha256": "9beb4bb5061d4b7c16998215903a85eb3d68b103c5bb9fa12a75e6f8a8ba0267",
+      "fetched_at": "2026-10-29T04:18:18.393397+05:30",
+      "status": "VALID",
+      "benchmark_version": "43a1062f2137f719d5aa50e47e31b05cc3b98e1e1914d946de29fa2c866f9727",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "ALKEM.NS": {
+      "first_date": "2015-12-23",
+      "last_date": "2026-10-28",
+      "rows": 2675,
+      "sha256": "7a0f6c7aeaef3161247d860937aa9737613f30c67cdc059b7b44172731097c7f",
+      "fetched_at": "2026-10-29T04:18:18.393397+05:30",
+      "status": "VALID",
+      "benchmark_version": "43a1062f2137f719d5aa50e47e31b05cc3b98e1e1914d946de29fa2c866f9727",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "CIPLA.NS": {
+      "first_date": "1996-01-01",
+      "last_date": "2026-10-28",
+      "rows": 7732,
+      "sha256": "9829ea1e76d8fa203768a7927a3539813184e770e6e7fbc010a7e3a7617981de",
+      "fetched_at": "2026-10-29T04:18:18.393397+05:30",
+      "status": "VALID",
+      "benchmark_version": "43a1062f2137f719d5aa50e47e31b05cc3b98e1e1914d946de29fa2c866f9727",
+      "warnings": [
+        "Flagged move of -92.0% on 2003-04-14",
+        "Flagged move of +1154.3% on 2003-04-15",
+        "Flagged move of -92.0% on 2003-11-26",
+        "Flagged move of +1224.2% on 2003-11-27",
+        "Flagged move of -92.0% on 2003-12-25",
+        "Flagged move of +1170.3% on 2003-12-26",
+        "Flagged move of -92.0% on 2004-04-26",
+        "Flagged move of +1190.8% on 2004-04-27",
+        "Flagged move of +386.1% on 2004-05-11",
+        "Flagged move of -79.5% on 2004-05-12"
+      ],
+      "flagged_moves": [
+        {
+          "date": "2003-04-14",
+          "pct_change": -92.0,
+          "close": 3.95
+        },
+        {
+          "date": "2003-04-15",
+          "pct_change": 1154.33,
+          "close": 49.52
+        },
+        {
+          "date": "2003-11-26",
+          "pct_change": -92.0,
+          "close": 6.13
+        },
+        {
+          "date": "2003-11-27",
+          "pct_change": 1224.17,
+          "close": 81.12
+        },
+        {
+          "date": "2003-12-25",
+          "pct_change": -92.0,
+          "close": 6.87
+        },
+        {
+          "date": "2003-12-26",
+          "pct_change": 1170.27,
+          "close": 87.26
+        },
+        {
+          "date": "2004-04-26",
+          "pct_change": -92.0,
+          "close": 7.05
+        },
+        {
+          "date": "2004-04-27",
+          "pct_change": 1190.79,
+          "close": 91.06
+        },
+        {
+          "date": "2004-05-11",
+          "pct_change": 386.12,
+          "close": 431.74
+        },
+        {
+          "date": "2004-05-12",
+          "pct_change": -79.53,
+          "close": 88.39
+        }
+      ]
+    },
+    "DRREDDY.NS": {
+      "first_date": "1996-01-01",
+      "last_date": "2026-10-28",
+      "rows": 7730,
+      "sha256": "0b1473c525881fe0e12c76d4e0d04c09bd3a8a42bf53fe0c2072d4cf72fc649a",
+      "fetched_at": "2026-10-29T04:18:18.393397+05:30",
+      "status": "VALID",
+      "benchmark_version": "43a1062f2137f719d5aa50e47e31b05cc3b98e1e1914d946de29fa2c866f9727",
+      "warnings": [
+        "Flagged move of +104.5% on 2001-10-10",
+        "Flagged move of -50.0% on 2001-10-15",
+        "Flagged move of +400.0% on 2005-07-28",
+        "Flagged move of -79.3% on 2005-07-29"
+      ],
+      "flagged_moves": [
+        {
+          "date": "2001-10-10",
+          "pct_change": 104.52,
+          "close": 156.4
+        },
+        {
+          "date": "2001-10-15",
+          "pct_change": -49.98,
+          "close": 79.26
+        },
+        {
+          "date": "2005-07-28",
+          "pct_change": 400.0,
+          "close": 352.53
+        },
+        {
+          "date": "2005-07-29",
+          "pct_change": -79.33,
+          "close": 72.86
+        }
+      ]
+    },
+    "EICHERMOT.NS": {
+      "first_date": "1996-01-01",
+      "last_date": "2026-10-28",
+      "rows": 7730,
+      "sha256": "f8b29dd9b1046ff6a845094e1fcc590b0af54c947e5e96c15b47fb74d0ed543f",
+      "fetched_at": "2026-10-29T04:18:18.393397+05:30",
+      "status": "VALID",
+      "benchmark_version": "43a1062f2137f719d5aa50e47e31b05cc3b98e1e1914d946de29fa2c866f9727",
+      "warnings": [
+        "Flagged move of +67.7% on 1997-07-21",
+        "Flagged move of +39.3% on 1998-10-23",
+        "Flagged move of +900.0% on 2005-07-28",
+        "Flagged move of -90.1% on 2005-07-29"
+      ],
+      "flagged_moves": [
+        {
+          "date": "1997-07-21",
+          "pct_change": 67.66,
+          "close": 1.03
+        },
+        {
+          "date": "1998-10-23",
+          "pct_change": 39.33,
+          "close": 0.6
+        },
+        {
+          "date": "2005-07-28",
+          "pct_change": 900.0,
+          "close": 228.18
+        },
+        {
+          "date": "2005-07-29",
+          "pct_change": -90.05,
+          "close": 22.7
+        }
+      ]
+    },
+    "GRASIM.NS": {
+      "first_date": "2002-07-01",
+      "last_date": "2026-10-28",
+      "rows": 6035,
+      "sha256": "7e8cc4cc8dea2bf254faacef0336e757cff32566ffca28fb907b420fbd7f111e",
+      "fetched_at": "2026-10-29T04:18:18.393397+05:30",
+      "status": "VALID",
+      "benchmark_version": "43a1062f2137f719d5aa50e47e31b05cc3b98e1e1914d946de29fa2c866f9727",
+      "warnings": [
+        "Flagged move of +548.1% on 2005-07-28",
+        "Flagged move of -84.5% on 2005-07-29"
+      ],
+      "flagged_moves": [
+        {
+          "date": "2005-07-28",
+          "pct_change": 548.08,
+          "close": 967.02
+        },
+        {
+          "date": "2005-07-29",
+          "pct_change": -84.55,
+          "close": 149.45
+        }
+      ]
+    },
+    "HINDUNILVR.NS": {
+      "first_date": "1996-01-01",
+      "last_date": "2026-10-28",
+      "rows": 7733,
+      "sha256": "322aa0f254e18c710d3f2f34c251aa81a8f1880b4454a102fd05b6fbd05db587",
+      "fetched_at": "2026-10-29T04:18:18.393397+05:30",
+      "status": "VALID",
+      "benchmark_version": "43a1062f2137f719d5aa50e47e31b05cc3b98e1e1914d946de29fa2c866f9727",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "MARUTI.NS": {
+      "first_date": "2003-07-09",
+      "last_date": "2026-10-28",
+      "rows": 5771,
+      "sha256": "ee269771b2ebc505c74bd2fde2909abbb7c3129b42b389248ad5663c8da84863",
+      "fetched_at": "2026-10-29T04:18:18.393397+05:30",
+      "status": "VALID",
+      "benchmark_version": "43a1062f2137f719d5aa50e47e31b05cc3b98e1e1914d946de29fa2c866f9727",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "NMDC.NS": {
+      "first_date": "2008-03-03",
+      "last_date": "2026-10-28",
+      "rows": 4594,
+      "sha256": "137b32a95f1a2116e567f31735857b2f73ba765f23312799f70df9683e19402e",
+      "fetched_at": "2026-10-29T04:18:18.393397+05:30",
+      "status": "VALID",
+      "benchmark_version": "43a1062f2137f719d5aa50e47e31b05cc3b98e1e1914d946de29fa2c866f9727",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "PFC.NS": {
+      "first_date": "2007-02-23",
+      "last_date": "2026-10-28",
+      "rows": 4851,
+      "sha256": "5bedc88ec76d520423596090f0275afbec618bf300d6fba947a59e77a7b1a79c",
+      "fetched_at": "2026-10-29T04:18:18.393397+05:30",
+      "status": "VALID",
+      "benchmark_version": "43a1062f2137f719d5aa50e47e31b05cc3b98e1e1914d946de29fa2c866f9727",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "SBIN.NS": {
+      "first_date": "1996-01-01",
+      "last_date": "2026-10-28",
+      "rows": 7731,
+      "sha256": "c8c8c27269444ba3d19bf9961869c0b0f930b39e872f36ea42adc17195f2eb42",
+      "fetched_at": "2026-10-29T04:18:18.393397+05:30",
+      "status": "VALID",
+      "benchmark_version": "43a1062f2137f719d5aa50e47e31b05cc3b98e1e1914d946de29fa2c866f9727",
+      "warnings": [
+        "Flagged move of +27.7% on 2017-10-25"
+      ],
+      "flagged_moves": [
+        {
+          "date": "2017-10-25",
+          "pct_change": 27.69,
+          "close": 294.48
+        }
+      ]
+    },
+    "SUNPHARMA.NS": {
+      "first_date": "1996-01-01",
+      "last_date": "2026-10-28",
+      "rows": 7733,
+      "sha256": "19036f0fae81b0e98efa32994b6093ad144afd27eea96195cd66a884734c7b8a",
+      "fetched_at": "2026-10-29T04:18:18.393397+05:30",
+      "status": "VALID",
+      "benchmark_version": "43a1062f2137f719d5aa50e47e31b05cc3b98e1e1914d946de29fa2c866f9727",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "HINDALCO.NS": {
+      "first_date": "1996-01-01",
+      "last_date": "2026-10-28",
+      "rows": 7733,
+      "sha256": "12c0ee22398bc26caba834b88e5d65f475088668fd76bcef53b62e428fb98926",
+      "fetched_at": "2026-10-29T04:18:18.393397+05:30",
+      "status": "VALID",
+      "benchmark_version": "43a1062f2137f719d5aa50e47e31b05cc3b98e1e1914d946de29fa2c866f9727",
+      "warnings": [
+        "Flagged move of -34.3% on 1996-09-04",
+        "Flagged move of +31.6% on 2008-10-29"
+      ],
+      "flagged_moves": [
+        {
+          "date": "1996-09-04",
+          "pct_change": -34.31,
+          "close": 42.78
+        },
+        {
+          "date": "2008-10-29",
+          "pct_change": 31.56,
+          "close": 45.93
+        }
+      ]
+    },
+    "COLPAL.NS": {
+      "first_date": "2002-07-01",
+      "last_date": "2026-10-28",
+      "rows": 6038,
+      "sha256": "8e11d90158a6900427198f99cbd690ff1675cae9d03c009fa204b689937f6b9f",
+      "fetched_at": "2026-10-29T04:18:18.393397+05:30",
+      "status": "VALID",
+      "benchmark_version": "43a1062f2137f719d5aa50e47e31b05cc3b98e1e1914d946de29fa2c866f9727",
+      "warnings": [],
+      "flagged_moves": []
     }
   },
   "last_attempt": {

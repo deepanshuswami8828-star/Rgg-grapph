@@ -24,12 +24,16 @@ SMALLCAP = ["REDINGTON", "CUB", "KPITTECH", "TATAELXSI", "IGL", "ATHERENERG", "G
             "CROMPTON", "DELHIVERY", "LALPATHLAB", "IIFL", "INOXWIND", "KAYNES", "KFINTECH", "MTARTECH", "MANAPPURAM",
             "NATCOPHARM", "NBCC", "NAVINFLUOR", "ONESOURCE", "PNBHOUSING", "PPLPHARMA", "RBLBANK", "SYNGENE",
             "TATACHEM", "TATATECH", "WOCKPHARMA"]
+# Nifty Alpha Quality Value Low-Volatility 30 stocks that passed all 3 data checks
+ALPHA_QVLV = ["MARICO", "AUROPHARMA", "FEDERALBNK", "HEROMOTOCO", "LUPIN", "COALINDIA", "NTPC", "ICICIBANK", "ALKEM", "CIPLA",
+              "DRREDDY", "EICHERMOT", "GRASIM", "HINDUNILVR", "MARUTI", "NMDC", "PFC", "SBIN", "SUNPHARMA", "HINDALCO", "COLPAL"]
 
 
 def test_tag_membership():
     assert cfg.stocks_for_tag(cfg.TAG_ALL) == list(cfg.STOCKS)
     assert sorted(cfg.stocks_for_tag("Midselect")) == sorted(t + ".NS" for t in MIDSELECT)
     assert sorted(cfg.stocks_for_tag("Smallcap")) == sorted(t + ".NS" for t in SMALLCAP)
+    assert sorted(cfg.stocks_for_tag("AlphaQVLowVol")) == sorted(t + ".NS" for t in ALPHA_QVLV)
 
 
 def test_every_tagged_stock_has_data():

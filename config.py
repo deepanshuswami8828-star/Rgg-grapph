@@ -84,7 +84,7 @@ STOCKS = {
         "name": "Hero MotoCorp",
         "sector": "Automobile - Two Wheelers",
         "notes": "long history",
-        "tags": ["Midselect"],
+        "tags": ["Midselect", "AlphaQVLowVol"],
     },
     "INDIANB.NS": {
         "name": "Indian Bank",
@@ -120,7 +120,7 @@ STOCKS = {
         "name": "Aurobindo Pharma",
         "sector": "Pharmaceuticals",
         "notes": "long history",
-        "tags": ["Midselect"],
+        "tags": ["Midselect", "AlphaQVLowVol"],
     },
     "DIXON.NS": {
         "name": "Dixon Technologies",
@@ -132,7 +132,7 @@ STOCKS = {
         "name": "Federal Bank",
         "sector": "Banking - Private Bank",
         "notes": "long history",
-        "tags": ["Midselect"],
+        "tags": ["Midselect", "AlphaQVLowVol"],
     },
     "INDUSINDBK.NS": {
         "name": "IndusInd Bank",
@@ -150,7 +150,7 @@ STOCKS = {
         "name": "Marico",
         "sector": "FMCG",
         "notes": "long history",
-        "tags": ["Midselect"],
+        "tags": ["Midselect", "AlphaQVLowVol"],
     },
     "LICI.NS": {
         "name": "Life Insurance Corporation (LIC)",
@@ -168,7 +168,7 @@ STOCKS = {
         "name": "Lupin",
         "sector": "Pharmaceuticals",
         "notes": "long history",
-        "tags": ["Midselect"],
+        "tags": ["Midselect", "AlphaQVLowVol"],
     },
     "YESBANK.NS": {
         "name": "Yes Bank",
@@ -429,13 +429,109 @@ STOCKS = {
         "notes": "long history",
         "tags": ["Smallcap"],
     },
+    "COALINDIA.NS": {
+        "name": "Coal India",
+        "sector": "Oil Gas & Consumable Fuels",
+        "notes": "listed 4 Nov 2010",
+        "tags": ["AlphaQVLowVol"],
+    },
+    "NTPC.NS": {
+        "name": "NTPC",
+        "sector": "Power",
+        "notes": "listed 5 Nov 2004",
+        "tags": ["AlphaQVLowVol"],
+    },
+    "ICICIBANK.NS": {
+        "name": "ICICI Bank",
+        "sector": "Financial Services",
+        "notes": "long history",
+        "tags": ["AlphaQVLowVol"],
+    },
+    "ALKEM.NS": {
+        "name": "Alkem Laboratories",
+        "sector": "Healthcare",
+        "notes": "listed 23 Dec 2015",
+        "tags": ["AlphaQVLowVol"],
+    },
+    "CIPLA.NS": {
+        "name": "Cipla",
+        "sector": "Healthcare",
+        "notes": "long history",
+        "tags": ["AlphaQVLowVol"],
+    },
+    "DRREDDY.NS": {
+        "name": "Dr. Reddy's Laboratories",
+        "sector": "Healthcare",
+        "notes": "long history",
+        "tags": ["AlphaQVLowVol"],
+    },
+    "EICHERMOT.NS": {
+        "name": "Eicher Motors",
+        "sector": "Automobile and Auto Components",
+        "notes": "long history",
+        "tags": ["AlphaQVLowVol"],
+    },
+    "GRASIM.NS": {
+        "name": "Grasim Industries",
+        "sector": "Construction Materials",
+        "notes": "long history",
+        "tags": ["AlphaQVLowVol"],
+    },
+    "HINDUNILVR.NS": {
+        "name": "Hindustan Unilever",
+        "sector": "Fast Moving Consumer Goods",
+        "notes": "long history; former NSE symbol HINDLEVER",
+        "tags": ["AlphaQVLowVol"],
+    },
+    "MARUTI.NS": {
+        "name": "Maruti Suzuki India",
+        "sector": "Automobile and Auto Components",
+        "notes": "listed 9 Jul 2003",
+        "tags": ["AlphaQVLowVol"],
+    },
+    "NMDC.NS": {
+        "name": "NMDC",
+        "sector": "Metals & Mining",
+        "notes": "long history",
+        "tags": ["AlphaQVLowVol"],
+    },
+    "PFC.NS": {
+        "name": "Power Finance Corporation",
+        "sector": "Financial Services",
+        "notes": "listed 23 Feb 2007",
+        "tags": ["AlphaQVLowVol"],
+    },
+    "SBIN.NS": {
+        "name": "State Bank of India",
+        "sector": "Financial Services",
+        "notes": "long history",
+        "tags": ["AlphaQVLowVol"],
+    },
+    "SUNPHARMA.NS": {
+        "name": "Sun Pharmaceutical Industries",
+        "sector": "Healthcare",
+        "notes": "long history",
+        "tags": ["AlphaQVLowVol"],
+    },
+    "HINDALCO.NS": {
+        "name": "Hindalco Industries",
+        "sector": "Metals & Mining",
+        "notes": "long history; former NSE symbol HINDALC0",
+        "tags": ["AlphaQVLowVol"],
+    },
+    "COLPAL.NS": {
+        "name": "Colgate Palmolive (India)",
+        "sector": "Fast Moving Consumer Goods",
+        "notes": "long history; former NSE symbol COLGATE",
+        "tags": ["AlphaQVLowVol"],
+    },
 }
 
 
 # Stock tags: the sidebar Tag option shows "ALL" (every stock above) or one tag's stocks.
 # A stock belongs to a tag when the tag's name is in its "tags" list.
 TAG_ALL = "ALL"
-TAGS = [TAG_ALL, "Midselect", "Smallcap"]
+TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol"]
 
 
 def stocks_for_tag(tag: str) -> list:
