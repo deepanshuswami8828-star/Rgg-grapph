@@ -78,7 +78,7 @@ STOCKS = {
         "name": "Indian Hotels (IHCL)",
         "sector": "Hotels & Tourism",
         "notes": "long history",
-        "tags": ["Midselect"],
+        "tags": ["Midselect", "TataGroup"],
     },
     "HEROMOTOCO.NS": {
         "name": "Hero MotoCorp",
@@ -649,7 +649,7 @@ STOCKS = {
         "name": "Tata Power Company",
         "sector": "Utilities",
         "notes": "long history",
-        "tags": ["Energy"],
+        "tags": ["Energy", "TataGroup"],
     },
     "NTPCGREEN.NS": {
         "name": "NTPC Green Energy",
@@ -777,13 +777,43 @@ STOCKS = {
         "notes": "listed 1 Jul 2016",
         "tags": ["Energy"],
     },
+    "TATASTEEL.NS": {
+        "name": "Tata Steel",
+        "sector": "Basic Materials",
+        "notes": "long history",
+        "tags": ["TataGroup"],
+    },
+    "TMCV.NS": {
+        "name": "Tata Motors (Commercial Vehicles)",
+        "sector": "Automobile and Auto Components",
+        "notes": "listed 12 Nov 2025; show its real first date, never invent pre-listing data",
+        "tags": ["TataGroup"],
+    },
+    "TMPV.NS": {
+        "name": "Tata Motors Passenger Vehicles",
+        "sector": "Consumer Cyclical",
+        "notes": "long history",
+        "tags": ["TataGroup"],
+    },
+    "VOLTAS.NS": {
+        "name": "Voltas",
+        "sector": "Consumer Cyclical",
+        "notes": "long history",
+        "tags": ["TataGroup"],
+    },
+    "TATACONSUM.NS": {
+        "name": "Tata Consumer Products",
+        "sector": "Consumer Defensive",
+        "notes": "long history",
+        "tags": ["TataGroup"],
+    },
 }
 
 
 # Stock tags: the sidebar Tag option shows "ALL" (every stock above) or one tag's stocks.
 # A stock belongs to a tag when the tag's name is in its "tags" list.
 TAG_ALL = "ALL"
-TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy"]
+TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup"]
 
 
 def stocks_for_tag(tag: str) -> list:
