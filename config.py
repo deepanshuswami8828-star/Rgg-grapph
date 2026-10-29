@@ -132,13 +132,13 @@ STOCKS = {
         "name": "Federal Bank",
         "sector": "Banking - Private Bank",
         "notes": "long history",
-        "tags": ["Midselect", "AlphaQVLowVol"],
+        "tags": ["Midselect", "AlphaQVLowVol", "PrivateBank"],
     },
     "INDUSINDBK.NS": {
         "name": "IndusInd Bank",
         "sector": "Banking - Private Bank",
         "notes": "long history",
-        "tags": ["Midselect"],
+        "tags": ["Midselect", "PrivateBank"],
     },
     "AUBANK.NS": {
         "name": "AU Small Finance Bank",
@@ -174,7 +174,7 @@ STOCKS = {
         "name": "Yes Bank",
         "sector": "Banking - Private Bank",
         "notes": "listed 12 Jul 2005",
-        "tags": ["Midselect"],
+        "tags": ["Midselect", "PrivateBank"],
     },
     "BHARATFORG.NS": {
         "name": "Bharat Forge",
@@ -295,7 +295,7 @@ STOCKS = {
         "name": "Bandhan Bank",
         "sector": "Financial Services",
         "notes": "listed 27 Mar 2018",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "PrivateBank"],
     },
     "CDSL.NS": {
         "name": "Central Depository Services (CDSL)",
@@ -403,7 +403,7 @@ STOCKS = {
         "name": "RBL Bank",
         "sector": "Financial Services",
         "notes": "listed 31 Aug 2016",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "PrivateBank"],
     },
     "SYNGENE.NS": {
         "name": "Syngene International",
@@ -445,7 +445,7 @@ STOCKS = {
         "name": "ICICI Bank",
         "sector": "Financial Services",
         "notes": "long history",
-        "tags": ["AlphaQVLowVol"],
+        "tags": ["AlphaQVLowVol", "PrivateBank"],
     },
     "ALKEM.NS": {
         "name": "Alkem Laboratories",
@@ -807,13 +807,37 @@ STOCKS = {
         "notes": "long history",
         "tags": ["TataGroup"],
     },
+    "KOTAKBANK.NS": {
+        "name": "Kotak Mahindra Bank",
+        "sector": "Financial Services",
+        "notes": "long history",
+        "tags": ["PrivateBank"],
+    },
+    "IDFCFIRSTB.NS": {
+        "name": "IDFC First Bank",
+        "sector": "Financial Services",
+        "notes": "long history",
+        "tags": ["PrivateBank"],
+    },
+    "HDFCBANK.NS": {
+        "name": "HDFC Bank",
+        "sector": "Financial Services",
+        "notes": "long history",
+        "tags": ["PrivateBank"],
+    },
+    "AXISBANK.NS": {
+        "name": "Axis Bank",
+        "sector": "Financial Services",
+        "notes": "long history",
+        "tags": ["PrivateBank"],
+    },
 }
 
 
 # Stock tags: the sidebar Tag option shows "ALL" (every stock above) or one tag's stocks.
 # A stock belongs to a tag when the tag's name is in its "tags" list.
 TAG_ALL = "ALL"
-TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup"]
+TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank"]
 
 
 def stocks_for_tag(tag: str) -> list:

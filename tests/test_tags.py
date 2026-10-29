@@ -30,6 +30,8 @@ ALPHA_QVLV = ["MARICO", "AUROPHARMA", "FEDERALBNK", "HEROMOTOCO", "LUPIN", "COAL
 # Hospitals stocks that passed all 3 data checks (DRAGARWQ and 3BBLACKBIO passed too, but Yahoo has under 60 sessions for them)
 HOSPITALS = ["LALPATHLAB", "SHALBY", "FORTIS", "RAINBOW", "ASTERDM", "MAXHEALTH", "GKSL", "NEPHROCARE", "SURAKSHA", "KRSNAA",
              "VIJAYA", "THYROCARE", "MEDANTA", "METROPOLIS", "HCG", "AGARWALEYE", "GPTHEALTH", "APOLLOHOSP"]
+# Nifty Private Bank stocks that passed all 3 data checks
+PRIVATE_BANK = ["AXISBANK", "BANDHANBNK", "FEDERALBNK", "HDFCBANK", "ICICIBANK", "IDFCFIRSTB", "INDUSINDBK", "KOTAKBANK", "RBLBANK", "YESBANK"]
 # Nifty Tata Group 25% Cap stocks that passed all 3 data checks
 TATA_GROUP = ["INDHOTEL", "TATACONSUM", "TATAPOWER", "TATASTEEL", "TMCV", "TMPV", "VOLTAS"]
 # Nifty Energy stocks (Strike list of 40) that passed all 3 data checks
@@ -44,6 +46,7 @@ def test_tag_membership():
     assert sorted(cfg.stocks_for_tag("Hospitals")) == sorted(t + ".NS" for t in HOSPITALS)
     assert sorted(cfg.stocks_for_tag("Energy")) == sorted(t + ".NS" for t in ENERGY)
     assert sorted(cfg.stocks_for_tag("TataGroup")) == sorted(t + ".NS" for t in TATA_GROUP)
+    assert sorted(cfg.stocks_for_tag("PrivateBank")) == sorted(t + ".NS" for t in PRIVATE_BANK)
 
 
 def test_every_tagged_stock_has_data():
