@@ -78,7 +78,7 @@ STOCKS = {
         "name": "Indian Hotels (IHCL)",
         "sector": "Hotels & Tourism",
         "notes": "long history",
-        "tags": ["Midselect", "TataGroup"],
+        "tags": ["Midselect", "TataGroup", "Tourism"],
     },
     "HEROMOTOCO.NS": {
         "name": "Hero MotoCorp",
@@ -831,13 +831,61 @@ STOCKS = {
         "notes": "long history",
         "tags": ["PrivateBank"],
     },
+    "LEMONTREE.NS": {
+        "name": "Lemon Tree Hotels",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 9 Apr 2018",
+        "tags": ["Tourism"],
+    },
+    "TBOTEK.NS": {
+        "name": "TBO Tek",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 15 May 2024; show its real first date, never invent pre-listing data",
+        "tags": ["Tourism"],
+    },
+    "DEVYANI.NS": {
+        "name": "Devyani International",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 16 Aug 2021",
+        "tags": ["Tourism"],
+    },
+    "INDIGO.NS": {
+        "name": "InterGlobe Aviation",
+        "sector": "Industrials",
+        "notes": "listed 10 Nov 2015",
+        "tags": ["Tourism"],
+    },
+    "JUBLFOOD.NS": {
+        "name": "Jubilant Foodworks",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 8 Feb 2010",
+        "tags": ["Tourism"],
+    },
+    "ITCHOTELS.NS": {
+        "name": "ITC Hotels",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 29 Jan 2025; show its real first date, never invent pre-listing data",
+        "tags": ["Tourism"],
+    },
+    "BLS.NS": {
+        "name": "BLS International Services",
+        "sector": "Industrials",
+        "notes": "listed 15 Jun 2016",
+        "tags": ["Tourism"],
+    },
+    "GMRAIRPORT.NS": {
+        "name": "GMR Airports",
+        "sector": "Industrials",
+        "notes": "listed 21 Aug 2006",
+        "tags": ["Tourism"],
+    },
 }
 
 
 # Stock tags: the sidebar Tag option shows "ALL" (every stock above) or one tag's stocks.
 # A stock belongs to a tag when the tag's name is in its "tags" list.
 TAG_ALL = "ALL"
-TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank"]
+TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism"]
 
 
 def stocks_for_tag(tag: str) -> list:

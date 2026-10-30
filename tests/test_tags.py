@@ -30,6 +30,8 @@ ALPHA_QVLV = ["MARICO", "AUROPHARMA", "FEDERALBNK", "HEROMOTOCO", "LUPIN", "COAL
 # Hospitals stocks that passed all 3 data checks (DRAGARWQ and 3BBLACKBIO passed too, but Yahoo has under 60 sessions for them)
 HOSPITALS = ["LALPATHLAB", "SHALBY", "FORTIS", "RAINBOW", "ASTERDM", "MAXHEALTH", "GKSL", "NEPHROCARE", "SURAKSHA", "KRSNAA",
              "VIJAYA", "THYROCARE", "MEDANTA", "METROPOLIS", "HCG", "AGARWALEYE", "GPTHEALTH", "APOLLOHOSP"]
+# Nifty India Tourism stocks that passed all 3 data checks
+TOURISM = ["BLS", "DEVYANI", "GMRAIRPORT", "INDHOTEL", "INDIGO", "ITCHOTELS", "JUBLFOOD", "LEMONTREE", "TBOTEK"]
 # Nifty Private Bank stocks that passed all 3 data checks
 PRIVATE_BANK = ["AXISBANK", "BANDHANBNK", "FEDERALBNK", "HDFCBANK", "ICICIBANK", "IDFCFIRSTB", "INDUSINDBK", "KOTAKBANK", "RBLBANK", "YESBANK"]
 # Nifty Tata Group 25% Cap stocks that passed all 3 data checks
@@ -47,6 +49,7 @@ def test_tag_membership():
     assert sorted(cfg.stocks_for_tag("Energy")) == sorted(t + ".NS" for t in ENERGY)
     assert sorted(cfg.stocks_for_tag("TataGroup")) == sorted(t + ".NS" for t in TATA_GROUP)
     assert sorted(cfg.stocks_for_tag("PrivateBank")) == sorted(t + ".NS" for t in PRIVATE_BANK)
+    assert sorted(cfg.stocks_for_tag("Tourism")) == sorted(t + ".NS" for t in TOURISM)
 
 
 def test_every_tagged_stock_has_data():
@@ -63,5 +66,5 @@ def test_rrg_sidebar_has_no_tag_box_and_lists_every_stock():
     assert list(at.sidebar.selectbox(key="stock").options) == [
         f"{cfg.STOCKS[t]['name']} ({cfg.STOCKS[t]['sector']})" for t in cfg.STOCKS]
     at.sidebar.radio(key="page").set_value("All stocks")
-    at.run(timeout=120)
+    at.run(timeout=300)  # 135+ stocks: a cold run of every view takes over 2 minutes
     assert len(at.exception) == 0, [e.message for e in at.exception]
