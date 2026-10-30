@@ -835,7 +835,7 @@ STOCKS = {
         "name": "Lemon Tree Hotels",
         "sector": "Consumer Cyclical",
         "notes": "listed 9 Apr 2018",
-        "tags": ["Tourism"],
+        "tags": ["Tourism", "Hotels"],
     },
     "TBOTEK.NS": {
         "name": "TBO Tek",
@@ -865,7 +865,7 @@ STOCKS = {
         "name": "ITC Hotels",
         "sector": "Consumer Cyclical",
         "notes": "listed 29 Jan 2025; show its real first date, never invent pre-listing data",
-        "tags": ["Tourism"],
+        "tags": ["Tourism", "Hotels"],
     },
     "BLS.NS": {
         "name": "BLS International Services",
@@ -879,13 +879,67 @@ STOCKS = {
         "notes": "listed 21 Aug 2006",
         "tags": ["Tourism"],
     },
+    "JUNIPER.NS": {
+        "name": "Juniper Hotels",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 28 Feb 2024; show its real first date, never invent pre-listing data",
+        "tags": ["Hotels"],
+    },
+    "THELEELA.NS": {
+        "name": "The Leela (Schloss Bangalore)",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 2 Jun 2025; show its real first date, never invent pre-listing data",
+        "tags": ["Hotels"],
+    },
+    "CHALET.NS": {
+        "name": "Chalet Hotels",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 7 Feb 2019",
+        "tags": ["Hotels"],
+    },
+    "VENTIVE.NS": {
+        "name": "Ventive Hospitality",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 30 Dec 2024; show its real first date, never invent pre-listing data",
+        "tags": ["Hotels"],
+    },
+    "ITDC.NS": {
+        "name": "India Tourism Development Corporation",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 30 Dec 2016",
+        "tags": ["Hotels"],
+    },
+    "MHRIL.NS": {
+        "name": "Mahindra Holidays & Resorts India",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 16 Jul 2009",
+        "tags": ["Hotels"],
+    },
+    "PARKHOTELS.NS": {
+        "name": "Apeejay Surrendra Park Hotels",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 12 Feb 2024; show its real first date, never invent pre-listing data",
+        "tags": ["Hotels"],
+    },
+    "BRIGHOTEL.NS": {
+        "name": "Brigade Hotel Ventures",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 31 Jul 2025; show its real first date, never invent pre-listing data",
+        "tags": ["Hotels"],
+    },
+    "SAMHI.NS": {
+        "name": "SAMHI Hotels",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 22 Sep 2023; show its real first date, never invent pre-listing data",
+        "tags": ["Hotels"],
+    },
 }
 
 
 # Stock tags: the sidebar Tag option shows "ALL" (every stock above) or one tag's stocks.
 # A stock belongs to a tag when the tag's name is in its "tags" list.
 TAG_ALL = "ALL"
-TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism"]
+TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels"]
 
 
 def stocks_for_tag(tag: str) -> list:
