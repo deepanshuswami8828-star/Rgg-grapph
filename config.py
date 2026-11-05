@@ -493,7 +493,7 @@ STOCKS = {
         "name": "NMDC",
         "sector": "Metals & Mining",
         "notes": "long history",
-        "tags": ["AlphaQVLowVol"],
+        "tags": ["AlphaQVLowVol", "Metal"],
     },
     "PFC.NS": {
         "name": "Power Finance Corporation",
@@ -517,7 +517,7 @@ STOCKS = {
         "name": "Hindalco Industries",
         "sector": "Metals & Mining",
         "notes": "long history; former NSE symbol HINDALC0",
-        "tags": ["AlphaQVLowVol"],
+        "tags": ["AlphaQVLowVol", "Metal"],
     },
     "COLPAL.NS": {
         "name": "Colgate Palmolive (India)",
@@ -781,7 +781,7 @@ STOCKS = {
         "name": "Tata Steel",
         "sector": "Basic Materials",
         "notes": "long history",
-        "tags": ["TataGroup"],
+        "tags": ["TataGroup", "Metal"],
     },
     "TMCV.NS": {
         "name": "Tata Motors (Commercial Vehicles)",
@@ -933,13 +933,43 @@ STOCKS = {
         "notes": "listed 22 Sep 2023; show its real first date, never invent pre-listing data",
         "tags": ["Hotels"],
     },
+    "VAML.NS": {
+        "name": "Vedanta Aluminium Metal",
+        "sector": "Basic Materials",
+        "notes": "listed 15 Jun 2026 (demerged from Vedanta); show its real first date, never invent pre-listing data",
+        "tags": ["Metal"],
+    },
+    "HINDCOPPER.NS": {
+        "name": "Hindustan Copper",
+        "sector": "Basic Materials",
+        "notes": "NSE listing 8 Jan 2010",
+        "tags": ["Metal"],
+    },
+    "LLOYDSME.NS": {
+        "name": "Lloyds Metals and Energy",
+        "sector": "Basic Materials",
+        "notes": "NSE listing 17 Jul 2023; show its real first date, never invent pre-listing data",
+        "tags": ["Metal"],
+    },
+    "ADANIENT.NS": {
+        "name": "Adani Enterprises",
+        "sector": "Energy",
+        "notes": "long history (former NSE symbol ADANIEXPO)",
+        "tags": ["Metal"],
+    },
+    "JSL.NS": {
+        "name": "Jindal Stainless",
+        "sector": "Basic Materials",
+        "notes": "NSE listing 17 Nov 2003 (former NSE symbol JSTAINLESS)",
+        "tags": ["Metal"],
+    },
 }
 
 
 # Stock tags: the sidebar Tag option shows "ALL" (every stock above) or one tag's stocks.
 # A stock belongs to a tag when the tag's name is in its "tags" list.
 TAG_ALL = "ALL"
-TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels"]
+TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal"]
 
 
 def stocks_for_tag(tag: str) -> list:

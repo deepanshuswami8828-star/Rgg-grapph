@@ -34,6 +34,8 @@ HOSPITALS = ["LALPATHLAB", "SHALBY", "FORTIS", "RAINBOW", "ASTERDM", "MAXHEALTH"
 HOTELS = ["BRIGHOTEL", "CHALET", "ITCHOTELS", "ITDC", "JUNIPER", "LEMONTREE", "MHRIL", "PARKHOTELS", "SAMHI", "THELEELA", "VENTIVE"]
 # Nifty India Tourism stocks that passed all 3 data checks
 TOURISM = ["BLS", "DEVYANI", "GMRAIRPORT", "INDHOTEL", "INDIGO", "ITCHOTELS", "JUBLFOOD", "LEMONTREE", "TBOTEK"]
+# Nifty Metal stocks that passed all 3 data checks (HINDZINC, JSWSTEEL, VEDL, NATIONALUM, JINDALSTEL, SAIL, APLAPOLLO failed)
+METAL = ["ADANIENT", "HINDALCO", "HINDCOPPER", "JSL", "LLOYDSME", "NMDC", "TATASTEEL", "VAML"]
 # Nifty Private Bank stocks that passed all 3 data checks
 PRIVATE_BANK = ["AXISBANK", "BANDHANBNK", "FEDERALBNK", "HDFCBANK", "ICICIBANK", "IDFCFIRSTB", "INDUSINDBK", "KOTAKBANK", "RBLBANK", "YESBANK"]
 # Nifty Tata Group 25% Cap stocks that passed all 3 data checks
@@ -53,6 +55,7 @@ def test_tag_membership():
     assert sorted(cfg.stocks_for_tag("PrivateBank")) == sorted(t + ".NS" for t in PRIVATE_BANK)
     assert sorted(cfg.stocks_for_tag("Tourism")) == sorted(t + ".NS" for t in TOURISM)
     assert sorted(cfg.stocks_for_tag("Hotels")) == sorted(t + ".NS" for t in HOTELS)
+    assert sorted(cfg.stocks_for_tag("Metal")) == sorted(t + ".NS" for t in METAL)
 
 
 def test_every_tagged_stock_has_data():
