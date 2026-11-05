@@ -151,7 +151,8 @@ def test_weekend_holiday_and_incomplete_candle_handling():
         assert res["status"] == "NO_NEW_SESSION"
         assert "Weekend" in res["message"]
 
-    # 2. Incomplete candle test (today 11:00 AM IST)
-    assert not dp.is_session_final(datetime.now(cfg.IST).date(), datetime(2026, 10, 22, 11, 0, 0, tzinfo=cfg.IST))
+    # 2. Incomplete candle test (that day 11:00 AM IST); a fixed session date, so the test does not depend on today
+    session = datetime(2026, 10, 22).date()
+    assert not dp.is_session_final(session, datetime(2026, 10, 22, 11, 0, 0, tzinfo=cfg.IST))
     # After 15:45 IST, it is final
-    assert dp.is_session_final(datetime.now(cfg.IST).date(), datetime(2026, 10, 22, 16, 0, 0, tzinfo=cfg.IST))
+    assert dp.is_session_final(session, datetime(2026, 10, 22, 16, 0, 0, tzinfo=cfg.IST))
