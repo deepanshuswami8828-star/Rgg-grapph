@@ -48,7 +48,7 @@ STOCKS = {
         "name": "Bharti Airtel",
         "sector": "Telecom",
         "notes": "long history",
-        "tags": [],
+        "tags": ["NonCyclicalConsumer"],
     },
     "RELIANCE.NS": {
         "name": "Reliance Industries",
@@ -78,7 +78,7 @@ STOCKS = {
         "name": "Indian Hotels (IHCL)",
         "sector": "Hotels & Tourism",
         "notes": "long history",
-        "tags": ["Midselect", "TataGroup", "Tourism"],
+        "tags": ["Midselect", "TataGroup", "Tourism", "NonCyclicalConsumer"],
     },
     "HEROMOTOCO.NS": {
         "name": "Hero MotoCorp",
@@ -108,7 +108,7 @@ STOCKS = {
         "name": "Info Edge (Naukri)",
         "sector": "Internet - Online Classifieds",
         "notes": "listed 21 Nov 2006",
-        "tags": ["Midselect"],
+        "tags": ["Midselect", "NonCyclicalConsumer"],
     },
     "BHEL.NS": {
         "name": "Bharat Heavy Electricals (BHEL)",
@@ -126,7 +126,7 @@ STOCKS = {
         "name": "Dixon Technologies",
         "sector": "Consumer Electronics - Manufacturing",
         "notes": "listed 18 Sep 2017",
-        "tags": ["Midselect"],
+        "tags": ["Midselect", "NonCyclicalConsumer"],
     },
     "FEDERALBNK.NS": {
         "name": "Federal Bank",
@@ -150,7 +150,7 @@ STOCKS = {
         "name": "Marico",
         "sector": "FMCG",
         "notes": "long history",
-        "tags": ["Midselect", "AlphaQVLowVol"],
+        "tags": ["Midselect", "AlphaQVLowVol", "NonCyclicalConsumer"],
     },
     "LICI.NS": {
         "name": "Life Insurance Corporation (LIC)",
@@ -198,7 +198,7 @@ STOCKS = {
         "name": "Swiggy",
         "sector": "Internet - Food & Quick-commerce Delivery",
         "notes": "listed 13 Nov 2024; show its real first date, never invent pre-listing data",
-        "tags": ["Midselect"],
+        "tags": ["Midselect", "NonCyclicalConsumer"],
     },
     # Nifty Smallcap 50 stocks that passed all 3 data checks (price break, repricing, missing data) on 28 Oct 2026
     "REDINGTON.NS": {
@@ -481,7 +481,7 @@ STOCKS = {
         "name": "Hindustan Unilever",
         "sector": "Fast Moving Consumer Goods",
         "notes": "long history; former NSE symbol HINDLEVER",
-        "tags": ["AlphaQVLowVol"],
+        "tags": ["AlphaQVLowVol", "NonCyclicalConsumer"],
     },
     "MARUTI.NS": {
         "name": "Maruti Suzuki India",
@@ -523,7 +523,7 @@ STOCKS = {
         "name": "Colgate Palmolive (India)",
         "sector": "Fast Moving Consumer Goods",
         "notes": "long history; former NSE symbol COLGATE",
-        "tags": ["AlphaQVLowVol"],
+        "tags": ["AlphaQVLowVol", "NonCyclicalConsumer"],
     },
     "SHALBY.NS": {
         "name": "Shalby",
@@ -799,13 +799,13 @@ STOCKS = {
         "name": "Voltas",
         "sector": "Consumer Cyclical",
         "notes": "long history",
-        "tags": ["TataGroup"],
+        "tags": ["TataGroup", "NonCyclicalConsumer"],
     },
     "TATACONSUM.NS": {
         "name": "Tata Consumer Products",
         "sector": "Consumer Defensive",
         "notes": "long history",
-        "tags": ["TataGroup"],
+        "tags": ["TataGroup", "NonCyclicalConsumer"],
     },
     "KOTAKBANK.NS": {
         "name": "Kotak Mahindra Bank",
@@ -853,7 +853,7 @@ STOCKS = {
         "name": "InterGlobe Aviation",
         "sector": "Industrials",
         "notes": "listed 10 Nov 2015",
-        "tags": ["Tourism"],
+        "tags": ["Tourism", "NonCyclicalConsumer"],
     },
     "JUBLFOOD.NS": {
         "name": "Jubilant Foodworks",
@@ -985,13 +985,13 @@ STOCKS = {
         "name": "Avenue Supermarts (DMart)",
         "sector": "Consumer Defensive",
         "notes": "listed 21 Mar 2017",
-        "tags": ["NiftyNext50"],
+        "tags": ["NiftyNext50", "NonCyclicalConsumer"],
     },
     "IDEA.NS": {
         "name": "Vodafone Idea",
         "sector": "Communication Services",
         "notes": "listed 9 Mar 2007",
-        "tags": ["NiftyNext50"],
+        "tags": ["NiftyNext50", "NonCyclicalConsumer"],
     },
     "MUTHOOTFIN.NS": {
         "name": "Muthoot Finance",
@@ -1051,7 +1051,7 @@ STOCKS = {
         "name": "Varun Beverages",
         "sector": "Consumer Defensive",
         "notes": "listed 8 Nov 2016",
-        "tags": ["NiftyNext50"],
+        "tags": ["NiftyNext50", "NonCyclicalConsumer"],
     },
     "POLYCAB.NS": {
         "name": "Polycab India",
@@ -1063,7 +1063,7 @@ STOCKS = {
         "name": "Godrej Consumer Products",
         "sector": "Consumer Defensive",
         "notes": "long history",
-        "tags": ["NiftyNext50"],
+        "tags": ["NiftyNext50", "NonCyclicalConsumer"],
     },
     "CANBK.NS": {
         "name": "Canara Bank",
@@ -1113,13 +1113,61 @@ STOCKS = {
         "notes": "listed 29 Jan 2021",
         "tags": ["NiftyNext50"],
     },
+    "ETERNAL.NS": {
+        "name": "Eternal (Zomato)",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 23 Jul 2021 (former NSE symbol ZOMATO)",
+        "tags": ["NonCyclicalConsumer"],
+    },
+    "NYKAA.NS": {
+        "name": "FSN E-Commerce Ventures (Nykaa)",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 10 Nov 2021",
+        "tags": ["NonCyclicalConsumer"],
+    },
+    "ASIANPAINT.NS": {
+        "name": "Asian Paints",
+        "sector": "Basic Materials",
+        "notes": "long history",
+        "tags": ["NonCyclicalConsumer"],
+    },
+    "LENSKART.NS": {
+        "name": "Lenskart Solutions",
+        "sector": "Healthcare",
+        "notes": "listed 10 Nov 2025; show its real first date, never invent pre-listing data",
+        "tags": ["NonCyclicalConsumer"],
+    },
+    "VMM.NS": {
+        "name": "Vishal Mega Mart",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 18 Dec 2024; show its real first date, never invent pre-listing data",
+        "tags": ["NonCyclicalConsumer"],
+    },
+    "UNITDSPR.NS": {
+        "name": "United Spirits",
+        "sector": "Consumer Defensive",
+        "notes": "long history (former NSE symbol MCDOWELL-N)",
+        "tags": ["NonCyclicalConsumer"],
+    },
+    "DABUR.NS": {
+        "name": "Dabur India",
+        "sector": "Consumer Defensive",
+        "notes": "long history",
+        "tags": ["NonCyclicalConsumer"],
+    },
+    "TATACOMM.NS": {
+        "name": "Tata Communications",
+        "sector": "Communication Services",
+        "notes": "long history (former NSE symbol VSNL)",
+        "tags": ["NonCyclicalConsumer"],
+    },
 }
 
 
 # Stock tags: the sidebar Tag option shows "ALL" (every stock above) or one tag's stocks.
 # A stock belongs to a tag when the tag's name is in its "tags" list.
 TAG_ALL = "ALL"
-TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50"]
+TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer"]
 
 
 def stocks_for_tag(tag: str) -> list:
