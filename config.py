@@ -499,7 +499,7 @@ STOCKS = {
         "name": "Power Finance Corporation",
         "sector": "Financial Services",
         "notes": "listed 23 Feb 2007",
-        "tags": ["AlphaQVLowVol"],
+        "tags": ["AlphaQVLowVol", "NiftyNext50"],
     },
     "SBIN.NS": {
         "name": "State Bank of India",
@@ -649,7 +649,7 @@ STOCKS = {
         "name": "Tata Power Company",
         "sector": "Utilities",
         "notes": "long history",
-        "tags": ["Energy", "TataGroup"],
+        "tags": ["Energy", "TataGroup", "NiftyNext50"],
     },
     "NTPCGREEN.NS": {
         "name": "NTPC Green Energy",
@@ -661,7 +661,7 @@ STOCKS = {
         "name": "Indian Oil Corporation",
         "sector": "Energy",
         "notes": "long history",
-        "tags": ["Energy"],
+        "tags": ["Energy", "NiftyNext50"],
     },
     "NHPC.NS": {
         "name": "NHPC",
@@ -673,31 +673,31 @@ STOCKS = {
         "name": "Siemens",
         "sector": "Industrials",
         "notes": "long history",
-        "tags": ["Energy"],
+        "tags": ["Energy", "NiftyNext50"],
     },
     "GAIL.NS": {
         "name": "GAIL (India)",
         "sector": "Utilities",
         "notes": "long history",
-        "tags": ["Energy"],
+        "tags": ["Energy", "NiftyNext50"],
     },
     "ABB.NS": {
         "name": "ABB India",
         "sector": "Industrials",
         "notes": "long history",
-        "tags": ["Energy"],
+        "tags": ["Energy", "NiftyNext50"],
     },
     "CGPOWER.NS": {
         "name": "CG Power and Industrial Solutions",
         "sector": "Industrials",
         "notes": "long history",
-        "tags": ["Energy"],
+        "tags": ["Energy", "NiftyNext50"],
     },
     "BPCL.NS": {
         "name": "Bharat Petroleum Corporation",
         "sector": "Energy",
         "notes": "long history",
-        "tags": ["Energy"],
+        "tags": ["Energy", "NiftyNext50"],
     },
     "RPOWER.NS": {
         "name": "Reliance Power",
@@ -721,7 +721,7 @@ STOCKS = {
         "name": "Adani Energy Solutions",
         "sector": "Utilities",
         "notes": "listed 31 Jul 2015",
-        "tags": ["Energy"],
+        "tags": ["Energy", "NiftyNext50"],
     },
     "TORNTPOWER.NS": {
         "name": "Torrent Power",
@@ -739,25 +739,25 @@ STOCKS = {
         "name": "Siemens Energy India",
         "sector": "Utilities",
         "notes": "listed 19 Jun 2025; show its real first date, never invent pre-listing data",
-        "tags": ["Energy"],
+        "tags": ["Energy", "NiftyNext50"],
     },
     "ADANIGREEN.NS": {
         "name": "Adani Green Energy",
         "sector": "Utilities",
         "notes": "listed 18 Jun 2018",
-        "tags": ["Energy"],
+        "tags": ["Energy", "NiftyNext50"],
     },
     "POWERINDIA.NS": {
         "name": "Hitachi Energy India",
         "sector": "Industrials",
         "notes": "listed 30 Mar 2020",
-        "tags": ["Energy"],
+        "tags": ["Energy", "NiftyNext50"],
     },
     "ADANIPOWER.NS": {
         "name": "Adani Power",
         "sector": "Utilities",
         "notes": "listed 20 Aug 2009",
-        "tags": ["Energy"],
+        "tags": ["Energy", "NiftyNext50"],
     },
     "JSWENERGY.NS": {
         "name": "JSW Energy",
@@ -787,7 +787,7 @@ STOCKS = {
         "name": "Tata Motors (Commercial Vehicles)",
         "sector": "Automobile and Auto Components",
         "notes": "listed 12 Nov 2025; show its real first date, never invent pre-listing data",
-        "tags": ["TataGroup"],
+        "tags": ["TataGroup", "NiftyNext50"],
     },
     "TMPV.NS": {
         "name": "Tata Motors Passenger Vehicles",
@@ -937,7 +937,7 @@ STOCKS = {
         "name": "Vedanta Aluminium Metal",
         "sector": "Basic Materials",
         "notes": "listed 15 Jun 2026 (demerged from Vedanta); show its real first date, never invent pre-listing data",
-        "tags": ["Metal"],
+        "tags": ["Metal", "NiftyNext50"],
     },
     "HINDCOPPER.NS": {
         "name": "Hindustan Copper",
@@ -963,13 +963,163 @@ STOCKS = {
         "notes": "NSE listing 17 Nov 2003 (former NSE symbol JSTAINLESS)",
         "tags": ["Metal"],
     },
+    "TVSMOTOR.NS": {
+        "name": "TVS Motor Company",
+        "sector": "Consumer Cyclical",
+        "notes": "long history",
+        "tags": ["NiftyNext50"],
+    },
+    "DIVISLAB.NS": {
+        "name": "Divi's Laboratories",
+        "sector": "Healthcare",
+        "notes": "NSE from 12 Mar 2003",
+        "tags": ["NiftyNext50"],
+    },
+    "DLF.NS": {
+        "name": "DLF",
+        "sector": "Real Estate",
+        "notes": "listed 5 Jul 2007",
+        "tags": ["NiftyNext50"],
+    },
+    "DMART.NS": {
+        "name": "Avenue Supermarts (DMart)",
+        "sector": "Consumer Defensive",
+        "notes": "listed 21 Mar 2017",
+        "tags": ["NiftyNext50"],
+    },
+    "IDEA.NS": {
+        "name": "Vodafone Idea",
+        "sector": "Communication Services",
+        "notes": "listed 9 Mar 2007",
+        "tags": ["NiftyNext50"],
+    },
+    "MUTHOOTFIN.NS": {
+        "name": "Muthoot Finance",
+        "sector": "Financial Services",
+        "notes": "listed 6 May 2011",
+        "tags": ["NiftyNext50"],
+    },
+    "HYUNDAI.NS": {
+        "name": "Hyundai Motor India",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 22 Oct 2024; show its real first date, never invent pre-listing data",
+        "tags": ["NiftyNext50"],
+    },
+    "HDFCAMC.NS": {
+        "name": "HDFC Asset Management",
+        "sector": "Financial Services",
+        "notes": "listed 6 Aug 2018",
+        "tags": ["NiftyNext50"],
+    },
+    "WIPRO.NS": {
+        "name": "Wipro",
+        "sector": "Technology",
+        "notes": "long history",
+        "tags": ["NiftyNext50"],
+    },
+    "UNIONBANK.NS": {
+        "name": "Union Bank of India",
+        "sector": "Financial Services",
+        "notes": "long history",
+        "tags": ["NiftyNext50"],
+    },
+    "PNB.NS": {
+        "name": "Punjab National Bank",
+        "sector": "Financial Services",
+        "notes": "long history",
+        "tags": ["NiftyNext50"],
+    },
+    "HAL.NS": {
+        "name": "Hindustan Aeronautics",
+        "sector": "Industrials",
+        "notes": "listed 28 Mar 2018",
+        "tags": ["NiftyNext50"],
+    },
+    "BANKBARODA.NS": {
+        "name": "Bank of Baroda",
+        "sector": "Financial Services",
+        "notes": "long history",
+        "tags": ["NiftyNext50"],
+    },
+    "MAZDOCK.NS": {
+        "name": "Mazagon Dock Shipbuilders",
+        "sector": "Industrials",
+        "notes": "listed 12 Oct 2020",
+        "tags": ["NiftyNext50"],
+    },
+    "VBL.NS": {
+        "name": "Varun Beverages",
+        "sector": "Consumer Defensive",
+        "notes": "listed 8 Nov 2016",
+        "tags": ["NiftyNext50"],
+    },
+    "POLYCAB.NS": {
+        "name": "Polycab India",
+        "sector": "Industrials",
+        "notes": "listed 16 Apr 2019",
+        "tags": ["NiftyNext50"],
+    },
+    "GODREJCP.NS": {
+        "name": "Godrej Consumer Products",
+        "sector": "Consumer Defensive",
+        "notes": "long history",
+        "tags": ["NiftyNext50"],
+    },
+    "CANBK.NS": {
+        "name": "Canara Bank",
+        "sector": "Financial Services",
+        "notes": "long history",
+        "tags": ["NiftyNext50"],
+    },
+    "PIDILITIND.NS": {
+        "name": "Pidilite Industries",
+        "sector": "Basic Materials",
+        "notes": "long history",
+        "tags": ["NiftyNext50"],
+    },
+    "BOSCHLTD.NS": {
+        "name": "Bosch",
+        "sector": "Consumer Cyclical",
+        "notes": "long history (former NSE symbol MICO)",
+        "tags": ["NiftyNext50"],
+    },
+    "CUMMINSIND.NS": {
+        "name": "Cummins India",
+        "sector": "Industrials",
+        "notes": "long history (former NSE symbol KIRLOSKCUM)",
+        "tags": ["NiftyNext50"],
+    },
+    "BAJAJHLDNG.NS": {
+        "name": "Bajaj Holdings & Investment",
+        "sector": "Financial Services",
+        "notes": "long history (former NSE symbol BAJAJAUTO)",
+        "tags": ["NiftyNext50"],
+    },
+    "LTM.NS": {
+        "name": "LTM (LTIMindtree)",
+        "sector": "Technology",
+        "notes": "listed 21 Jul 2016 (former NSE symbols LTIM, LTI)",
+        "tags": ["NiftyNext50"],
+    },
+    "TATACAP.NS": {
+        "name": "Tata Capital",
+        "sector": "Financial Services",
+        "notes": "listed 13 Oct 2025; show its real first date, never invent pre-listing data",
+        "tags": ["NiftyNext50"],
+    },
+    "IRFC.NS": {
+        "name": "Indian Railway Finance Corporation",
+        "sector": "Financial Services",
+        "notes": "listed 29 Jan 2021",
+        "tags": ["NiftyNext50"],
+    },
 }
 
 
 # Stock tags: the sidebar Tag option shows "ALL" (every stock above) or one tag's stocks.
 # A stock belongs to a tag when the tag's name is in its "tags" list.
 TAG_ALL = "ALL"
-TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal"]
+TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50"]
 
 
 def stocks_for_tag(tag: str) -> list:

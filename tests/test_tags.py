@@ -36,6 +36,12 @@ HOTELS = ["BRIGHOTEL", "CHALET", "ITCHOTELS", "ITDC", "JUNIPER", "LEMONTREE", "M
 TOURISM = ["BLS", "DEVYANI", "GMRAIRPORT", "INDHOTEL", "INDIGO", "ITCHOTELS", "JUBLFOOD", "LEMONTREE", "TBOTEK"]
 # Nifty Metal stocks that passed all 3 data checks (HINDZINC, JSWSTEEL, VEDL, NATIONALUM, JINDALSTEL, SAIL, APLAPOLLO failed)
 METAL = ["ADANIENT", "HINDALCO", "HINDCOPPER", "JSL", "LLOYDSME", "NMDC", "TATASTEEL", "VAML"]
+# Nifty Next 50 stocks that passed all 3 data checks (ZYDUSLIFE, HINDZINC, VEDL, CHOLAFIN, TORNTPHARM, JINDALSTEL,
+# AMBUJACEM, SOLARINDS, BRITANNIA, MOTHERSON failed)
+NIFTY_NEXT_50 = ["ABB", "ADANIENSOL", "ADANIGREEN", "ADANIPOWER", "BAJAJHLDNG", "BANKBARODA", "BOSCHLTD", "BPCL", "CANBK",
+                 "CGPOWER", "CUMMINSIND", "DIVISLAB", "DLF", "DMART", "ENRIN", "GAIL", "GODREJCP", "HAL", "HDFCAMC", "HYUNDAI",
+                 "IDEA", "IOC", "IRFC", "LTM", "MAZDOCK", "MUTHOOTFIN", "PFC", "PIDILITIND", "PNB", "POLYCAB", "POWERINDIA",
+                 "SIEMENS", "TATACAP", "TATAPOWER", "TMCV", "TVSMOTOR", "UNIONBANK", "VAML", "VBL", "WIPRO"]
 # Nifty Private Bank stocks that passed all 3 data checks
 PRIVATE_BANK = ["AXISBANK", "BANDHANBNK", "FEDERALBNK", "HDFCBANK", "ICICIBANK", "IDFCFIRSTB", "INDUSINDBK", "KOTAKBANK", "RBLBANK", "YESBANK"]
 # Nifty Tata Group 25% Cap stocks that passed all 3 data checks
@@ -56,6 +62,7 @@ def test_tag_membership():
     assert sorted(cfg.stocks_for_tag("Tourism")) == sorted(t + ".NS" for t in TOURISM)
     assert sorted(cfg.stocks_for_tag("Hotels")) == sorted(t + ".NS" for t in HOTELS)
     assert sorted(cfg.stocks_for_tag("Metal")) == sorted(t + ".NS" for t in METAL)
+    assert sorted(cfg.stocks_for_tag("NiftyNext50")) == sorted(t + ".NS" for t in NIFTY_NEXT_50)
 
 
 def test_every_tagged_stock_has_data():
