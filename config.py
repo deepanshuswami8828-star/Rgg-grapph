@@ -66,7 +66,7 @@ STOCKS = {
         "name": "Multi Commodity Exchange (MCX)",
         "sector": "Financial Services - Commodity Exchange",
         "notes": "listed 9 Mar 2012; 5-for-1 split Jan 2026 must NOT appear as a crash",
-        "tags": ["Midselect"],
+        "tags": ["Midselect", "CapitalMarket"],
     },
     "PERSISTENT.NS": {
         "name": "Persistent Systems",
@@ -277,13 +277,13 @@ STOCKS = {
         "name": "Anand Rathi Wealth",
         "sector": "Financial Services",
         "notes": "listed 14 Dec 2021",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "CapitalMarket"],
     },
     "ANGELONE.NS": {
         "name": "Angel One",
         "sector": "Financial Services",
         "notes": "listed 5 Oct 2020",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "CapitalMarket"],
     },
     "APOLLOTYRE.NS": {
         "name": "Apollo Tyres",
@@ -301,13 +301,13 @@ STOCKS = {
         "name": "Central Depository Services (CDSL)",
         "sector": "Financial Services",
         "notes": "listed 30 Jun 2017",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "CapitalMarket"],
     },
     "CAMS.NS": {
         "name": "Computer Age Management Services (CAMS)",
         "sector": "Financial Services",
         "notes": "listed 5 Oct 2020",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "CapitalMarket"],
     },
     "CROMPTON.NS": {
         "name": "Crompton Greaves Consumer Electricals",
@@ -349,7 +349,7 @@ STOCKS = {
         "name": "KFin Technologies",
         "sector": "Financial Services",
         "notes": "listed 29 Dec 2022; show its real first date, never invent pre-listing data",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "CapitalMarket"],
     },
     "MTARTECH.NS": {
         "name": "MTAR Technologies",
@@ -1009,7 +1009,7 @@ STOCKS = {
         "name": "HDFC Asset Management",
         "sector": "Financial Services",
         "notes": "listed 6 Aug 2018",
-        "tags": ["NiftyNext50"],
+        "tags": ["NiftyNext50", "CapitalMarket"],
     },
     "WIPRO.NS": {
         "name": "Wipro",
@@ -1173,13 +1173,67 @@ STOCKS = {
         "notes": "listed 2 Jun 2025; show its real first date, never invent pre-listing data",
         "tags": ["OilGas"],
     },
+    "UTIAMC.NS": {
+        "name": "UTI Asset Management",
+        "sector": "Financial Services",
+        "notes": "listed 12 Oct 2020",
+        "tags": ["CapitalMarket"],
+    },
+    "MOTILALOFS.NS": {
+        "name": "Motilal Oswal Financial Services",
+        "sector": "Financial Services",
+        "notes": "listed 11 Sep 2007",
+        "tags": ["CapitalMarket"],
+    },
+    "NUVAMA.NS": {
+        "name": "Nuvama Wealth Management",
+        "sector": "Financial Services",
+        "notes": "listed 26 Sep 2023; show its real first date, never invent pre-listing data",
+        "tags": ["CapitalMarket"],
+    },
+    "GROWW.NS": {
+        "name": "Billionbrains Garage Ventures (Groww)",
+        "sector": "Financial Services",
+        "notes": "listed 12 Nov 2025; show its real first date, never invent pre-listing data",
+        "tags": ["CapitalMarket"],
+    },
+    "IEX.NS": {
+        "name": "Indian Energy Exchange",
+        "sector": "Financial Services",
+        "notes": "listed 23 Oct 2017",
+        "tags": ["CapitalMarket"],
+    },
+    "NAM-INDIA.NS": {
+        "name": "Nippon Life India Asset Management",
+        "sector": "Financial Services",
+        "notes": "listed 6 Nov 2017 (former NSE symbol RNAM)",
+        "tags": ["CapitalMarket"],
+    },
+    "BSE.NS": {
+        "name": "BSE Ltd",
+        "sector": "Financial Services",
+        "notes": "listed 3 Feb 2017",
+        "tags": ["CapitalMarket"],
+    },
+    "ABSLAMC.NS": {
+        "name": "Aditya Birla Sun Life AMC",
+        "sector": "Financial Services",
+        "notes": "listed 11 Oct 2021",
+        "tags": ["CapitalMarket"],
+    },
+    "ICICIAMC.NS": {
+        "name": "ICICI Prudential Asset Management",
+        "sector": "Financial Services",
+        "notes": "listed 19 Dec 2025; show its real first date, never invent pre-listing data",
+        "tags": ["CapitalMarket"],
+    },
 }
 
 
 # Stock tags: the sidebar Tag option shows "ALL" (every stock above) or one tag's stocks.
 # A stock belongs to a tag when the tag's name is in its "tags" list.
 TAG_ALL = "ALL"
-TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer", "OilGas"]
+TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer", "OilGas", "CapitalMarket"]
 
 
 def stocks_for_tag(tag: str) -> list:
