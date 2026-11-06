@@ -54,7 +54,7 @@ STOCKS = {
         "name": "Reliance Industries",
         "sector": "Energy / conglomerate",
         "notes": "1:1 bonus Oct 2024 must NOT appear as a crash",
-        "tags": ["Energy"],
+        "tags": ["Energy", "OilGas"],
     },
     "PAYTM.NS": {
         "name": "Paytm (One 97 Communications)",
@@ -229,7 +229,7 @@ STOCKS = {
         "name": "Indraprastha Gas (IGL)",
         "sector": "City gas distribution",
         "notes": "listed 26 Dec 2003",
-        "tags": ["Smallcap", "Energy"],
+        "tags": ["Smallcap", "Energy", "OilGas"],
     },
     "ATHERENERG.NS": {
         "name": "Ather Energy",
@@ -631,13 +631,13 @@ STOCKS = {
         "name": "Petronet LNG",
         "sector": "Energy",
         "notes": "listed 26 Mar 2004",
-        "tags": ["Energy"],
+        "tags": ["Energy", "OilGas"],
     },
     "OIL.NS": {
         "name": "Oil India",
         "sector": "Energy",
         "notes": "listed 30 Sep 2009",
-        "tags": ["Energy"],
+        "tags": ["Energy", "OilGas"],
     },
     "POWERGRID.NS": {
         "name": "Power Grid Corporation of India",
@@ -661,7 +661,7 @@ STOCKS = {
         "name": "Indian Oil Corporation",
         "sector": "Energy",
         "notes": "long history",
-        "tags": ["Energy", "NiftyNext50"],
+        "tags": ["Energy", "NiftyNext50", "OilGas"],
     },
     "NHPC.NS": {
         "name": "NHPC",
@@ -679,7 +679,7 @@ STOCKS = {
         "name": "GAIL (India)",
         "sector": "Utilities",
         "notes": "long history",
-        "tags": ["Energy", "NiftyNext50"],
+        "tags": ["Energy", "NiftyNext50", "OilGas"],
     },
     "ABB.NS": {
         "name": "ABB India",
@@ -697,7 +697,7 @@ STOCKS = {
         "name": "Bharat Petroleum Corporation",
         "sector": "Energy",
         "notes": "long history",
-        "tags": ["Energy", "NiftyNext50"],
+        "tags": ["Energy", "NiftyNext50", "OilGas"],
     },
     "RPOWER.NS": {
         "name": "Reliance Power",
@@ -733,7 +733,7 @@ STOCKS = {
         "name": "Adani Total Gas",
         "sector": "Utilities",
         "notes": "listed 5 Nov 2018",
-        "tags": ["Energy"],
+        "tags": ["Energy", "OilGas"],
     },
     "ENRIN.NS": {
         "name": "Siemens Energy India",
@@ -769,13 +769,13 @@ STOCKS = {
         "name": "Hindustan Petroleum Corporation",
         "sector": "Energy",
         "notes": "long history",
-        "tags": ["Energy"],
+        "tags": ["Energy", "OilGas"],
     },
     "MGL.NS": {
         "name": "Mahanagar Gas",
         "sector": "Utilities",
         "notes": "listed 1 Jul 2016",
-        "tags": ["Energy"],
+        "tags": ["Energy", "OilGas"],
     },
     "TATASTEEL.NS": {
         "name": "Tata Steel",
@@ -1161,13 +1161,25 @@ STOCKS = {
         "notes": "long history (former NSE symbol VSNL)",
         "tags": ["NonCyclicalConsumer"],
     },
+    "CHENNPETRO.NS": {
+        "name": "Chennai Petroleum Corporation",
+        "sector": "Energy",
+        "notes": "long history",
+        "tags": ["OilGas"],
+    },
+    "AEGISVOPAK.NS": {
+        "name": "Aegis Vopak Terminals",
+        "sector": "Energy",
+        "notes": "listed 2 Jun 2025; show its real first date, never invent pre-listing data",
+        "tags": ["OilGas"],
+    },
 }
 
 
 # Stock tags: the sidebar Tag option shows "ALL" (every stock above) or one tag's stocks.
 # A stock belongs to a tag when the tag's name is in its "tags" list.
 TAG_ALL = "ALL"
-TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer"]
+TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer", "OilGas"]
 
 
 def stocks_for_tag(tag: str) -> list:

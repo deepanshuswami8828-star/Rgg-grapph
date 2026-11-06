@@ -47,6 +47,8 @@ NIFTY_NEXT_50 = ["ABB", "ADANIENSOL", "ADANIGREEN", "ADANIPOWER", "BAJAJHLDNG", 
 NON_CYCLICAL = ["ASIANPAINT", "BHARTIARTL", "COLPAL", "DABUR", "DIXON", "DMART", "ETERNAL", "GODREJCP", "HINDUNILVR", "IDEA",
                 "INDHOTEL", "INDIGO", "LENSKART", "MARICO", "NAUKRI", "NYKAA", "SWIGGY", "TATACOMM", "TATACONSUM", "UNITDSPR",
                 "VBL", "VMM", "VOLTAS"]
+# Nifty Oil & Gas stocks that passed all 3 data checks (CASTROLIND, ONGC, AEGISLOG failed)
+OIL_GAS = ["AEGISVOPAK", "ATGL", "BPCL", "CHENNPETRO", "GAIL", "HINDPETRO", "IGL", "IOC", "MGL", "OIL", "PETRONET", "RELIANCE"]
 # Nifty Private Bank stocks that passed all 3 data checks
 PRIVATE_BANK = ["AXISBANK", "BANDHANBNK", "FEDERALBNK", "HDFCBANK", "ICICIBANK", "IDFCFIRSTB", "INDUSINDBK", "KOTAKBANK", "RBLBANK", "YESBANK"]
 # Nifty Tata Group 25% Cap stocks that passed all 3 data checks
@@ -69,6 +71,7 @@ def test_tag_membership():
     assert sorted(cfg.stocks_for_tag("Metal")) == sorted(t + ".NS" for t in METAL)
     assert sorted(cfg.stocks_for_tag("NiftyNext50")) == sorted(t + ".NS" for t in NIFTY_NEXT_50)
     assert sorted(cfg.stocks_for_tag("NonCyclicalConsumer")) == sorted(t + ".NS" for t in NON_CYCLICAL)
+    assert sorted(cfg.stocks_for_tag("OilGas")) == sorted(t + ".NS" for t in OIL_GAS)
 
 
 def test_every_tagged_stock_has_data():
