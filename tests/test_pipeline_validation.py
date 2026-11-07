@@ -156,3 +156,20 @@ def test_weekend_holiday_and_incomplete_candle_handling():
     assert not dp.is_session_final(session, datetime(2026, 10, 22, 11, 0, 0, tzinfo=cfg.IST))
     # After 15:45 IST, it is final
     assert dp.is_session_final(session, datetime(2026, 10, 22, 16, 0, 0, tzinfo=cfg.IST))
+
+
+def test_nse_weekend_sessions_are_kept():
+    """Special NSE sessions on a Saturday / Sunday (Muhurat trading, Budget day) are in the data, with NSE's official
+    NIFTY 50 close, a stock close on Yahoo's adjusted scale, and pass validation; ordinary weekend days are not."""
+    sessions = dp.weekend_sessions()
+    assert pd.Timestamp("2025-02-01") in sessions and pd.Timestamp("2023-11-12") in sessions
+    bench = dp.load_clean_data(cfg.BENCHMARK_TICKER)["Close"]
+    assert bench.loc["2025-02-01"] == 23482.15 and bench.loc["2023-11-12"] == 19525.55
+    rel = dp.load_clean_data("RELIANCE.NS")["Close"]
+    assert abs(rel.loc["2025-02-01"] / rel.loc["2025-01-31"] - 1) < 0.02      # same scale as the day before
+    weekend = bench.index[bench.index.weekday >= 5]
+    assert set(weekend) <= set(sessions)
+    ok, warn, _ = dp.validate_series(cfg.BENCHMARK_TICKER, bench, None, is_benchmark=True)
+    assert ok, warn
+    bad = pd.concat([bench, pd.Series([bench.iloc[-1]], index=[pd.Timestamp("2025-02-02")])]).sort_index()
+    assert not dp.validate_series(cfg.BENCHMARK_TICKER, bad, None, is_benchmark=True)[0]

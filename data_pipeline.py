@@ -163,6 +163,121 @@ def clean_price_series(series: pd.Series, ticker: str) -> pd.Series:
     return s
 
 
+# ---- NSE special sessions on a Saturday / Sunday (Diwali Muhurat trading, Budget-day and DR-drill sessions) ----
+# Yahoo leaves most of them out (NIFTY 50 almost always), so their prices come from NSE's official end-of-day files:
+# the equity bhavcopy (sec_bhavdata_full) for the stocks and ind_close_all for NIFTY 50. Each session is kept as
+# data/nse_weekend/<YYYY-MM-DD>.csv (Symbol, Series, PrevClose, Open, High, Close; NIFTY 50 as Series INDEX).
+# Only sessions with an official NIFTY 50 close are kept (NSE's index files start around 2013).
+WEEKEND_DIR = os.path.join(DATA_DIR, "nse_weekend")
+NSE_BHAV_URL = "https://nsearchives.nseindia.com/products/content/sec_bhavdata_full_{:%d%m%Y}.csv"
+NSE_INDEX_URL = "https://nsearchives.nseindia.com/content/indices/ind_close_all_{:%d%m%Y}.csv"
+_weekend_rows_cache: Dict[pd.Timestamp, pd.DataFrame] = {}
+_weekend_lookups: Dict[pd.Timestamp, float] = {}
+
+
+def _nse_get(url: str) -> str:
+    import urllib.request
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    with urllib.request.urlopen(req, timeout=30) as r:
+        return r.read().decode("utf-8", "replace")
+
+
+def save_weekend_session(day) -> bool:
+    """Download NSE's official files for a weekend day and store them in data/nse_weekend/ when NSE held a session
+    that day (its bhavcopy is dated that day and NIFTY 50 has a close). True when the session is stored."""
+    import csv
+    import io
+    day = pd.Timestamp(day).normalize()
+    path = os.path.join(WEEKEND_DIR, f"{day:%Y-%m-%d}.csv")
+    if os.path.exists(path):
+        return True
+    try:
+        bhav = list(csv.reader(io.StringIO(_nse_get(NSE_BHAV_URL.format(day)))))
+        if len(bhav) < 2 or pd.to_datetime(bhav[1][2].strip(), format="%d-%b-%Y") != day:
+            return False
+        nifty = [r for r in csv.reader(io.StringIO(_nse_get(NSE_INDEX_URL.format(day))))
+                 if r and r[0].strip().lower() == "nifty 50"]
+        if not nifty:
+            return False
+    except Exception as e:
+        logger.info("No NSE session files for %s: %s", day.date(), e)
+        return False
+    n = [x.strip() for x in nifty[0]]
+    out = [["Symbol", "Series", "PrevClose", "Open", "High", "Close"], ["NIFTY 50", "INDEX", "", n[2], n[3], n[5]]]
+    for r in bhav[1:]:
+        r = [x.strip() for x in r]
+        if len(r) > 8 and r[1] in ("EQ", "BE", "BZ", "T0"):
+            out.append([r[0], r[1], r[3], r[4], r[5], r[8]])
+    os.makedirs(WEEKEND_DIR, exist_ok=True)
+    with open(path, "w", newline="", encoding="utf-8") as fh:
+        csv.writer(fh).writerows(out)
+    logger.info("Stored NSE weekend session %s (%d stocks)", day.date(), len(out) - 2)
+    return True
+
+
+def weekend_sessions(today: Optional[date] = None) -> List[pd.Timestamp]:
+    """Saturday / Sunday NSE sessions with stored official prices. The last 10 days are also looked up on NSE (a new
+    special session, e.g. today's Muhurat trading, is stored the first time it is seen)."""
+    today = pd.Timestamp(today or datetime.now(IST).date())
+    for k in range(10):
+        d = today - pd.Timedelta(days=k)
+        if d.weekday() >= 5 and not os.path.exists(os.path.join(WEEKEND_DIR, f"{d:%Y-%m-%d}.csv")):
+            # look each day up at most every 5 minutes (NSE publishes the day's files some time after the session)
+            if pytime.time() - _weekend_lookups.get(d, 0) > 300:
+                _weekend_lookups[d] = pytime.time()
+                save_weekend_session(d)
+    if not os.path.isdir(WEEKEND_DIR):
+        return []
+    return sorted(pd.Timestamp(f[:-4]) for f in os.listdir(WEEKEND_DIR) if f.endswith(".csv"))
+
+
+def _weekend_rows(day: pd.Timestamp) -> pd.DataFrame:
+    rows = _weekend_rows_cache.get(day)
+    if rows is None:
+        rows = pd.read_csv(os.path.join(WEEKEND_DIR, f"{day:%Y-%m-%d}.csv"), dtype={"Symbol": str})
+        rows = rows.drop_duplicates("Symbol").set_index("Symbol")
+        _weekend_rows_cache[day] = rows
+    return rows
+
+
+def add_weekend_sessions(s: pd.Series, ticker: str, column: str = "Close",
+                         close_ref: Optional[pd.Series] = None) -> pd.Series:
+    """Add the NSE weekend sessions to a cleaned (weekday-only) Yahoo series of `column` (Close / Open / High).
+    A stock's NSE price is put on Yahoo's adjusted scale with the factor (Yahoo close on the session before) /
+    (NSE previous close); close_ref is that Yahoo close series (default: `s` itself, for a Close series).
+    NIFTY 50 uses the official index value. Sessions before the series starts or without a price are skipped."""
+    if s is None or len(s) == 0:
+        return s
+    ref_series = s if close_ref is None else close_ref
+    sym = "NIFTY 50" if ticker == BENCHMARK_TICKER else ticker.replace(".NS", "")
+    add = {}
+    for d in weekend_sessions():
+        if d <= s.index[0] or d in s.index:
+            continue
+        try:
+            rows = _weekend_rows(d)
+            if sym not in rows.index:
+                continue
+            r = rows.loc[sym]
+            val = float(r[column])
+            if sym != "NIFTY 50":
+                prev = ref_series.loc[:d - pd.Timedelta(days=1)]
+                nse_prev = float(r["PrevClose"])
+                if not len(prev) or (d - prev.index[-1]).days > 7 or not nse_prev > 0:
+                    continue
+                val *= float(prev.iloc[-1]) / nse_prev
+            if val > 0:
+                add[d] = val
+        except Exception as e:
+            logger.warning("Weekend session %s for %s skipped: %s", d.date(), ticker, e)
+    if not add:
+        return s
+    out = pd.concat([s, pd.Series(add, dtype=float)]).sort_index()
+    out = out[~out.index.duplicated(keep="first")]
+    out.name = s.name
+    return out
+
+
 def validate_series(
     ticker: str,
     new_s: pd.Series,
@@ -200,8 +315,8 @@ def validate_series(
     if not new_s.index.is_monotonic_increasing:
         return False, ["Date index is not monotonically increasing"], []
 
-    # Check 5: No weekend dates
-    weekend_mask = new_s.index.weekday >= 5
+    # Check 5: No weekend dates (except NSE's special weekend sessions, e.g. Muhurat trading)
+    weekend_mask = (new_s.index.weekday >= 5) & ~new_s.index.isin(weekend_sessions())
     if weekend_mask.any():
         weekend_dates = new_s.index[weekend_mask].strftime("%Y-%m-%d").tolist()
         return False, [f"Weekend dates detected: {weekend_dates}"], []
@@ -272,10 +387,11 @@ def get_expected_latest_session(now_dt: datetime) -> date:
     Otherwise, the last weekday prior to today.
     """
     current_date = now_dt.date()
-    if now_dt.weekday() < 5 and now_dt.time() >= REFRESH_AFTER_CLOSE_IST:
+    special = {x.date() for x in weekend_sessions(current_date)}
+    if (now_dt.weekday() < 5 or current_date in special) and now_dt.time() >= REFRESH_AFTER_CLOSE_IST:
         return current_date
     d = current_date - timedelta(days=1)
-    while d.weekday() >= 5:
+    while d.weekday() >= 5 and d not in special:
         d -= timedelta(days=1)
     return d
 
@@ -316,7 +432,7 @@ def fetch_ticker_series(ticker: str, retries: int = 3, backoff: float = 2.0) -> 
                     s = close_obj.iloc[:, 0]
                 else:
                     s = close_obj
-                cleaned = clean_price_series(s, ticker)
+                cleaned = add_weekend_sessions(clean_price_series(s, ticker), ticker)
                 if len(cleaned) > 0:
                     return cleaned
         except Exception as e:
@@ -369,10 +485,12 @@ def refresh_open_high(tickers=None, retries: int = 3, backoff: float = 2.0) -> D
             try:
                 raw = yf.download(ticker, period="max", interval="1d", auto_adjust=True, progress=False)
                 cols = {}
+                c_obj = raw["Close"]
+                close = clean_price_series(c_obj.iloc[:, 0] if isinstance(c_obj, pd.DataFrame) else c_obj, ticker)
                 for col in ("Open", "High"):
                     obj = raw[col]
                     obj = obj.iloc[:, 0] if isinstance(obj, pd.DataFrame) else obj
-                    cols[col] = clean_price_series(obj, ticker)
+                    cols[col] = add_weekend_sessions(clean_price_series(obj, ticker), ticker, col, close_ref=close)
                 df = pd.concat(cols, axis=1).dropna(how="all")
                 if len(df) == 0:
                     raise ValueError("no open/high data")
@@ -420,8 +538,9 @@ def refresh_data(force: bool = False, include_provisional: bool = False) -> dict
     now_ist = datetime.now(IST)
     manifest = load_manifest()
 
-    # Rule 11: Weekend run does not fetch/publish unless force=True
-    if not force and now_ist.weekday() >= 5:
+    # Rule 11: Weekend run does not fetch/publish unless force=True, or NSE held a special session that day
+    if not force and now_ist.weekday() >= 5 and \
+            pd.Timestamp(now_ist.date()) not in weekend_sessions(now_ist.date()):
         msg = "Weekend: NSE closed; skipping fetch/publish."
         logger.info(msg)
         manifest["last_attempt"] = {
