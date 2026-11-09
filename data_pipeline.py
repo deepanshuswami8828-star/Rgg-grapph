@@ -206,7 +206,7 @@ def save_weekend_session(day) -> bool:
     out = [["Symbol", "Series", "PrevClose", "Open", "High", "Close"], ["NIFTY 50", "INDEX", "", n[2], n[3], n[5]]]
     for r in bhav[1:]:
         r = [x.strip() for x in r]
-        if len(r) > 8 and r[1] in ("EQ", "BE", "BZ", "T0"):
+        if len(r) > 8 and r[1] in ("EQ", "BE", "BZ", "T0", "SM", "ST"):   # SM / ST: SME stocks
             out.append([r[0], r[1], r[3], r[4], r[5], r[8]])
     os.makedirs(WEEKEND_DIR, exist_ok=True)
     with open(path, "w", newline="", encoding="utf-8") as fh:
