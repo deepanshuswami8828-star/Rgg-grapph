@@ -30,7 +30,7 @@ STOCKS = {
         "name": "Bharat Electronics (BEL)",
         "sector": "Defence",
         "notes": "long history",
-        "tags": [],
+        "tags": ["Shipping"],
     },
     "SUZLON.NS": {
         "name": "Suzlon Energy",
@@ -114,7 +114,7 @@ STOCKS = {
         "name": "Bharat Heavy Electricals (BHEL)",
         "sector": "Capital Goods - Heavy Electrical Equipment",
         "notes": "long history",
-        "tags": ["Midselect", "Energy"],
+        "tags": ["Midselect", "Energy", "Shipping"],
     },
     "AUROPHARMA.NS": {
         "name": "Aurobindo Pharma",
@@ -1045,7 +1045,7 @@ STOCKS = {
         "name": "Mazagon Dock Shipbuilders",
         "sector": "Industrials",
         "notes": "listed 12 Oct 2020",
-        "tags": ["NiftyNext50"],
+        "tags": ["NiftyNext50", "Shipping"],
     },
     "VBL.NS": {
         "name": "Varun Beverages",
@@ -1227,13 +1227,67 @@ STOCKS = {
         "notes": "listed 19 Dec 2025; show its real first date, never invent pre-listing data",
         "tags": ["CapitalMarket"],
     },
+    "SCI.NS": {
+        "name": "Shipping Corporation of India",
+        "sector": "Industrials",
+        "notes": "long history",
+        "tags": ["Shipping"],
+    },
+    "ESSARSHPNG.NS": {
+        "name": "Essar Shipping",
+        "sector": "Industrials",
+        "notes": "listed 15 Nov 2011",
+        "tags": ["Shipping"],
+    },
+    "SHREEJISPG.NS": {
+        "name": "Shreeji Shipping Global",
+        "sector": "Industrials",
+        "notes": "listed 26 Aug 2025; show its real first date, never invent pre-listing data",
+        "tags": ["Shipping"],
+    },
+    "SEAMECLTD.NS": {
+        "name": "Seamec",
+        "sector": "Industrials",
+        "notes": "long history",
+        "tags": ["Shipping"],
+    },
+    "ABSMARINE.NS": {
+        "name": "ABS Marine Services",
+        "sector": "Shipping (SME)",
+        "notes": "SME, listed 21 May 2024; show its real first date, never invent pre-listing data",
+        "tags": ["Shipping"],
+    },
+    "SADHAV.NS": {
+        "name": "Sadhav Shipping",
+        "sector": "Shipping (SME)",
+        "notes": "SME, listed 1 Mar 2024; show its real first date, never invent pre-listing data",
+        "tags": ["Shipping"],
+    },
+    "COCHINSHIP.NS": {
+        "name": "Cochin Shipyard",
+        "sector": "Industrials",
+        "notes": "listed 11 Aug 2017",
+        "tags": ["Shipping"],
+    },
+    "GRSE.NS": {
+        "name": "Garden Reach Shipbuilders & Engineers",
+        "sector": "Industrials",
+        "notes": "listed 10 Oct 2018",
+        "tags": ["Shipping"],
+    },
+    "KIRLPNU.NS": {
+        "name": "Kirloskar Pneumatic",
+        "sector": "Industrials",
+        "notes": "NSE listing 26 Apr 2023 (earlier BSE only)",
+        "tags": ["Shipping"],
+    },
 }
 
 
 # Stock tags: the sidebar Tag option shows "ALL" (every stock above) or one tag's stocks.
 # A stock belongs to a tag when the tag's name is in its "tags" list.
 TAG_ALL = "ALL"
-TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer", "OilGas", "CapitalMarket"]
+TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer", "OilGas", "CapitalMarket", "Shipping"]
 
 
 def stocks_for_tag(tag: str) -> list:
