@@ -1147,7 +1147,7 @@ STOCKS = {
         "name": "United Spirits",
         "sector": "Consumer Defensive",
         "notes": "long history (former NSE symbol MCDOWELL-N)",
-        "tags": ["NonCyclicalConsumer"],
+        "tags": ["NonCyclicalConsumer", "Spirits"],
     },
     "DABUR.NS": {
         "name": "Dabur India",
@@ -1425,13 +1425,55 @@ STOCKS = {
         "notes": "long history (former NSE symbol MYSORECEM)",
         "tags": ["Cement"],
     },
+    "ABDL.NS": {
+        "name": "Allied Blenders and Distillers",
+        "sector": "Consumer Defensive",
+        "notes": "listed 2 Jul 2024; show its real first date, never invent pre-listing data",
+        "tags": ["Spirits"],
+    },
+    "TI.NS": {
+        "name": "Tilaknagar Industries",
+        "sector": "Consumer Defensive",
+        "notes": "NSE from 16 Jul 2010",
+        "tags": ["Spirits"],
+    },
+    "ASALCBR.NS": {
+        "name": "Associated Alcohols & Breweries",
+        "sector": "Consumer Defensive",
+        "notes": "NSE from 12 Feb 2020",
+        "tags": ["Spirits"],
+    },
+    "GLOBUSSPR.NS": {
+        "name": "Globus Spirits",
+        "sector": "Consumer Defensive",
+        "notes": "NSE from 23 Sep 2009",
+        "tags": ["Spirits"],
+    },
+    "PICCADIL.NS": {
+        "name": "Piccadily Agro Industries",
+        "sector": "Consumer Defensive",
+        "notes": "NSE listing 2 Jul 2025 (earlier BSE only); show its real first date, never invent pre-listing data",
+        "tags": ["Spirits"],
+    },
+    "SDBL.NS": {
+        "name": "Som Distilleries & Breweries",
+        "sector": "Consumer Defensive",
+        "notes": "NSE from 1 Apr 2014",
+        "tags": ["Spirits"],
+    },
+    "SULA.NS": {
+        "name": "Sula Vineyards",
+        "sector": "Consumer Defensive",
+        "notes": "listed 22 Dec 2022; show its real first date, never invent pre-listing data",
+        "tags": ["Spirits"],
+    },
 }
 
 
 # Stock tags: the sidebar Tag option shows "ALL" (every stock above) or one tag's stocks.
 # A stock belongs to a tag when the tag's name is in its "tags" list.
 TAG_ALL = "ALL"
-TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer", "OilGas", "CapitalMarket", "Shipping", "Infra", "Cement"]
+TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer", "OilGas", "CapitalMarket", "Shipping", "Infra", "Cement", "Spirits"]
 
 
 def stocks_for_tag(tag: str) -> list:
