@@ -1353,13 +1353,85 @@ STOCKS = {
         "notes": "listed 9 Sep 2010",
         "tags": ["Infra"],
     },
+    "SHREECEM.NS": {
+        "name": "Shree Cement",
+        "sector": "Basic Materials",
+        "notes": "long history",
+        "tags": ["Cement"],
+    },
+    "ACC.NS": {
+        "name": "ACC",
+        "sector": "Basic Materials",
+        "notes": "long history",
+        "tags": ["Cement"],
+    },
+    "JKCEMENT.NS": {
+        "name": "J.K. Cement",
+        "sector": "Basic Materials",
+        "notes": "listed 14 Mar 2006",
+        "tags": ["Cement"],
+    },
+    "JSWCEMENT.NS": {
+        "name": "JSW Cement",
+        "sector": "Basic Materials",
+        "notes": "listed 14 Aug 2025; show its real first date, never invent pre-listing data",
+        "tags": ["Cement"],
+    },
+    "NUVOCO.NS": {
+        "name": "Nuvoco Vistas",
+        "sector": "Basic Materials",
+        "notes": "listed 23 Aug 2021",
+        "tags": ["Cement"],
+    },
+    "INDIACEM.NS": {
+        "name": "The India Cements",
+        "sector": "Basic Materials",
+        "notes": "long history",
+        "tags": ["Cement"],
+    },
+    "BIRLACORPN.NS": {
+        "name": "Birla Corporation",
+        "sector": "Basic Materials",
+        "notes": "long history (former NSE symbol BIRLAJUTE)",
+        "tags": ["Cement"],
+    },
+    "JKLAKSHMI.NS": {
+        "name": "JK Lakshmi Cement",
+        "sector": "Basic Materials",
+        "notes": "listed 19 Jun 2006",
+        "tags": ["Cement"],
+    },
+    "PRSMJOHNSN.NS": {
+        "name": "Prism Johnson",
+        "sector": "Basic Materials",
+        "notes": "long history (former NSE symbol PRISMCEM)",
+        "tags": ["Cement"],
+    },
+    "ORIENTCEM.NS": {
+        "name": "Orient Cement",
+        "sector": "Basic Materials",
+        "notes": "listed 12 Jul 2013",
+        "tags": ["Cement"],
+    },
+    "STARCEMENT.NS": {
+        "name": "Star Cement",
+        "sector": "Basic Materials",
+        "notes": "listed 16 Jun 2017",
+        "tags": ["Cement"],
+    },
+    "HEIDELBERG.NS": {
+        "name": "HeidelbergCement India",
+        "sector": "Basic Materials",
+        "notes": "long history (former NSE symbol MYSORECEM)",
+        "tags": ["Cement"],
+    },
 }
 
 
 # Stock tags: the sidebar Tag option shows "ALL" (every stock above) or one tag's stocks.
 # A stock belongs to a tag when the tag's name is in its "tags" list.
 TAG_ALL = "ALL"
-TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer", "OilGas", "CapitalMarket", "Shipping", "Infra"]
+TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer", "OilGas", "CapitalMarket", "Shipping", "Infra", "Cement"]
 
 
 def stocks_for_tag(tag: str) -> list:
