@@ -56,6 +56,9 @@ CAPITAL_MARKET = ["ABSLAMC", "ANANDRATHI", "ANGELONE", "BSE", "CAMS", "CDSL", "G
 # GLOBOFFS has no Yahoo data; CHOWGULSTM, SHAHISHIP trade on BSE only)
 SHIPPING = ["ABSMARINE", "BEL", "BHEL", "COCHINSHIP", "ESSARSHPNG", "GRSE", "KIRLPNU", "MAZDOCK", "SADHAV", "SCI", "SEAMECLTD",
             "SHREEJISPG"]
+# Infra list stocks that passed all 3 data checks (LT, NCC, CEMPRO, HGINFRA, KNRCON, JKIL, ASHOKA, KPIL, KEC failed)
+INFRA = ["ADANIPORTS", "AFCONS", "DBL", "GMRAIRPORT", "GPPL", "GRINFRA", "HCC", "IRB", "IRCON", "JSWINFRA", "NBCC", "PNCINFRA",
+         "RITES", "RVNL"]
 # Nifty Private Bank stocks that passed all 3 data checks
 PRIVATE_BANK = ["AXISBANK", "BANDHANBNK", "FEDERALBNK", "HDFCBANK", "ICICIBANK", "IDFCFIRSTB", "INDUSINDBK", "KOTAKBANK", "RBLBANK", "YESBANK"]
 # Nifty Tata Group 25% Cap stocks that passed all 3 data checks
@@ -81,6 +84,7 @@ def test_tag_membership():
     assert sorted(cfg.stocks_for_tag("OilGas")) == sorted(t + ".NS" for t in OIL_GAS)
     assert sorted(cfg.stocks_for_tag("CapitalMarket")) == sorted(t + ".NS" for t in CAPITAL_MARKET)
     assert sorted(cfg.stocks_for_tag("Shipping")) == sorted(t + ".NS" for t in SHIPPING)
+    assert sorted(cfg.stocks_for_tag("Infra")) == sorted(t + ".NS" for t in INFRA)
 
 
 def test_every_tagged_stock_has_data():

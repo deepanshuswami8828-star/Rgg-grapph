@@ -373,7 +373,7 @@ STOCKS = {
         "name": "NBCC (India)",
         "sector": "Construction",
         "notes": "listed 12 Apr 2012",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "Infra"],
     },
     "NAVINFLUOR.NS": {
         "name": "Navin Fluorine International",
@@ -877,7 +877,7 @@ STOCKS = {
         "name": "GMR Airports",
         "sector": "Industrials",
         "notes": "listed 21 Aug 2006",
-        "tags": ["Tourism"],
+        "tags": ["Tourism", "Infra"],
     },
     "JUNIPER.NS": {
         "name": "Juniper Hotels",
@@ -1281,13 +1281,85 @@ STOCKS = {
         "notes": "NSE listing 26 Apr 2023 (earlier BSE only)",
         "tags": ["Shipping"],
     },
+    "AFCONS.NS": {
+        "name": "Afcons Infrastructure",
+        "sector": "Industrials",
+        "notes": "listed 4 Nov 2024; show its real first date, never invent pre-listing data",
+        "tags": ["Infra"],
+    },
+    "HCC.NS": {
+        "name": "Hindustan Construction Company",
+        "sector": "Industrials",
+        "notes": "long history (former NSE symbol HINDCONS)",
+        "tags": ["Infra"],
+    },
+    "GRINFRA.NS": {
+        "name": "G R Infraprojects",
+        "sector": "Industrials",
+        "notes": "listed 19 Jul 2021",
+        "tags": ["Infra"],
+    },
+    "PNCINFRA.NS": {
+        "name": "PNC Infratech",
+        "sector": "Industrials",
+        "notes": "listed 26 May 2015",
+        "tags": ["Infra"],
+    },
+    "DBL.NS": {
+        "name": "Dilip Buildcon",
+        "sector": "Industrials",
+        "notes": "listed 11 Aug 2016",
+        "tags": ["Infra"],
+    },
+    "RVNL.NS": {
+        "name": "Rail Vikas Nigam",
+        "sector": "Industrials",
+        "notes": "listed 11 Apr 2019",
+        "tags": ["Infra"],
+    },
+    "IRCON.NS": {
+        "name": "Ircon International",
+        "sector": "Industrials",
+        "notes": "listed 28 Sep 2018",
+        "tags": ["Infra"],
+    },
+    "RITES.NS": {
+        "name": "RITES",
+        "sector": "Industrials",
+        "notes": "listed 2 Jul 2018",
+        "tags": ["Infra"],
+    },
+    "IRB.NS": {
+        "name": "IRB Infrastructure Developers",
+        "sector": "Industrials",
+        "notes": "listed 25 Feb 2008",
+        "tags": ["Infra"],
+    },
+    "ADANIPORTS.NS": {
+        "name": "Adani Ports and SEZ",
+        "sector": "Industrials",
+        "notes": "listed 27 Nov 2007 (former NSE symbol MUNDRAPORT)",
+        "tags": ["Infra"],
+    },
+    "JSWINFRA.NS": {
+        "name": "JSW Infrastructure",
+        "sector": "Industrials",
+        "notes": "listed 3 Oct 2023",
+        "tags": ["Infra"],
+    },
+    "GPPL.NS": {
+        "name": "Gujarat Pipavav Port",
+        "sector": "Industrials",
+        "notes": "listed 9 Sep 2010",
+        "tags": ["Infra"],
+    },
 }
 
 
 # Stock tags: the sidebar Tag option shows "ALL" (every stock above) or one tag's stocks.
 # A stock belongs to a tag when the tag's name is in its "tags" list.
 TAG_ALL = "ALL"
-TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer", "OilGas", "CapitalMarket", "Shipping"]
+TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer", "OilGas", "CapitalMarket", "Shipping", "Infra"]
 
 
 def stocks_for_tag(tag: str) -> list:
