@@ -65,6 +65,11 @@ CEMENT = ["ACC", "BIRLACORPN", "HEIDELBERG", "INDIACEM", "JKCEMENT", "JKLAKSHMI"
 # Spirits list stocks that passed all 3 data checks (RADICO, GMBREW, IFBAGRO, UBL failed; JAGAJITIND trades on BSE only;
 # IGLSPIRITS listed 4 Nov 2026, too short a history for now)
 SPIRITS = ["ABDL", "ASALCBR", "GLOBUSSPR", "PICCADIL", "SDBL", "SULA", "TI", "UNITDSPR"]
+# Luxury list stocks that passed all 3 data checks (EIHOTEL, EIHAHOTELS, TAJGVK, ORIENTHOT, ASIANHOTNR, KDDL, TITAN, RADICO
+# failed; BENARAS passed but has under 60 Yahoo sessions for now)
+LUXURY = ["ADVENTHTL", "BLUESTONE", "CARYSIL", "CHALET", "CORDELIA", "ETHOSLTD", "INDHOTEL", "ITCHOTELS", "JUNIPER", "KAYA",
+          "LANDMARK", "LODHA", "MANYAVAR", "OBEROIRLTY", "PNGSREVA", "SOBHA", "STANLEY", "SULA", "SUNTECK", "TBZ", "THELEELA",
+          "TMPV", "UNITDSPR", "VENTIVE"]
 # Nifty Private Bank stocks that passed all 3 data checks
 PRIVATE_BANK = ["AXISBANK", "BANDHANBNK", "FEDERALBNK", "HDFCBANK", "ICICIBANK", "IDFCFIRSTB", "INDUSINDBK", "KOTAKBANK", "RBLBANK", "YESBANK"]
 # Nifty Tata Group 25% Cap stocks that passed all 3 data checks
@@ -93,6 +98,7 @@ def test_tag_membership():
     assert sorted(cfg.stocks_for_tag("Infra")) == sorted(t + ".NS" for t in INFRA)
     assert sorted(cfg.stocks_for_tag("Cement")) == sorted(t + ".NS" for t in CEMENT)
     assert sorted(cfg.stocks_for_tag("Spirits")) == sorted(t + ".NS" for t in SPIRITS)
+    assert sorted(cfg.stocks_for_tag("Luxury")) == sorted(t + ".NS" for t in LUXURY)
 
 
 def test_every_tagged_stock_has_data():

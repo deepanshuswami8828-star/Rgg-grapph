@@ -78,7 +78,7 @@ STOCKS = {
         "name": "Indian Hotels (IHCL)",
         "sector": "Hotels & Tourism",
         "notes": "long history",
-        "tags": ["Midselect", "TataGroup", "Tourism", "NonCyclicalConsumer"],
+        "tags": ["Midselect", "TataGroup", "Tourism", "NonCyclicalConsumer", "Luxury"],
     },
     "HEROMOTOCO.NS": {
         "name": "Hero MotoCorp",
@@ -793,7 +793,7 @@ STOCKS = {
         "name": "Tata Motors Passenger Vehicles",
         "sector": "Consumer Cyclical",
         "notes": "long history",
-        "tags": ["TataGroup"],
+        "tags": ["TataGroup", "Luxury"],
     },
     "VOLTAS.NS": {
         "name": "Voltas",
@@ -865,7 +865,7 @@ STOCKS = {
         "name": "ITC Hotels",
         "sector": "Consumer Cyclical",
         "notes": "listed 29 Jan 2025; show its real first date, never invent pre-listing data",
-        "tags": ["Tourism", "Hotels"],
+        "tags": ["Tourism", "Hotels", "Luxury"],
     },
     "BLS.NS": {
         "name": "BLS International Services",
@@ -883,25 +883,25 @@ STOCKS = {
         "name": "Juniper Hotels",
         "sector": "Consumer Cyclical",
         "notes": "listed 28 Feb 2024; show its real first date, never invent pre-listing data",
-        "tags": ["Hotels"],
+        "tags": ["Hotels", "Luxury"],
     },
     "THELEELA.NS": {
         "name": "The Leela (Schloss Bangalore)",
         "sector": "Consumer Cyclical",
         "notes": "listed 2 Jun 2025; show its real first date, never invent pre-listing data",
-        "tags": ["Hotels"],
+        "tags": ["Hotels", "Luxury"],
     },
     "CHALET.NS": {
         "name": "Chalet Hotels",
         "sector": "Consumer Cyclical",
         "notes": "listed 7 Feb 2019",
-        "tags": ["Hotels"],
+        "tags": ["Hotels", "Luxury"],
     },
     "VENTIVE.NS": {
         "name": "Ventive Hospitality",
         "sector": "Consumer Cyclical",
         "notes": "listed 30 Dec 2024; show its real first date, never invent pre-listing data",
-        "tags": ["Hotels"],
+        "tags": ["Hotels", "Luxury"],
     },
     "ITDC.NS": {
         "name": "India Tourism Development Corporation",
@@ -1147,7 +1147,7 @@ STOCKS = {
         "name": "United Spirits",
         "sector": "Consumer Defensive",
         "notes": "long history (former NSE symbol MCDOWELL-N)",
-        "tags": ["NonCyclicalConsumer", "Spirits"],
+        "tags": ["NonCyclicalConsumer", "Spirits", "Luxury"],
     },
     "DABUR.NS": {
         "name": "Dabur India",
@@ -1465,7 +1465,97 @@ STOCKS = {
         "name": "Sula Vineyards",
         "sector": "Consumer Defensive",
         "notes": "listed 22 Dec 2022; show its real first date, never invent pre-listing data",
-        "tags": ["Spirits"],
+        "tags": ["Spirits", "Luxury"],
+    },
+    "ADVENTHTL.NS": {
+        "name": "Advent Hotels International",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 13 Nov 2025; show its real first date, never invent pre-listing data",
+        "tags": ["Luxury"],
+    },
+    "CORDELIA.NS": {
+        "name": "Waterways Leisure Tourism (Cordelia Cruises)",
+        "sector": "Industrials",
+        "notes": "listed 1 Jul 2026; show its real first date, never invent pre-listing data",
+        "tags": ["Luxury"],
+    },
+    "ETHOSLTD.NS": {
+        "name": "Ethos",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 30 May 2022",
+        "tags": ["Luxury"],
+    },
+    "BLUESTONE.NS": {
+        "name": "BlueStone Jewellery and Lifestyle",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 19 Aug 2025; show its real first date, never invent pre-listing data",
+        "tags": ["Luxury"],
+    },
+    "PNGSREVA.NS": {
+        "name": "PNGS Reva Diamond Jewellery",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 4 Mar 2026; show its real first date, never invent pre-listing data",
+        "tags": ["Luxury"],
+    },
+    "TBZ.NS": {
+        "name": "Tribhovandas Bhimji Zaveri",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 9 May 2012",
+        "tags": ["Luxury"],
+    },
+    "MANYAVAR.NS": {
+        "name": "Vedant Fashions (Manyavar)",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 16 Feb 2022",
+        "tags": ["Luxury"],
+    },
+    "KAYA.NS": {
+        "name": "Kaya",
+        "sector": "Consumer Defensive",
+        "notes": "NSE from 14 Aug 2015",
+        "tags": ["Luxury"],
+    },
+    "STANLEY.NS": {
+        "name": "Stanley Lifestyles",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 28 Jun 2024; show its real first date, never invent pre-listing data",
+        "tags": ["Luxury"],
+    },
+    "CARYSIL.NS": {
+        "name": "Carysil",
+        "sector": "Consumer Cyclical",
+        "notes": "NSE from 14 Jan 2021 (former NSE symbol ACRYSIL)",
+        "tags": ["Luxury"],
+    },
+    "OBEROIRLTY.NS": {
+        "name": "Oberoi Realty",
+        "sector": "Real Estate",
+        "notes": "listed 20 Oct 2010 (former NSE symbol OBEROIREAL)",
+        "tags": ["Luxury"],
+    },
+    "SUNTECK.NS": {
+        "name": "Sunteck Realty",
+        "sector": "Real Estate",
+        "notes": "NSE from 13 Nov 2009",
+        "tags": ["Luxury"],
+    },
+    "LODHA.NS": {
+        "name": "Lodha Developers",
+        "sector": "Real Estate",
+        "notes": "listed 19 Apr 2021 (former NSE symbol MACROTECH)",
+        "tags": ["Luxury"],
+    },
+    "SOBHA.NS": {
+        "name": "Sobha",
+        "sector": "Real Estate",
+        "notes": "listed 20 Dec 2006",
+        "tags": ["Luxury"],
+    },
+    "LANDMARK.NS": {
+        "name": "Landmark Cars",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 23 Dec 2022",
+        "tags": ["Luxury"],
     },
 }
 
@@ -1473,7 +1563,7 @@ STOCKS = {
 # Stock tags: the sidebar Tag option shows "ALL" (every stock above) or one tag's stocks.
 # A stock belongs to a tag when the tag's name is in its "tags" list.
 TAG_ALL = "ALL"
-TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer", "OilGas", "CapitalMarket", "Shipping", "Infra", "Cement", "Spirits"]
+TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer", "OilGas", "CapitalMarket", "Shipping", "Infra", "Cement", "Spirits", "Luxury"]
 
 
 def stocks_for_tag(tag: str) -> list:
