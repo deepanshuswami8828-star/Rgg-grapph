@@ -180,7 +180,7 @@ STOCKS = {
         "name": "Bharat Forge",
         "sector": "Auto Components - Forgings",
         "notes": "long history",
-        "tags": ["Midselect"],
+        "tags": ["Midselect", "AutomationRobotics"],
     },
     "GVT&D.NS": {
         "name": "GE Vernova T&D India",
@@ -253,7 +253,7 @@ STOCKS = {
         "name": "Sona BLW Precision Forgings",
         "sector": "Auto components",
         "notes": "listed 24 Jun 2021",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "AutomationRobotics"],
     },
     "ACUTAAS.NS": {
         "name": "Acutaas Chemicals",
@@ -355,7 +355,7 @@ STOCKS = {
         "name": "MTAR Technologies",
         "sector": "Capital Goods",
         "notes": "listed 15 Mar 2021",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "AutomationRobotics"],
     },
     "MANAPPURAM.NS": {
         "name": "Manappuram Finance",
@@ -673,7 +673,7 @@ STOCKS = {
         "name": "Siemens",
         "sector": "Industrials",
         "notes": "long history",
-        "tags": ["Energy", "NiftyNext50"],
+        "tags": ["Energy", "NiftyNext50", "AutomationRobotics"],
     },
     "GAIL.NS": {
         "name": "GAIL (India)",
@@ -1659,13 +1659,31 @@ STOCKS = {
         "notes": "listed 26 Dec 2019 (former NSE symbol SHIL)",
         "tags": ["LifestyleFashion"],
     },
+    "BBL.NS": {
+        "name": "Bharat Bijlee",
+        "sector": "Industrials",
+        "notes": "NSE from 21 Nov 2006",
+        "tags": ["AutomationRobotics"],
+    },
+    "ELECON.NS": {
+        "name": "Elecon Engineering",
+        "sector": "Industrials",
+        "notes": "NSE from 29 Sep 2006",
+        "tags": ["AutomationRobotics"],
+    },
+    "NRBBEARING.NS": {
+        "name": "NRB Bearings",
+        "sector": "Consumer Cyclical",
+        "notes": "long history",
+        "tags": ["AutomationRobotics"],
+    },
 }
 
 
 # Stock tags: the sidebar Tag option shows "ALL" (every stock above) or one tag's stocks.
 # A stock belongs to a tag when the tag's name is in its "tags" list.
 TAG_ALL = "ALL"
-TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer", "OilGas", "CapitalMarket", "Shipping", "Infra", "Cement", "Spirits", "Luxury", "LifestyleFashion"]
+TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer", "OilGas", "CapitalMarket", "Shipping", "Infra", "Cement", "Spirits", "Luxury", "LifestyleFashion", "AutomationRobotics"]
 
 
 def stocks_for_tag(tag: str) -> list:

@@ -75,6 +75,8 @@ LUXURY = ["ADVENTHTL", "BLUESTONE", "CARYSIL", "CHALET", "CORDELIA", "ETHOSLTD",
 LIFESTYLE_FASHION = ["ABFRL", "ABLBL", "ARVINDFASN", "BRIGHOTEL", "CAMPUS", "EICHERMOT", "GREENLAM", "HINDWAREAP", "KAJARIACER",
                      "KALYANKJIL", "METROBRAND", "MHRIL", "NYKAA", "PICCADIL", "PNGJL", "PVRINOX", "RAYMONDLSL", "REDTAPE",
                      "SAFARI", "SENCO", "SFL", "SPECIALITY", "WELSPUNLIV"]
+# Automation and Robotics list stocks that passed all 3 data checks (SCHAEFFLER, TIMKEN, SHANTIGEAR, HONAUT, NIBL failed)
+AUTOMATION_ROBOTICS = ["BBL", "BHARATFORG", "ELECON", "MTARTECH", "NRBBEARING", "SIEMENS", "SONACOMS"]
 # Nifty Private Bank stocks that passed all 3 data checks
 PRIVATE_BANK = ["AXISBANK", "BANDHANBNK", "FEDERALBNK", "HDFCBANK", "ICICIBANK", "IDFCFIRSTB", "INDUSINDBK", "KOTAKBANK", "RBLBANK", "YESBANK"]
 # Nifty Tata Group 25% Cap stocks that passed all 3 data checks
@@ -105,6 +107,7 @@ def test_tag_membership():
     assert sorted(cfg.stocks_for_tag("Spirits")) == sorted(t + ".NS" for t in SPIRITS)
     assert sorted(cfg.stocks_for_tag("Luxury")) == sorted(t + ".NS" for t in LUXURY)
     assert sorted(cfg.stocks_for_tag("LifestyleFashion")) == sorted(t + ".NS" for t in LIFESTYLE_FASHION)
+    assert sorted(cfg.stocks_for_tag("AutomationRobotics")) == sorted(t + ".NS" for t in AUTOMATION_ROBOTICS)
 
 
 def test_every_tagged_stock_has_data():
