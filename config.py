@@ -24,7 +24,7 @@ STOCKS = {
         "name": "PVR INOX",
         "sector": "Media & entertainment",
         "notes": "long history",
-        "tags": [],
+        "tags": ["LifestyleFashion"],
     },
     "BEL.NS": {
         "name": "Bharat Electronics (BEL)",
@@ -469,7 +469,7 @@ STOCKS = {
         "name": "Eicher Motors",
         "sector": "Automobile and Auto Components",
         "notes": "long history",
-        "tags": ["AlphaQVLowVol"],
+        "tags": ["AlphaQVLowVol", "LifestyleFashion"],
     },
     "GRASIM.NS": {
         "name": "Grasim Industries",
@@ -913,7 +913,7 @@ STOCKS = {
         "name": "Mahindra Holidays & Resorts India",
         "sector": "Consumer Cyclical",
         "notes": "listed 16 Jul 2009",
-        "tags": ["Hotels"],
+        "tags": ["Hotels", "LifestyleFashion"],
     },
     "PARKHOTELS.NS": {
         "name": "Apeejay Surrendra Park Hotels",
@@ -925,7 +925,7 @@ STOCKS = {
         "name": "Brigade Hotel Ventures",
         "sector": "Consumer Cyclical",
         "notes": "listed 31 Jul 2025; show its real first date, never invent pre-listing data",
-        "tags": ["Hotels"],
+        "tags": ["Hotels", "LifestyleFashion"],
     },
     "SAMHI.NS": {
         "name": "SAMHI Hotels",
@@ -1123,7 +1123,7 @@ STOCKS = {
         "name": "FSN E-Commerce Ventures (Nykaa)",
         "sector": "Consumer Cyclical",
         "notes": "listed 10 Nov 2021",
-        "tags": ["NonCyclicalConsumer"],
+        "tags": ["NonCyclicalConsumer", "LifestyleFashion"],
     },
     "ASIANPAINT.NS": {
         "name": "Asian Paints",
@@ -1453,7 +1453,7 @@ STOCKS = {
         "name": "Piccadily Agro Industries",
         "sector": "Consumer Defensive",
         "notes": "NSE listing 2 Jul 2025 (earlier BSE only); show its real first date, never invent pre-listing data",
-        "tags": ["Spirits"],
+        "tags": ["Spirits", "LifestyleFashion"],
     },
     "SDBL.NS": {
         "name": "Som Distilleries & Breweries",
@@ -1557,13 +1557,115 @@ STOCKS = {
         "notes": "listed 23 Dec 2022",
         "tags": ["Luxury"],
     },
+    "PNGJL.NS": {
+        "name": "P N Gadgil Jewellers",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 17 Sep 2024; show its real first date, never invent pre-listing data",
+        "tags": ["LifestyleFashion"],
+    },
+    "KALYANKJIL.NS": {
+        "name": "Kalyan Jewellers India",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 26 Mar 2021",
+        "tags": ["LifestyleFashion"],
+    },
+    "SENCO.NS": {
+        "name": "Senco Gold",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 14 Jul 2023; show its real first date, never invent pre-listing data",
+        "tags": ["LifestyleFashion"],
+    },
+    "ARVINDFASN.NS": {
+        "name": "Arvind Fashions",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 8 Mar 2019",
+        "tags": ["LifestyleFashion"],
+    },
+    "RAYMONDLSL.NS": {
+        "name": "Raymond Lifestyle",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 5 Sep 2024; show its real first date, never invent pre-listing data",
+        "tags": ["LifestyleFashion"],
+    },
+    "METROBRAND.NS": {
+        "name": "Metro Brands",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 22 Dec 2021",
+        "tags": ["LifestyleFashion"],
+    },
+    "ABLBL.NS": {
+        "name": "Aditya Birla Lifestyle Brands",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 23 Jun 2025 (demerged from ABFRL); show its real first date, never invent pre-listing data",
+        "tags": ["LifestyleFashion"],
+    },
+    "REDTAPE.NS": {
+        "name": "Redtape",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 11 Aug 2023; show its real first date, never invent pre-listing data",
+        "tags": ["LifestyleFashion"],
+    },
+    "CAMPUS.NS": {
+        "name": "Campus Activewear",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 9 May 2022",
+        "tags": ["LifestyleFashion"],
+    },
+    "SAFARI.NS": {
+        "name": "Safari Industries (India)",
+        "sector": "Consumer Cyclical",
+        "notes": "NSE from 12 Sep 2019",
+        "tags": ["LifestyleFashion"],
+    },
+    "SFL.NS": {
+        "name": "Sheela Foam",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 9 Dec 2016",
+        "tags": ["LifestyleFashion"],
+    },
+    "GREENLAM.NS": {
+        "name": "Greenlam Industries",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 2 Mar 2015",
+        "tags": ["LifestyleFashion"],
+    },
+    "KAJARIACER.NS": {
+        "name": "Kajaria Ceramics",
+        "sector": "Industrials",
+        "notes": "long history",
+        "tags": ["LifestyleFashion"],
+    },
+    "WELSPUNLIV.NS": {
+        "name": "Welspun Living",
+        "sector": "Consumer Cyclical",
+        "notes": "long history (former NSE symbol WELSPUNIND)",
+        "tags": ["LifestyleFashion"],
+    },
+    "SPECIALITY.NS": {
+        "name": "Speciality Restaurants",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 30 May 2012",
+        "tags": ["LifestyleFashion"],
+    },
+    "ABFRL.NS": {
+        "name": "Aditya Birla Fashion and Retail",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 17 Jul 2013 (former NSE symbol PFRL); 22 May 2025 price drop is the ABLBL demerger",
+        "tags": ["LifestyleFashion"],
+    },
+    "HINDWAREAP.NS": {
+        "name": "Hindware Home Innovation",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 26 Dec 2019 (former NSE symbol SHIL)",
+        "tags": ["LifestyleFashion"],
+    },
 }
 
 
 # Stock tags: the sidebar Tag option shows "ALL" (every stock above) or one tag's stocks.
 # A stock belongs to a tag when the tag's name is in its "tags" list.
 TAG_ALL = "ALL"
-TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer", "OilGas", "CapitalMarket", "Shipping", "Infra", "Cement", "Spirits", "Luxury"]
+TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer", "OilGas", "CapitalMarket", "Shipping", "Infra", "Cement", "Spirits", "Luxury", "LifestyleFashion"]
 
 
 def stocks_for_tag(tag: str) -> list:
