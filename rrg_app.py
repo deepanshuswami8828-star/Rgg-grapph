@@ -1298,8 +1298,14 @@ def stock_search(options) -> None:
         st.session_state["_stock_pick"] = t
 
     st_searchbox(lambda term: stock_suggestions(term, options), key="stock_searchbox",
-                 label="🔍 Search stock", placeholder="Type: b, pfc, bank, GoldLending ...",
+                 label="🔍 Search stock", placeholder="Type b, pfc, bank ...",
                  clear_on_submit=True, rerun_scope="fragment", submit_function=pick, debounce=150,
+                 # one line, the same height as the "Select Stock" box below
+                 style_overrides={"searchbox": {
+                     "control": {"minHeight": "40px", "height": "40px"},
+                     "placeholder": {"whiteSpace": "nowrap", "overflow": "hidden", "textOverflow": "ellipsis"},
+                     "input": {"margin": "0px", "paddingTop": "0px", "paddingBottom": "0px"},
+                 }},
                  help="Suggestions update as you type: symbols starting with the letters come first, then names, "
                       "sectors and tags. Pick one to open it.")
     t = st.session_state.pop("_stock_pick", None)
