@@ -27,9 +27,10 @@ SMALLCAP = ["REDINGTON", "CUB", "KPITTECH", "TATAELXSI", "IGL", "ATHERENERG", "G
 # Nifty Alpha Quality Value Low-Volatility 30 stocks that passed all 3 data checks
 ALPHA_QVLV = ["MARICO", "AUROPHARMA", "FEDERALBNK", "HEROMOTOCO", "LUPIN", "COALINDIA", "NTPC", "ICICIBANK", "ALKEM", "CIPLA",
               "DRREDDY", "EICHERMOT", "GRASIM", "HINDUNILVR", "MARUTI", "NMDC", "PFC", "SBIN", "SUNPHARMA", "HINDALCO", "COLPAL"]
-# Hospitals stocks that passed all 3 data checks (DRAGARWQ and 3BBLACKBIO passed too, but Yahoo has under 60 sessions for them)
+# Hospitals stocks that passed all 3 data checks (DRAGARWQ and 3BBLACKBIO added on 12 Nov 2026, once Yahoo had 60 sessions)
 HOSPITALS = ["LALPATHLAB", "SHALBY", "FORTIS", "RAINBOW", "ASTERDM", "MAXHEALTH", "GKSL", "NEPHROCARE", "SURAKSHA", "KRSNAA",
-             "VIJAYA", "THYROCARE", "MEDANTA", "METROPOLIS", "HCG", "AGARWALEYE", "GPTHEALTH", "APOLLOHOSP"]
+             "VIJAYA", "THYROCARE", "MEDANTA", "METROPOLIS", "HCG", "AGARWALEYE", "GPTHEALTH", "APOLLOHOSP",
+             "DRAGARWQ", "3BBLACKBIO"]
 # Hotels and hospitality stocks that passed all 3 data checks
 HOTELS = ["BRIGHOTEL", "CHALET", "ITCHOTELS", "ITDC", "JUNIPER", "LEMONTREE", "MHRIL", "PARKHOTELS", "SAMHI", "THELEELA", "VENTIVE"]
 # Nifty India Tourism stocks that passed all 3 data checks
@@ -66,10 +67,10 @@ CEMENT = ["ACC", "BIRLACORPN", "HEIDELBERG", "INDIACEM", "JKCEMENT", "JKLAKSHMI"
 # IGLSPIRITS listed 4 Nov 2026, too short a history for now)
 SPIRITS = ["ABDL", "ASALCBR", "GLOBUSSPR", "PICCADIL", "SDBL", "SULA", "TI", "UNITDSPR"]
 # Luxury list stocks that passed all 3 data checks (EIHOTEL, EIHAHOTELS, TAJGVK, ORIENTHOT, ASIANHOTNR, KDDL, TITAN, RADICO
-# failed; BENARAS passed but has under 60 Yahoo sessions for now)
+# failed; BENARAS added on 12 Nov 2026, once Yahoo had 60 sessions)
 LUXURY = ["ADVENTHTL", "BLUESTONE", "CARYSIL", "CHALET", "CORDELIA", "ETHOSLTD", "INDHOTEL", "ITCHOTELS", "JUNIPER", "KAYA",
           "LANDMARK", "LODHA", "MANYAVAR", "OBEROIRLTY", "PNGSREVA", "SOBHA", "STANLEY", "SULA", "SUNTECK", "TBZ", "THELEELA",
-          "TMPV", "UNITDSPR", "VENTIVE"]
+          "TMPV", "UNITDSPR", "VENTIVE", "BENARAS"]
 # Lifestyle and Fashion list stocks that passed all 3 data checks (VHLTD, SHOPERSTOP, CERA, PHOENIXLTD, TRENT, BATAINDIA,
 # KKCL, VIPIND, ICIL failed)
 LIFESTYLE_FASHION = ["ABFRL", "ABLBL", "ARVINDFASN", "BRIGHOTEL", "CAMPUS", "EICHERMOT", "GREENLAM", "HINDWAREAP", "KAJARIACER",
@@ -77,6 +78,18 @@ LIFESTYLE_FASHION = ["ABFRL", "ABLBL", "ARVINDFASN", "BRIGHOTEL", "CAMPUS", "EIC
                      "SAFARI", "SENCO", "SFL", "SPECIALITY", "WELSPUNLIV"]
 # Automation and Robotics list stocks that passed all 3 data checks (SCHAEFFLER, TIMKEN, SHANTIGEAR, HONAUT, NIBL failed)
 AUTOMATION_ROBOTICS = ["BBL", "BHARATFORG", "ELECON", "MTARTECH", "NRBBEARING", "SIEMENS", "SONACOMS"]
+# Gold Lending list stocks that passed all 3 data checks (CGCL, KARURVYSYA failed)
+GOLD_LENDING = ["CSBBANK", "CUB", "DHANBANK", "FEDERALBNK", "FEDFINA", "FINKURVE", "IIFL", "MANAPPURAM", "MUTHOOTFIN", "SOUTHBANK"]
+# Consumer loans list stocks that passed all 3 data checks (BAJFINANCE, POONAWALLA, CHOLAFIN, SUNDARMFIN failed)
+CONSUMER_LOANS = ["HDBFS", "INDOSTAR", "LTF", "M&MFIN", "MANBA", "MUTHOOTCAP", "SBICARD", "SHRIRAMFIN", "TATACAP"]
+# Housing and large ticket finance list stocks that passed all 3 data checks (GICHSGFIN failed)
+HOUSING_LARGE_TICKET = ["AADHARHFC", "AAVAS", "ABCAPITAL", "APTUS", "BAJAJHFL", "CANFINHOME", "HDBFS", "HOMEFIRST", "IIFL",
+                        "INDIASHLTR", "JIOFIN", "LICHSGFIN", "PIRAMALFIN", "PNBHOUSING", "REPCOHOME", "SAMMAANCAP", "TATACAP"]
+# MSME and Microfinance list stocks that passed all 3 data checks (CGCL, PAISALO failed)
+MSME_MICROFINANCE = ["ARMANFIN", "CREDITACC", "FIVESTAR", "FUSION", "MASFIN", "MUTHOOTMF", "NORTHARC", "SATIN", "SBFC", "SPANDANA",
+                     "UGROCAP"]
+# Consumer Finance list = Consumer loans + Housing and large ticket finance + MSME and Microfinance
+CONSUMER_FINANCE = sorted(set(CONSUMER_LOANS + HOUSING_LARGE_TICKET + MSME_MICROFINANCE))
 # Nifty Private Bank stocks that passed all 3 data checks
 PRIVATE_BANK = ["AXISBANK", "BANDHANBNK", "FEDERALBNK", "HDFCBANK", "ICICIBANK", "IDFCFIRSTB", "INDUSINDBK", "KOTAKBANK", "RBLBANK", "YESBANK"]
 # Nifty Tata Group 25% Cap stocks that passed all 3 data checks
@@ -108,6 +121,12 @@ def test_tag_membership():
     assert sorted(cfg.stocks_for_tag("Luxury")) == sorted(t + ".NS" for t in LUXURY)
     assert sorted(cfg.stocks_for_tag("LifestyleFashion")) == sorted(t + ".NS" for t in LIFESTYLE_FASHION)
     assert sorted(cfg.stocks_for_tag("AutomationRobotics")) == sorted(t + ".NS" for t in AUTOMATION_ROBOTICS)
+    assert sorted(cfg.stocks_for_tag("GoldLending")) == sorted(t + ".NS" for t in GOLD_LENDING)
+    assert sorted(cfg.stocks_for_tag("ConsumerLoans")) == sorted(t + ".NS" for t in CONSUMER_LOANS)
+    assert sorted(cfg.stocks_for_tag("HousingLargeTicketFinance")) == sorted(t + ".NS" for t in HOUSING_LARGE_TICKET)
+    assert sorted(cfg.stocks_for_tag("MSMEMicrofinance")) == sorted(t + ".NS" for t in MSME_MICROFINANCE)
+    assert sorted(cfg.stocks_for_tag("ConsumerFinance")) == sorted(t + ".NS" for t in CONSUMER_FINANCE)
+    assert len(CONSUMER_FINANCE) == 35
 
 
 def test_every_tagged_stock_has_data():

@@ -132,7 +132,7 @@ STOCKS = {
         "name": "Federal Bank",
         "sector": "Banking - Private Bank",
         "notes": "long history",
-        "tags": ["Midselect", "AlphaQVLowVol", "PrivateBank"],
+        "tags": ["Midselect", "AlphaQVLowVol", "PrivateBank", "GoldLending"],
     },
     "INDUSINDBK.NS": {
         "name": "IndusInd Bank",
@@ -211,7 +211,7 @@ STOCKS = {
         "name": "City Union Bank",
         "sector": "Banking - private",
         "notes": "long history",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "GoldLending"],
     },
     "KPITTECH.NS": {
         "name": "KPIT Technologies",
@@ -331,7 +331,7 @@ STOCKS = {
         "name": "IIFL Finance",
         "sector": "Financial Services",
         "notes": "listed 17 May 2005",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "GoldLending", "HousingLargeTicketFinance", "ConsumerFinance"],
     },
     "INOXWIND.NS": {
         "name": "Inox Wind",
@@ -361,7 +361,7 @@ STOCKS = {
         "name": "Manappuram Finance",
         "sector": "Financial Services",
         "notes": "listed 30 Jun 2010",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "GoldLending"],
     },
     "NATCOPHARM.NS": {
         "name": "NATCO Pharma",
@@ -391,7 +391,7 @@ STOCKS = {
         "name": "PNB Housing Finance",
         "sector": "Financial Services",
         "notes": "listed 7 Nov 2016",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "HousingLargeTicketFinance", "ConsumerFinance"],
     },
     "PPLPHARMA.NS": {
         "name": "Piramal Pharma",
@@ -997,7 +997,7 @@ STOCKS = {
         "name": "Muthoot Finance",
         "sector": "Financial Services",
         "notes": "listed 6 May 2011",
-        "tags": ["NiftyNext50"],
+        "tags": ["NiftyNext50", "GoldLending"],
     },
     "HYUNDAI.NS": {
         "name": "Hyundai Motor India",
@@ -1105,7 +1105,7 @@ STOCKS = {
         "name": "Tata Capital",
         "sector": "Financial Services",
         "notes": "listed 13 Oct 2025; show its real first date, never invent pre-listing data",
-        "tags": ["NiftyNext50"],
+        "tags": ["NiftyNext50", "ConsumerLoans", "HousingLargeTicketFinance", "ConsumerFinance"],
     },
     "IRFC.NS": {
         "name": "Indian Railway Finance Corporation",
@@ -1677,13 +1677,253 @@ STOCKS = {
         "notes": "long history",
         "tags": ["AutomationRobotics"],
     },
+    "FINKURVE.NS": {
+        "name": "Finkurve Financial Services",
+        "sector": "Financial Services",
+        "notes": "NSE from 1 Oct 2025 (BSE-listed before); show its real first date, never invent pre-listing data",
+        "tags": ["GoldLending"],
+    },
+    "FEDFINA.NS": {
+        "name": "Fedbank Financial Services",
+        "sector": "Financial Services",
+        "notes": "listed 30 Nov 2023; show its real first date, never invent pre-listing data",
+        "tags": ["GoldLending"],
+    },
+    "CSBBANK.NS": {
+        "name": "CSB Bank",
+        "sector": "Financial Services",
+        "notes": "listed 4 Dec 2019",
+        "tags": ["GoldLending"],
+    },
+    "DHANBANK.NS": {
+        "name": "Dhanlaxmi Bank",
+        "sector": "Financial Services",
+        "notes": "NSE from 1 Apr 2004",
+        "tags": ["GoldLending"],
+    },
+    "SOUTHBANK.NS": {
+        "name": "South Indian Bank",
+        "sector": "Financial Services",
+        "notes": "long history",
+        "tags": ["GoldLending"],
+    },
+    "SBICARD.NS": {
+        "name": "SBI Cards and Payment Services",
+        "sector": "Financial Services",
+        "notes": "listed 16 Mar 2020",
+        "tags": ["ConsumerLoans", "ConsumerFinance"],
+    },
+    "HDBFS.NS": {
+        "name": "HDB Financial Services",
+        "sector": "Financial Services",
+        "notes": "listed 2 Jul 2025; show its real first date, never invent pre-listing data",
+        "tags": ["ConsumerLoans", "HousingLargeTicketFinance", "ConsumerFinance"],
+    },
+    "LTF.NS": {
+        "name": "L&T Finance",
+        "sector": "Financial Services",
+        "notes": "listed 12 Aug 2011 (former NSE symbol L&TFH)",
+        "tags": ["ConsumerLoans", "ConsumerFinance"],
+    },
+    "SHRIRAMFIN.NS": {
+        "name": "Shriram Finance",
+        "sector": "Financial Services",
+        "notes": "long history (former NSE symbol SRTRANSFIN)",
+        "tags": ["ConsumerLoans", "ConsumerFinance"],
+    },
+    "M&MFIN.NS": {
+        "name": "Mahindra & Mahindra Financial Services",
+        "sector": "Financial Services",
+        "notes": "listed 17 Mar 2006",
+        "tags": ["ConsumerLoans", "ConsumerFinance"],
+    },
+    "INDOSTAR.NS": {
+        "name": "IndoStar Capital Finance",
+        "sector": "Financial Services",
+        "notes": "listed 21 May 2018",
+        "tags": ["ConsumerLoans", "ConsumerFinance"],
+    },
+    "MUTHOOTCAP.NS": {
+        "name": "Muthoot Capital Services",
+        "sector": "Financial Services",
+        "notes": "NSE from 24 Aug 2015",
+        "tags": ["ConsumerLoans", "ConsumerFinance"],
+    },
+    "MANBA.NS": {
+        "name": "Manba Finance",
+        "sector": "Financial Services",
+        "notes": "listed 30 Sep 2024; show its real first date, never invent pre-listing data",
+        "tags": ["ConsumerLoans", "ConsumerFinance"],
+    },
+    "LICHSGFIN.NS": {
+        "name": "LIC Housing Finance",
+        "sector": "Financial Services",
+        "notes": "long history",
+        "tags": ["HousingLargeTicketFinance", "ConsumerFinance"],
+    },
+    "CANFINHOME.NS": {
+        "name": "Can Fin Homes",
+        "sector": "Financial Services",
+        "notes": "long history",
+        "tags": ["HousingLargeTicketFinance", "ConsumerFinance"],
+    },
+    "REPCOHOME.NS": {
+        "name": "Repco Home Finance",
+        "sector": "Financial Services",
+        "notes": "listed 1 Apr 2013",
+        "tags": ["HousingLargeTicketFinance", "ConsumerFinance"],
+    },
+    "AAVAS.NS": {
+        "name": "Aavas Financiers",
+        "sector": "Financial Services",
+        "notes": "listed 8 Oct 2018",
+        "tags": ["HousingLargeTicketFinance", "ConsumerFinance"],
+    },
+    "APTUS.NS": {
+        "name": "Aptus Value Housing Finance India",
+        "sector": "Financial Services",
+        "notes": "listed 24 Aug 2021",
+        "tags": ["HousingLargeTicketFinance", "ConsumerFinance"],
+    },
+    "HOMEFIRST.NS": {
+        "name": "Home First Finance Company India",
+        "sector": "Financial Services",
+        "notes": "listed 3 Feb 2021",
+        "tags": ["HousingLargeTicketFinance", "ConsumerFinance"],
+    },
+    "AADHARHFC.NS": {
+        "name": "Aadhar Housing Finance",
+        "sector": "Financial Services",
+        "notes": "listed 15 May 2024; show its real first date, never invent pre-listing data",
+        "tags": ["HousingLargeTicketFinance", "ConsumerFinance"],
+    },
+    "INDIASHLTR.NS": {
+        "name": "India Shelter Finance Corporation",
+        "sector": "Financial Services",
+        "notes": "listed 20 Dec 2023; show its real first date, never invent pre-listing data",
+        "tags": ["HousingLargeTicketFinance", "ConsumerFinance"],
+    },
+    "BAJAJHFL.NS": {
+        "name": "Bajaj Housing Finance",
+        "sector": "Financial Services",
+        "notes": "listed 16 Sep 2024; show its real first date, never invent pre-listing data",
+        "tags": ["HousingLargeTicketFinance", "ConsumerFinance"],
+    },
+    "SAMMAANCAP.NS": {
+        "name": "Sammaan Capital",
+        "sector": "Financial Services",
+        "notes": "listed 23 Jul 2013 (former NSE symbol IBULHSGFIN)",
+        "tags": ["HousingLargeTicketFinance", "ConsumerFinance"],
+    },
+    "PIRAMALFIN.NS": {
+        "name": "Piramal Finance",
+        "sector": "Financial Services",
+        "notes": "listed 7 Nov 2025; show its real first date, never invent pre-listing data",
+        "tags": ["HousingLargeTicketFinance", "ConsumerFinance"],
+    },
+    "ABCAPITAL.NS": {
+        "name": "Aditya Birla Capital",
+        "sector": "Financial Services",
+        "notes": "listed 1 Sep 2017",
+        "tags": ["HousingLargeTicketFinance", "ConsumerFinance"],
+    },
+    "JIOFIN.NS": {
+        "name": "Jio Financial Services",
+        "sector": "Financial Services",
+        "notes": "listed 21 Aug 2023 (demerged from Reliance); show its real first date, never invent pre-listing data",
+        "tags": ["HousingLargeTicketFinance", "ConsumerFinance"],
+    },
+    "CREDITACC.NS": {
+        "name": "CreditAccess Grameen",
+        "sector": "Financial Services",
+        "notes": "listed 23 Aug 2018",
+        "tags": ["MSMEMicrofinance", "ConsumerFinance"],
+    },
+    "FUSION.NS": {
+        "name": "Fusion Finance",
+        "sector": "Financial Services",
+        "notes": "listed 15 Nov 2022",
+        "tags": ["MSMEMicrofinance", "ConsumerFinance"],
+    },
+    "SPANDANA.NS": {
+        "name": "Spandana Sphoorty Financial",
+        "sector": "Financial Services",
+        "notes": "listed 19 Aug 2019",
+        "tags": ["MSMEMicrofinance", "ConsumerFinance"],
+    },
+    "SATIN.NS": {
+        "name": "Satin Creditcare Network",
+        "sector": "Financial Services",
+        "notes": "NSE from 27 Aug 2015",
+        "tags": ["MSMEMicrofinance", "ConsumerFinance"],
+    },
+    "MUTHOOTMF.NS": {
+        "name": "Muthoot Microfin",
+        "sector": "Financial Services",
+        "notes": "listed 26 Dec 2023; show its real first date, never invent pre-listing data",
+        "tags": ["MSMEMicrofinance", "ConsumerFinance"],
+    },
+    "ARMANFIN.NS": {
+        "name": "Arman Financial Services",
+        "sector": "Financial Services",
+        "notes": "NSE from 14 Jun 2016",
+        "tags": ["MSMEMicrofinance", "ConsumerFinance"],
+    },
+    "FIVESTAR.NS": {
+        "name": "Five-Star Business Finance",
+        "sector": "Financial Services",
+        "notes": "listed 21 Nov 2022",
+        "tags": ["MSMEMicrofinance", "ConsumerFinance"],
+    },
+    "SBFC.NS": {
+        "name": "SBFC Finance",
+        "sector": "Financial Services",
+        "notes": "listed 16 Aug 2023; show its real first date, never invent pre-listing data",
+        "tags": ["MSMEMicrofinance", "ConsumerFinance"],
+    },
+    "UGROCAP.NS": {
+        "name": "UGRO Capital",
+        "sector": "Financial Services",
+        "notes": "NSE from 11 Aug 2021",
+        "tags": ["MSMEMicrofinance", "ConsumerFinance"],
+    },
+    "MASFIN.NS": {
+        "name": "MAS Financial Services",
+        "sector": "Financial Services",
+        "notes": "listed 18 Oct 2017",
+        "tags": ["MSMEMicrofinance", "ConsumerFinance"],
+    },
+    "NORTHARC.NS": {
+        "name": "Northern Arc Capital",
+        "sector": "Financial Services",
+        "notes": "listed 24 Sep 2024; show its real first date, never invent pre-listing data",
+        "tags": ["MSMEMicrofinance", "ConsumerFinance"],
+    },
+    "DRAGARWQ.NS": {
+        "name": "Dr. Agarwal's Eye Hospital",
+        "sector": "Healthcare",
+        "notes": "NSE listing 20 Apr 2026 (BSE-only before); Yahoo NSE history starts 18 Aug 2026; show its real first date, never invent pre-listing data",
+        "tags": ["Hospitals"],
+    },
+    "3BBLACKBIO.NS": {
+        "name": "3B Blackbio Dx",
+        "sector": "Healthcare",
+        "notes": "NSE listing 20 Apr 2026 (BSE-only before); Yahoo NSE history starts 18 Aug 2026; show its real first date, never invent pre-listing data",
+        "tags": ["Hospitals"],
+    },
+    "BENARAS.NS": {
+        "name": "Benares Hotels",
+        "sector": "Hotels & Tourism",
+        "notes": "NSE listing 17 Aug 2026 (BSE-only before); show its real first date, never invent pre-listing data",
+        "tags": ["Luxury"],
+    },
 }
 
 
 # Stock tags: the sidebar Tag option shows "ALL" (every stock above) or one tag's stocks.
 # A stock belongs to a tag when the tag's name is in its "tags" list.
 TAG_ALL = "ALL"
-TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer", "OilGas", "CapitalMarket", "Shipping", "Infra", "Cement", "Spirits", "Luxury", "LifestyleFashion", "AutomationRobotics"]
+TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer", "OilGas", "CapitalMarket", "Shipping", "Infra", "Cement", "Spirits", "Luxury", "LifestyleFashion", "AutomationRobotics", "GoldLending", "ConsumerLoans", "HousingLargeTicketFinance", "MSMEMicrofinance", "ConsumerFinance"]
 
 
 def stocks_for_tag(tag: str) -> list:
