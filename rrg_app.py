@@ -17,6 +17,7 @@ import plotly.graph_objects as go
 import plotly.io as pio
 import streamlit as st
 from plotly.subplots import make_subplots
+from streamlit_searchbox import st_searchbox
 
 import config as cfg
 import data_pipeline as dp
@@ -1261,6 +1262,53 @@ def strategy_page(stock_ticker: str, strategy_id: int = 1):
                          hide_index=True, width="stretch")
 
 
+# ---- Stock search box ---------------------------------------------------------
+def stock_label(t: str) -> str:
+    return f"{t.replace('.NS', '')} · {cfg.STOCKS[t]['name']} ({cfg.STOCKS[t]['sector']})"
+
+
+def stock_suggestions(term: str, options) -> list:
+    """Suggestions for the search box, best first: symbol starts with the text (b -> BBL, BEL, BSE ...), then a word of
+    the name starts with it, then the text appears anywhere in the symbol, name, sector or tags. With several words,
+    every word must appear."""
+    q = term.strip().lower()
+    if not q:
+        return []
+    words = q.split()
+    ranked = []
+    for t in options:
+        m = cfg.STOCKS[t]
+        sym, name = t.replace(".NS", "").lower(), m["name"].lower()
+        text = " ".join([sym, name, m["sector"].lower(), " ".join(m.get("tags", [])).lower()])
+        if not all(w in text for w in words):
+            continue
+        rank = 0 if sym.startswith(q) else 1 if name.startswith(q) else 2 if any(x.startswith(words[0]) for x in name.split()) else 3
+        ranked.append((rank, sym, t))
+    return [(stock_label(t), t) for _, _, t in sorted(ranked)[:30]]
+
+
+@st.fragment
+def stock_search(options) -> None:
+    """Type-ahead search: suggestions change with every letter. Only this box reruns while typing; picking a
+    suggestion selects that stock and reloads the page."""
+    # Picking a suggestion only notes the stock: the searchbox then clears itself with a fragment rerun, and on that
+    # rerun the stock is selected and the whole page reloads. (Reloading the page straight from the pick would leave the
+    # searchbox's pending fragment rerun to fire during a full run, which Streamlit refuses.)
+    def pick(t):
+        st.session_state["_stock_pick"] = t
+
+    st_searchbox(lambda term: stock_suggestions(term, options), key="stock_searchbox",
+                 label="🔍 Search stock", placeholder="Type: b, pfc, bank, GoldLending ...",
+                 clear_on_submit=True, rerun_scope="fragment", submit_function=pick, debounce=150,
+                 help="Suggestions update as you type: symbols starting with the letters come first, then names, "
+                      "sectors and tags. Pick one to open it.")
+    t = st.session_state.pop("_stock_pick", None)
+    if t in options:
+        st.session_state["stock"] = t
+        st.session_state["stock_searchbox"]["result"] = None   # so the same stock can be picked again later
+        st.rerun(scope="app")
+
+
 # ---- Sidebar & Main Execution -----------------------------------------------
 with st.sidebar:
     # the RRG pages always show every stock; tags are used on the Tags analysis tab
@@ -1268,28 +1316,14 @@ with st.sidebar:
     tag_stocks = cfg.stocks_for_tag(selected_tag)
 
     st.header("Stock & View Selection")
-    # search box: every word must appear in the stock's symbol, name, sector or tags (e.g. "pfc", "bank", "gold")
-    search = st.text_input("🔍 Search stock", key="stock_search",
-                           placeholder="Symbol, name, sector or tag",
-                           help="Type part of a symbol (PFC), name (power finance), sector (bank) or tag (GoldLending). "
-                                "Every word must match. Clear the box to see all stocks.")
-    words = search.lower().split()
-
-    def _stock_text(t):
-        m = cfg.STOCKS[t]
-        return " ".join([t.replace(".NS", ""), m["name"], m["sector"], " ".join(m.get("tags", []))]).lower()
-
-    stock_options = [t for t in tag_stocks if all(w in _stock_text(t) for w in words)] if words else tag_stocks
-    if not stock_options:
-        st.warning(f"No stock matches “{search.strip()}”. Showing all {len(tag_stocks)} stocks.")
-        stock_options = tag_stocks
-    if st.session_state.get("stock") not in stock_options:   # the search hid the current stock: pick the first match
-        st.session_state["stock"] = stock_options[0]
+    stock_options = sorted(tag_stocks, key=lambda t: t.replace(".NS", "").upper())   # symbols A to Z
+    stock_search(stock_options)
+    default_stock = "PVRINOX.NS" if "PVRINOX.NS" in stock_options else stock_options[0]
     selected_stock = st.selectbox(
-        f"Select Stock ({len(stock_options)} of {len(tag_stocks)})" if words else f"Select Stock ({len(tag_stocks)})",
+        f"Select Stock ({len(stock_options)}, A to Z)",
         options=stock_options,
-        format_func=lambda t: f"{t.replace('.NS', '')} · {cfg.STOCKS[t]['name']} ({cfg.STOCKS[t]['sector']})",
-        key="stock"
+        format_func=stock_label,
+        index=stock_options.index(default_stock), key="stock"
     )
     stock_meta = cfg.STOCKS[selected_stock]
     st.caption(f"**Selected:** {stock_meta['name']} · Sector: *{stock_meta['sector']}*")
