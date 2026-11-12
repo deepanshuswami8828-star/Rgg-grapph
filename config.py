@@ -499,7 +499,7 @@ STOCKS = {
         "name": "Power Finance Corporation",
         "sector": "Financial Services",
         "notes": "listed 23 Feb 2007",
-        "tags": ["AlphaQVLowVol", "NiftyNext50"],
+        "tags": ["AlphaQVLowVol", "NiftyNext50", "Energy"],
     },
     "SBIN.NS": {
         "name": "State Bank of India",
@@ -1111,7 +1111,7 @@ STOCKS = {
         "name": "Indian Railway Finance Corporation",
         "sector": "Financial Services",
         "notes": "listed 29 Jan 2021",
-        "tags": ["NiftyNext50"],
+        "tags": ["NiftyNext50", "Infra"],
     },
     "ETERNAL.NS": {
         "name": "Eternal (Zomato)",
@@ -1916,6 +1916,42 @@ STOCKS = {
         "sector": "Hotels & Tourism",
         "notes": "NSE listing 17 Aug 2026 (BSE-only before); show its real first date, never invent pre-listing data",
         "tags": ["Luxury"],
+    },
+    "RECLTD.NS": {
+        "name": "REC",
+        "sector": "Financial Services",
+        "notes": "listed 12 Mar 2008",
+        "tags": ["Energy"],
+    },
+    "IREDA.NS": {
+        "name": "Indian Renewable Energy Development Agency",
+        "sector": "Financial Services",
+        "notes": "listed 29 Nov 2023; show its real first date, never invent pre-listing data",
+        "tags": ["Energy"],
+    },
+    "HUDCO.NS": {
+        "name": "Housing and Urban Development Corporation",
+        "sector": "Financial Services",
+        "notes": "listed 19 May 2017",
+        "tags": ["Infra"],
+    },
+    "PFS.NS": {
+        "name": "PTC India Financial Services",
+        "sector": "Financial Services",
+        "notes": "listed 30 Mar 2011",
+        "tags": ["Infra"],
+    },
+    "TFCILTD.NS": {
+        "name": "Tourism Finance Corporation of India",
+        "sector": "Financial Services",
+        "notes": "long history",
+        "tags": ["Infra"],
+    },
+    "IFCI.NS": {
+        "name": "IFCI",
+        "sector": "Financial Services",
+        "notes": "long history",
+        "tags": ["Infra"],
     },
 }
 

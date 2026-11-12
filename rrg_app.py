@@ -1268,11 +1268,28 @@ with st.sidebar:
     tag_stocks = cfg.stocks_for_tag(selected_tag)
 
     st.header("Stock & View Selection")
+    # search box: every word must appear in the stock's symbol, name, sector or tags (e.g. "pfc", "bank", "gold")
+    search = st.text_input("🔍 Search stock", key="stock_search",
+                           placeholder="Symbol, name, sector or tag",
+                           help="Type part of a symbol (PFC), name (power finance), sector (bank) or tag (GoldLending). "
+                                "Every word must match. Clear the box to see all stocks.")
+    words = search.lower().split()
+
+    def _stock_text(t):
+        m = cfg.STOCKS[t]
+        return " ".join([t.replace(".NS", ""), m["name"], m["sector"], " ".join(m.get("tags", []))]).lower()
+
+    stock_options = [t for t in tag_stocks if all(w in _stock_text(t) for w in words)] if words else tag_stocks
+    if not stock_options:
+        st.warning(f"No stock matches “{search.strip()}”. Showing all {len(tag_stocks)} stocks.")
+        stock_options = tag_stocks
+    if st.session_state.get("stock") not in stock_options:   # the search hid the current stock: pick the first match
+        st.session_state["stock"] = stock_options[0]
     selected_stock = st.selectbox(
-        "Select Stock",
-        options=tag_stocks,
-        format_func=lambda t: f"{cfg.STOCKS[t]['name']} ({cfg.STOCKS[t]['sector']})",
-        index=0, key="stock"
+        f"Select Stock ({len(stock_options)} of {len(tag_stocks)})" if words else f"Select Stock ({len(tag_stocks)})",
+        options=stock_options,
+        format_func=lambda t: f"{t.replace('.NS', '')} · {cfg.STOCKS[t]['name']} ({cfg.STOCKS[t]['sector']})",
+        key="stock"
     )
     stock_meta = cfg.STOCKS[selected_stock]
     st.caption(f"**Selected:** {stock_meta['name']} · Sector: *{stock_meta['sector']}*")
