@@ -158,6 +158,31 @@ def test_weekend_holiday_and_incomplete_candle_handling():
     assert dp.is_session_final(session, datetime(2026, 10, 22, 16, 0, 0, tzinfo=cfg.IST))
 
 
+def test_late_friday_run_on_saturday_still_fetches_friday():
+    """GitHub can start Friday evening's scheduled refresh after midnight IST (a Saturday). That run must still
+    fetch Friday's session when it is missing (13 Nov 2026 was skipped as 'Weekend' until Monday); a Saturday
+    run with Friday already stored still skips."""
+    last = dp.load_clean_data(cfg.BENCHMARK_TICKER).index[-1]
+    sat = last + pd.Timedelta(days=(5 - last.weekday()) % 7 or 7)
+    if (sat - pd.Timedelta(days=1)) <= last:          # the stored data already has that Friday: take the next week
+        sat += pd.Timedelta(days=7)
+    calls = []
+    # the mocked clock can be earlier than the manifest's last refresh (set by other tests): no minimum interval here
+    with patch("data_pipeline.datetime") as mock_dt, patch("data_pipeline.MIN_REFRESH_INTERVAL_MINUTES", -10**9), \
+            patch("data_pipeline.fetch_and_clean_all", side_effect=lambda: calls.append(1) or (None, "stop: test")):
+        mock_dt.now.return_value = datetime(sat.year, sat.month, sat.day, 1, 30, tzinfo=cfg.IST)
+        mock_dt.fromisoformat = datetime.fromisoformat
+        res = dp.refresh_data(force=False)
+    assert calls and "Weekend" not in res["message"], res["message"]
+    # Friday already stored (a Saturday long before the stored data ends): skip as before
+    with patch("data_pipeline.datetime") as mock_dt, \
+            patch("data_pipeline.fetch_and_clean_all", side_effect=lambda: calls.append(2) or (None, "stop: test")):
+        mock_dt.now.return_value = datetime(2026, 10, 24, 1, 30, tzinfo=cfg.IST)
+        mock_dt.fromisoformat = datetime.fromisoformat
+        res = dp.refresh_data(force=False)
+    assert res["status"] == "NO_NEW_SESSION" and "Weekend" in res["message"] and 2 not in calls
+
+
 def test_nse_weekend_sessions_are_kept():
     """Special NSE sessions on a Saturday / Sunday (Muhurat trading, Budget day) are in the data, with NSE's official
     NIFTY 50 close, a stock close on Yahoo's adjusted scale, and pass validation; ordinary weekend days are not."""

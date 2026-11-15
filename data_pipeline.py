@@ -537,10 +537,18 @@ def refresh_data(force: bool = False, include_provisional: bool = False) -> dict
     """
     now_ist = datetime.now(IST)
     manifest = load_manifest()
+    expected_session = get_expected_latest_session(now_ist)
+    bench_clean = load_clean_data(BENCHMARK_TICKER)
+    latest_stored_date = (
+        bench_clean.index[-1].date() if bench_clean is not None and len(bench_clean) > 0 else None
+    )
 
-    # Rule 11: Weekend run does not fetch/publish unless force=True, or NSE held a special session that day
+    # Rule 11: Weekend run does not fetch/publish unless force=True, or NSE held a special session that day -
+    # or Friday's session is still missing: GitHub can start Friday evening's scheduled refresh hours late, after
+    # midnight IST, and that run must still fetch Friday (13 Nov 2026 was skipped that way until Monday).
     if not force and now_ist.weekday() >= 5 and \
-            pd.Timestamp(now_ist.date()) not in weekend_sessions(now_ist.date()):
+            pd.Timestamp(now_ist.date()) not in weekend_sessions(now_ist.date()) and \
+            latest_stored_date is not None and latest_stored_date >= expected_session:
         msg = "Weekend: NSE closed; skipping fetch/publish."
         logger.info(msg)
         manifest["last_attempt"] = {
@@ -550,12 +558,6 @@ def refresh_data(force: bool = False, include_provisional: bool = False) -> dict
         }
         save_manifest(manifest)
         return {"status": "NO_NEW_SESSION", "message": msg, "manifest": manifest}
-
-    expected_session = get_expected_latest_session(now_ist)
-    bench_clean = load_clean_data(BENCHMARK_TICKER)
-    latest_stored_date = (
-        bench_clean.index[-1].date() if bench_clean is not None and len(bench_clean) > 0 else None
-    )
 
     # Check minimum refresh interval
     last_fetched_str = manifest.get("updated_at")
