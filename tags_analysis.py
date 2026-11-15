@@ -114,9 +114,10 @@ for label, p_start, p_end in strat.TAG_PERIODS:
     c2.metric("Closed trades in period", rep["trades"])
     c3.metric("Average daily profit % (simple)", f"{avg:.4f}%" if avg is not None else "—",
               help="Simple average of 'Daily profit %' over the tickers that had at least one closed trade.")
-    c4.metric("Cumulative profit (₹1 lakh per trade)", inr(rep["total_profit_rs"]) if rep["trades"] else "—",
-              help="Cumulative profit of every closed trade in the period, ₹1,00,000 invested per trade "
-                   f"(sum of profit % = {rep['total_profit_pct']:.2f}%). Not divided by days.")
+    c4.metric("Cumulative profit %", f"{rep['total_profit_pct']:+.2f}%" if rep["trades"] else "—",
+              delta=inr(rep["total_profit_rs"]) if rep["trades"] else None, delta_color="off", delta_arrow="off",
+              help="Profit % of every closed trade in the period added up. Not divided by days. With ₹1,00,000 "
+                   "invested per trade, 100% = ₹1 lakh; the ₹ amount is shown below the %.")
     if len(rows) > strat.TAG_MAX_ROWS:
         st.caption(f"Showing {strat.TAG_MAX_ROWS} of {len(rows)} tickers.")
     shown = rows[:strat.TAG_MAX_ROWS]
@@ -136,7 +137,7 @@ def _point(rep: dict):
     return [inr(rep["total_profit_rs"]), f"{a:.4f}%" if a is not None else "—", rep["avg_days_held"] or 0, rep["trades"]]
 
 
-HOVER_LINES = ("Cumulative profit %{customdata[0]}<br>Avg daily profit %{customdata[1]}<br>"
+HOVER_LINES = ("Cumulative profit %{y:+.2f}% (%{customdata[0]})<br>Avg daily profit %{customdata[1]}<br>"
                "Avg days held per trade %{customdata[2]:.1f}<br>Closed trades %{customdata[3]}<extra></extra>")
 
 
@@ -172,13 +173,13 @@ def threshold_chart(stop_loss: float, base_rep: dict, curve_rep: dict, y_range: 
 
 
 def cumulative_chart(stop_loss: float, base_rep: dict, curve_rep: dict, y_range: list) -> go.Figure:
-    """Take-profit threshold (x) vs TOTAL (cumulative) profit of the period's closed trades in ₹ lakh, ₹1 lakh per
-    trade (y), one line per period; dashed line per period = base strategy (no take-profit) at the same stop-loss.
-    Hover and legend also give the simple average of daily profit %."""
+    """Take-profit threshold (x) vs TOTAL (cumulative) profit % of the period's closed trades, i.e. the sum of their
+    profit %, ₹1 lakh per trade so 100% = ₹1 lakh (y), one line per period; dashed line per period = base strategy
+    (no take-profit) at the same stop-loss. Hover gives the ₹ amount and the simple average of daily profit %."""
     fig = go.Figure()
     for color, (label, p_start, p_end) in zip(PERIOD_COLORS, strat.TAG_PERIODS):
         reps = [(x, curve_rep[x][label]) for x in strat.TAKE_PROFIT_THRESHOLDS if curve_rep[x][label]["trades"]]
-        fig.add_trace(go.Scatter(x=[x for x, _ in reps], y=[r["total_profit_rs"] / 1e5 for _, r in reps],
+        fig.add_trace(go.Scatter(x=[x for x, _ in reps], y=[r["total_profit_pct"] for _, r in reps],
                                  customdata=[_point(r) for _, r in reps],
                                  mode="lines+markers", name=f"{label} ({p_start:%b %y}-{p_end:%b %y})",
                                  line=dict(color=color, width=2), marker=dict(size=4),
@@ -187,8 +188,8 @@ def cumulative_chart(stop_loss: float, base_rep: dict, curve_rep: dict, y_range:
         b = base_rep[label]
         if b["trades"]:
             avg = f" · avg daily {b['avg_daily_profit']:.4f}%" if b["avg_daily_profit"] is not None else ""
-            fig.add_trace(go.Scatter(x=[0, 100], y=[b["total_profit_rs"] / 1e5] * 2, mode="lines",
-                                     name=f"{label} base: {inr(b['total_profit_rs'])}{avg}",
+            fig.add_trace(go.Scatter(x=[0, 100], y=[b["total_profit_pct"]] * 2, mode="lines",
+                                     name=f"{label} base: {b['total_profit_pct']:+.2f}%{avg}",
                                      line=dict(color=color, width=1.5, dash="dash"),
                                      customdata=[_point(b)] * 2,
                                      hovertemplate=f"<b>{label} · {stop_loss:g}% stop-loss · base (no take-profit)</b><br>"
@@ -196,8 +197,8 @@ def cumulative_chart(stop_loss: float, base_rep: dict, curve_rep: dict, y_range:
     fig.update_layout(title=dict(text=f"{stop_loss:g}% stop-loss", font=dict(size=15)), height=380,
                       margin=dict(l=10, r=10, t=40, b=10),
                       xaxis_title="Take-profit threshold x (%)",
-                      yaxis_title="Cumulative profit (₹ lakh)<br><sup>all closed trades, ₹1 lakh each</sup>",
-                      xaxis=dict(range=[0, 102], dtick=10), yaxis=dict(range=y_range, ticksuffix=" L"),
+                      yaxis_title="Cumulative profit %<br><sup>sum of all closed trades' profit %</sup>",
+                      xaxis=dict(range=[0, 102], dtick=10), yaxis=dict(range=y_range, ticksuffix="%"),
                       legend=dict(orientation="h", y=-0.28, font=dict(size=10)),
                       plot_bgcolor="#fcfcfb", paper_bgcolor="#fcfcfb")
     return fig
@@ -227,7 +228,7 @@ def _y_range(values: list):
 
 all_reps = [r[label] for b, c in by_sl.values() for r in [b] + list(c.values()) for label, _, _ in strat.TAG_PERIODS]
 avg_range = _y_range([r["avg_daily_profit"] for r in all_reps if r["avg_daily_profit"] is not None])
-cum_range = _y_range([r["total_profit_rs"] / 1e5 for r in all_reps if r["trades"]])
+cum_range = _y_range([r["total_profit_pct"] for r in all_reps if r["trades"]])
 
 
 def chart_grid(make_chart, y_range: list, key: str):
@@ -242,11 +243,11 @@ def chart_grid(make_chart, y_range: list, key: str):
 chart_grid(threshold_chart, avg_range, "tp_chart")
 
 st.markdown("### Cumulative profit by take-profit threshold and stop-loss")
-st.caption("Same runs as the charts above, measured differently. Y-axis = cumulative profit: the profit of all closed "
-           "trades in the period added up, ₹1 lakh per trade, not divided by days. One colour per period: solid line = "
-           "with take-profit, dashed line = base strategy without take-profit at the same stop-loss. All charts share "
-           "the same y-axis. Hover a point for the average daily profit %, the average days held per trade and the "
-           "number of trades.")
+st.caption("Same runs as the charts above, measured differently. Y-axis = cumulative profit %: the profit % of all "
+           "closed trades in the period added up, not divided by days. With ₹1 lakh per trade, 100% = ₹1 lakh. One "
+           "colour per period: solid line = with take-profit, dashed line = base strategy without take-profit at the "
+           "same stop-loss. All charts share the same y-axis. Hover a point for the ₹ amount, the average daily "
+           "profit %, the average days held per trade and the number of trades.")
 chart_grid(cumulative_chart, cum_range, "tp_cum_chart")
 
 with st.expander("Numbers behind the charts"):
@@ -258,6 +259,7 @@ with st.expander("Numbers behind the charts"):
             row = {"Take-profit threshold": "Base (none)" if x is None else f"{x}%"}
             for label, _, _ in strat.TAG_PERIODS:
                 a, d = reps[label]["avg_daily_profit"], reps[label]["avg_days_held"]
+                row[f"{label}: cumulative profit %"] = round(reps[label]["total_profit_pct"], 2) if reps[label]["trades"] else None
                 row[f"{label}: total profit ₹"] = round(reps[label]["total_profit_rs"]) if reps[label]["trades"] else None
                 row[f"{label}: avg daily profit %"] = round(a, 4) if a is not None else None
                 row[f"{label}: closed trades"] = reps[label]["trades"]

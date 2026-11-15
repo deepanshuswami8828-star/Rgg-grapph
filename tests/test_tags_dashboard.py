@@ -150,9 +150,13 @@ def test_tags_page_shows_take_profit_charts():
     assert ten["Period 1: closed trades"] == int(at.metric[1].value)
     assert at.metric[2].label.startswith("Average daily profit")
     assert f"{ten['Period 1: avg daily profit %']:.4f}%" == at.metric[2].value
-    # the period's total profit box (Rs 1 lakh per trade) matches the chart numbers' base row
-    assert at.metric[3].label.startswith("Cumulative profit")
-    assert ten["Period 1: total profit ₹"] == int(at.metric[3].value.replace("₹", "").replace(",", ""))
+    # the period's cumulative profit box (% with the Rs amount below, Rs 1 lakh per trade) matches the base row
+    assert at.metric[3].label == "Cumulative profit %"
+    assert f"{ten['Period 1: cumulative profit %']:+.2f}%" == at.metric[3].value
+    assert ten["Period 1: total profit ₹"] == int(at.metric[3].delta.replace("₹", "").replace(",", ""))
+    cumulative_axes = [json.loads(c.proto.spec)["layout"]["yaxis"] for c in charts]
+    cumulative_axes = [a for a in cumulative_axes if a["title"]["text"].startswith("Cumulative profit %")]
+    assert len(cumulative_axes) == len(strat.TAG_STOP_LOSSES) and all(a["ticksuffix"] == "%" for a in cumulative_axes)
 
 
 def test_stop_loss_level_changes_exits():
