@@ -112,7 +112,7 @@ for label, p_start, p_end in strat.TAG_PERIODS:
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Tickers in period", rep["tickers"])
     c2.metric("Closed trades in period", rep["trades"])
-    c3.metric("Total profit (₹1 lakh per trade)", inr(rep["total_profit_rs"]) if rep["trades"] else "—",
+    c3.metric("Cumulative profit (₹1 lakh per trade)", inr(rep["total_profit_rs"]) if rep["trades"] else "—",
               help="Cumulative profit of every closed trade in the period, ₹1,00,000 invested per trade "
                    f"(sum of profit % = {rep['total_profit_pct']:.2f}%). Not divided by days.")
     c4.metric("Average daily profit % (simple)", f"{avg:.4f}%" if avg is not None else "—",
@@ -136,7 +136,7 @@ def _point(rep: dict):
     return [inr(rep["total_profit_rs"]), f"{a:.4f}%" if a is not None else "—", rep["avg_days_held"] or 0, rep["trades"]]
 
 
-HOVER_LINES = ("Total profit %{customdata[0]}<br>Avg daily profit %{customdata[1]}<br>"
+HOVER_LINES = ("Cumulative profit %{customdata[0]}<br>Avg daily profit %{customdata[1]}<br>"
                "Avg days held per trade %{customdata[2]:.1f}<br>Closed trades %{customdata[3]}<extra></extra>")
 
 
@@ -164,7 +164,8 @@ def threshold_chart(stop_loss: float, base_rep: dict, curve_rep: dict, y_range: 
                                                    + HOVER_LINES))
     fig.update_layout(title=dict(text=f"{stop_loss:g}% stop-loss", font=dict(size=15)), height=380,
                       margin=dict(l=10, r=10, t=40, b=10),
-                      xaxis_title="Take-profit threshold x (%)", yaxis_title="Total profit (₹ lakh)",
+                      xaxis_title="Take-profit threshold x (%)",
+                      yaxis_title="Cumulative profit (₹ lakh)<br><sup>all closed trades, ₹1 lakh each</sup>",
                       xaxis=dict(range=[0, 102], dtick=10), yaxis=dict(range=y_range, ticksuffix=" L"),
                       legend=dict(orientation="h", y=-0.28, font=dict(size=10)),
                       plot_bgcolor="#fcfcfb", paper_bgcolor="#fcfcfb")
@@ -178,7 +179,8 @@ st.caption("Modified Strategy 2 · Version 3: on any day after the buy, if the d
            "the weekly has dropped into Weakening/Lagging and come back up, as after a stop-loss. Each chart uses one "
            "stop-loss level; everything else (weekly exits, periods, ₹1,00,000 per trade) is unchanged. One colour per "
            "period: solid line = with take-profit, dashed line = base strategy without take-profit at the same stop-loss. "
-           "Y-axis = total (cumulative) profit of all closed trades in the period, ₹1 lakh per trade, not divided by days. "
+           "Y-axis = cumulative profit: the profit of all closed trades in the period added up, ₹1 lakh per trade, not "
+           "divided by days. "
            "All charts share the same y-axis so they can be compared. Hover a point for the average daily profit %, "
            "the average days held per trade and the number of trades.")
 

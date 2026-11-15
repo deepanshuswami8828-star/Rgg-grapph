@@ -143,7 +143,7 @@ def test_tags_page_shows_take_profit_charts():
     ten = numbers[strat.TAG_STOP_LOSSES.index(10.0)].iloc[0]
     assert ten["Period 1: closed trades"] == int(at.metric[1].value)
     # the period's total profit box (Rs 1 lakh per trade) matches the chart numbers' base row
-    assert at.metric[2].label.startswith("Total profit")
+    assert at.metric[2].label.startswith("Cumulative profit")
     assert ten["Period 1: total profit ₹"] == int(at.metric[2].value.replace("₹", "").replace(",", ""))
 
 
