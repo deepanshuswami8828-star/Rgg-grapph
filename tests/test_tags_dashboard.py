@@ -131,6 +131,9 @@ def test_thresholds_and_period_report():
     assert abs(rep["avg_daily_profit"] - (1.0 + (-5 / 30)) / 2) < 1e-9
     # total (cumulative) profit: +10% and -5% -> 5%, i.e. Rs 5,000 with Rs 1 lakh per trade; not divided by days
     assert abs(rep["total_profit_pct"] - 5.0) < 1e-9 and abs(rep["total_profit_rs"] - 5000.0) < 1e-6
+    # cumulative profit per stock: simple average of each ticker's total (+10% and -5%), C without a trade left out
+    assert abs(rep["avg_cum_profit_pct"] - 2.5) < 1e-9
+    assert strat.period_report({"C": []}, p1s, p1e)["avg_cum_profit_pct"] is None
 
 
 def test_tags_page_shows_take_profit_charts():
@@ -151,9 +154,14 @@ def test_tags_page_shows_take_profit_charts():
     assert ten["Period 1: closed trades"] == int(at.metric[1].value)
     assert at.metric[2].label.startswith("Average daily profit")
     assert f"{ten['Period 1: avg daily profit %']:.4f}%" == at.metric[2].value
-    # the period's cumulative profit box (percent only, no rupees) matches the chart numbers' base row
-    assert at.metric[3].label == "Cumulative profit %"
-    assert f"{ten['Period 1: cumulative profit %']:+,.2f}%" == at.metric[3].value
+    # the period's cumulative profit box (percent only, no rupees) matches the chart numbers' base row and is the
+    # simple average of the period table's per-stock 'Sum of profit %' over the stocks with a closed trade
+    assert at.metric[3].label == "Cumulative profit % (simple avg per stock)"
+    assert f"{ten['Period 1: cumulative profit % (avg per stock)']:+,.2f}%" == at.metric[3].value
+    p1 = [df.value for df in at.dataframe if "Daily profit %" in df.value.columns][0]
+    if len(p1) < strat.TAG_MAX_ROWS:
+        sums = p1.loc[p1["Number of trades"] > 0, "Sum of profit %"]
+        assert abs(sums.mean() - ten["Period 1: cumulative profit % (avg per stock)"]) < 0.01
     assert not at.metric[3].delta
     assert not any("₹" in c for c in ten.index)
     # cumulative hover shows the % with 2 decimals and no rupee amount
@@ -162,7 +170,8 @@ def test_tags_page_shows_take_profit_charts():
     for s in cum_specs:
         for tr in s["data"]:
             assert "₹" not in tr["hovertemplate"] and "₹" not in tr["name"]
-            assert all(re.fullmatch(r"[+-][\d,]+\.\d\d%", p[0]) for p in tr["customdata"])
+            assert all(re.fullmatch(r"[+-][\d,]+\.\d\d%", p[0]) and re.fullmatch(r"[+-][\d,]+\.\d\d%", p[1])
+                       for p in tr["customdata"])
     cumulative_axes = [json.loads(c.proto.spec)["layout"]["yaxis"] for c in charts]
     cumulative_axes = [a for a in cumulative_axes if a["title"]["text"].startswith("Cumulative profit %")]
     assert len(cumulative_axes) == len(strat.TAG_STOP_LOSSES) and all(a["ticksuffix"] == "%" for a in cumulative_axes)

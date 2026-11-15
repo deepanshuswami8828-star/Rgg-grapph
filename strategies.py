@@ -562,6 +562,7 @@ def period_report(trades_by_ticker: Dict[str, List[Dict]], start: pd.Timestamp, 
     daily = [s["daily_profit"] for s in rows.values() if s["daily_profit"] is not None]
     n_trades = sum(s["trades"] for s in rows.values())
     total_pct = sum(s["profit_sum"] for s in rows.values())
+    traded = [s["profit_sum"] for s in rows.values() if s["trades"]]
     return {
         "rows": rows,
         "tickers": len(rows),
@@ -570,6 +571,9 @@ def period_report(trades_by_ticker: Dict[str, List[Dict]], start: pd.Timestamp, 
         # TAG_TRADE_AMOUNT invested per trade
         "total_profit_pct": total_pct,
         "total_profit_rs": total_pct / 100.0 * TAG_TRADE_AMOUNT,
+        # cumulative profit per stock: simple average of each ticker's total profit % (its trades' profit % added
+        # up), over the tickers with at least one closed trade, like the average daily profit
+        "avg_cum_profit_pct": sum(traded) / len(traded) if traded else None,
         "avg_days_held": sum(s["days_sum"] for s in rows.values()) / n_trades if n_trades else None,
         "avg_daily_profit": sum(daily) / len(daily) if daily else None,
         "tickers_with_trades": len(daily),
