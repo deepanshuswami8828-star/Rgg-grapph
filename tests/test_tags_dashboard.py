@@ -5,6 +5,7 @@ Verifies:
 2. Profit % assumes a fixed Rs 1,00,000 per trade; days held are calendar days; daily profit = sum % / sum days.
 3. The Tags page loads for every tag and its numbers match a direct calculation.
 """
+import json
 import os
 import sys
 import pandas as pd
@@ -138,13 +139,20 @@ def test_tags_page_shows_take_profit_charts():
     numbers = [df.value for df in at.dataframe if "Take-profit threshold" in df.value.columns]
     assert len(numbers) == len(strat.TAG_STOP_LOSSES)                 # one table per stop-loss level
     assert all(len(n) == 1 + len(strat.TAKE_PROFIT_THRESHOLDS) for n in numbers)
-    assert len(at.get("plotly_chart")) == len(strat.TAG_STOP_LOSSES)  # one chart per stop-loss, both periods in each
+    # per stop-loss: one average-daily-profit chart (as before) and one cumulative-profit chart, both periods in each
+    charts = at.get("plotly_chart")
+    assert len(charts) == 2 * len(strat.TAG_STOP_LOSSES)
+    y_titles = [json.loads(c.proto.spec)["layout"]["yaxis"]["title"]["text"] for c in charts]
+    assert y_titles.count("Avg daily profit %") == len(strat.TAG_STOP_LOSSES)
+    assert sum(t.startswith("Cumulative profit") for t in y_titles) == len(strat.TAG_STOP_LOSSES)
     # the 10% chart is the base strategy's own stop-loss: its "no take-profit" row matches the period tables
     ten = numbers[strat.TAG_STOP_LOSSES.index(10.0)].iloc[0]
     assert ten["Period 1: closed trades"] == int(at.metric[1].value)
+    assert at.metric[2].label.startswith("Average daily profit")
+    assert f"{ten['Period 1: avg daily profit %']:.4f}%" == at.metric[2].value
     # the period's total profit box (Rs 1 lakh per trade) matches the chart numbers' base row
-    assert at.metric[2].label.startswith("Cumulative profit")
-    assert ten["Period 1: total profit ₹"] == int(at.metric[2].value.replace("₹", "").replace(",", ""))
+    assert at.metric[3].label.startswith("Cumulative profit")
+    assert ten["Period 1: total profit ₹"] == int(at.metric[3].value.replace("₹", "").replace(",", ""))
 
 
 def test_stop_loss_level_changes_exits():

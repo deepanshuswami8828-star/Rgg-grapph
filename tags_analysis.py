@@ -112,11 +112,11 @@ for label, p_start, p_end in strat.TAG_PERIODS:
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Tickers in period", rep["tickers"])
     c2.metric("Closed trades in period", rep["trades"])
-    c3.metric("Cumulative profit (₹1 lakh per trade)", inr(rep["total_profit_rs"]) if rep["trades"] else "—",
+    c3.metric("Average daily profit % (simple)", f"{avg:.4f}%" if avg is not None else "—",
+              help="Simple average of 'Daily profit %' over the tickers that had at least one closed trade.")
+    c4.metric("Cumulative profit (₹1 lakh per trade)", inr(rep["total_profit_rs"]) if rep["trades"] else "—",
               help="Cumulative profit of every closed trade in the period, ₹1,00,000 invested per trade "
                    f"(sum of profit % = {rep['total_profit_pct']:.2f}%). Not divided by days.")
-    c4.metric("Average daily profit % (simple)", f"{avg:.4f}%" if avg is not None else "—",
-              help="Simple average of 'Daily profit %' over the tickers that had at least one closed trade.")
     if len(rows) > strat.TAG_MAX_ROWS:
         st.caption(f"Showing {strat.TAG_MAX_ROWS} of {len(rows)} tickers.")
     shown = rows[:strat.TAG_MAX_ROWS]
@@ -141,6 +141,37 @@ HOVER_LINES = ("Cumulative profit %{customdata[0]}<br>Avg daily profit %{customd
 
 
 def threshold_chart(stop_loss: float, base_rep: dict, curve_rep: dict, y_range: list) -> go.Figure:
+    """Take-profit threshold (x) vs simple average of daily profit % (y), one line per period;
+    dashed line per period = base strategy (no take-profit) at the same stop-loss."""
+    fig = go.Figure()
+    for color, (label, p_start, p_end) in zip(PERIOD_COLORS, strat.TAG_PERIODS):
+        pts = [(x, curve_rep[x][label]["avg_daily_profit"], curve_rep[x][label]["avg_days_held"], curve_rep[x][label]["trades"])
+               for x in strat.TAKE_PROFIT_THRESHOLDS if curve_rep[x][label]["avg_daily_profit"] is not None]
+        fig.add_trace(go.Scatter(x=[p[0] for p in pts], y=[p[1] for p in pts], customdata=[[p[2], p[3]] for p in pts],
+                                 mode="lines+markers", name=f"{label} ({p_start:%b %y}-{p_end:%b %y})",
+                                 line=dict(color=color, width=2), marker=dict(size=4),
+                                 hovertemplate=f"<b>{label} · {stop_loss:g}% stop-loss</b><br>Take-profit %{{x}}%<br>"
+                                               "Avg daily profit %{y:.4f}%<br>Avg days held per trade %{customdata[0]:.1f}<br>"
+                                               "Closed trades %{customdata[1]}<extra></extra>"))
+        b = base_rep[label]
+        if b["avg_daily_profit"] is not None:
+            fig.add_trace(go.Scatter(x=[0, 100], y=[b["avg_daily_profit"]] * 2, mode="lines",
+                                     name=f"{label} base: {b['avg_daily_profit']:.4f}%",
+                                     line=dict(color=color, width=1.5, dash="dash"),
+                                     customdata=[[b["avg_days_held"], b["trades"]]] * 2,
+                                     hovertemplate=f"<b>{label} · {stop_loss:g}% stop-loss · base (no take-profit)</b><br>"
+                                                   "Avg daily profit %{y:.4f}%<br>Avg days held per trade %{customdata[0]:.1f}<br>"
+                                                   "Closed trades %{customdata[1]}<extra></extra>"))
+    fig.update_layout(title=dict(text=f"{stop_loss:g}% stop-loss", font=dict(size=15)), height=380,
+                      margin=dict(l=10, r=10, t=40, b=10),
+                      xaxis_title="Take-profit threshold x (%)", yaxis_title="Avg daily profit %",
+                      xaxis=dict(range=[0, 102], dtick=10), yaxis=dict(range=y_range),
+                      legend=dict(orientation="h", y=-0.28, font=dict(size=10)),
+                      plot_bgcolor="#fcfcfb", paper_bgcolor="#fcfcfb")
+    return fig
+
+
+def cumulative_chart(stop_loss: float, base_rep: dict, curve_rep: dict, y_range: list) -> go.Figure:
     """Take-profit threshold (x) vs TOTAL (cumulative) profit of the period's closed trades in ₹ lakh, ₹1 lakh per
     trade (y), one line per period; dashed line per period = base strategy (no take-profit) at the same stop-loss.
     Hover and legend also give the simple average of daily profit %."""
@@ -179,10 +210,7 @@ st.caption("Modified Strategy 2 · Version 3: on any day after the buy, if the d
            "the weekly has dropped into Weakening/Lagging and come back up, as after a stop-loss. Each chart uses one "
            "stop-loss level; everything else (weekly exits, periods, ₹1,00,000 per trade) is unchanged. One colour per "
            "period: solid line = with take-profit, dashed line = base strategy without take-profit at the same stop-loss. "
-           "Y-axis = cumulative profit: the profit of all closed trades in the period added up, ₹1 lakh per trade, not "
-           "divided by days. "
-           "All charts share the same y-axis so they can be compared. Hover a point for the average daily profit %, "
-           "the average days held per trade and the number of trades.")
+           "All charts share the same y-axis so they can be compared. Hover a point for the average days held per trade.")
 
 with st.spinner(f"Testing {len(strat.TAKE_PROFIT_THRESHOLDS)} take-profit thresholds x {len(strat.TAG_STOP_LOSSES)} "
                 "stop-loss levels for every stock in the tag..."):
@@ -190,16 +218,36 @@ with st.spinner(f"Testing {len(strat.TAKE_PROFIT_THRESHOLDS)} take-profit thresh
                   {x: tag_reports(tag, m_ver, float(x), sl) for x in strat.TAKE_PROFIT_THRESHOLDS})
              for sl in strat.TAG_STOP_LOSSES}
 
-values = [r[label]["total_profit_rs"] / 1e5 for b, c in by_sl.values() for r in [b] + list(c.values())
-          for label, _, _ in strat.TAG_PERIODS if r[label]["trades"]]
-pad = (max(values) - min(values)) * 0.05 if values else 0.01
-y_range = [min(values) - pad, max(values) + pad] if values else None
 
-for row_start in range(0, len(strat.TAG_STOP_LOSSES), 2):
-    cols = st.columns(2)
-    for col, sl in zip(cols, strat.TAG_STOP_LOSSES[row_start:row_start + 2]):
-        base_rep, curve_rep = by_sl[sl]
-        col.plotly_chart(threshold_chart(sl, base_rep, curve_rep, y_range), width="stretch", key=f"tp_chart_{sl:g}")
+def _y_range(values: list):
+    """Shared y-axis range for one set of charts, with 5% padding."""
+    pad = (max(values) - min(values)) * 0.05 if values else 0.01
+    return [min(values) - pad, max(values) + pad] if values else None
+
+
+all_reps = [r[label] for b, c in by_sl.values() for r in [b] + list(c.values()) for label, _, _ in strat.TAG_PERIODS]
+avg_range = _y_range([r["avg_daily_profit"] for r in all_reps if r["avg_daily_profit"] is not None])
+cum_range = _y_range([r["total_profit_rs"] / 1e5 for r in all_reps if r["trades"]])
+
+
+def chart_grid(make_chart, y_range: list, key: str):
+    """One chart per stop-loss level, two per row."""
+    for row_start in range(0, len(strat.TAG_STOP_LOSSES), 2):
+        cols = st.columns(2)
+        for col, sl in zip(cols, strat.TAG_STOP_LOSSES[row_start:row_start + 2]):
+            base_rep, curve_rep = by_sl[sl]
+            col.plotly_chart(make_chart(sl, base_rep, curve_rep, y_range), width="stretch", key=f"{key}_{sl:g}")
+
+
+chart_grid(threshold_chart, avg_range, "tp_chart")
+
+st.markdown("### Cumulative profit by take-profit threshold and stop-loss")
+st.caption("Same runs as the charts above, measured differently. Y-axis = cumulative profit: the profit of all closed "
+           "trades in the period added up, ₹1 lakh per trade, not divided by days. One colour per period: solid line = "
+           "with take-profit, dashed line = base strategy without take-profit at the same stop-loss. All charts share "
+           "the same y-axis. Hover a point for the average daily profit %, the average days held per trade and the "
+           "number of trades.")
+chart_grid(cumulative_chart, cum_range, "tp_cum_chart")
 
 with st.expander("Numbers behind the charts"):
     for tab, sl in zip(st.tabs([f"{sl:g}% stop-loss" for sl in strat.TAG_STOP_LOSSES]), strat.TAG_STOP_LOSSES):
