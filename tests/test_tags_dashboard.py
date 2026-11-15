@@ -7,6 +7,7 @@ Verifies:
 """
 import json
 import os
+import re
 import sys
 import pandas as pd
 from streamlit.testing.v1 import AppTest
@@ -150,10 +151,18 @@ def test_tags_page_shows_take_profit_charts():
     assert ten["Period 1: closed trades"] == int(at.metric[1].value)
     assert at.metric[2].label.startswith("Average daily profit")
     assert f"{ten['Period 1: avg daily profit %']:.4f}%" == at.metric[2].value
-    # the period's cumulative profit box (% with the Rs amount below, Rs 1 lakh per trade) matches the base row
+    # the period's cumulative profit box (percent only, no rupees) matches the chart numbers' base row
     assert at.metric[3].label == "Cumulative profit %"
-    assert f"{ten['Period 1: cumulative profit %']:+.2f}%" == at.metric[3].value
-    assert ten["Period 1: total profit ₹"] == int(at.metric[3].delta.replace("₹", "").replace(",", ""))
+    assert f"{ten['Period 1: cumulative profit %']:+,.2f}%" == at.metric[3].value
+    assert not at.metric[3].delta
+    assert not any("₹" in c for c in ten.index)
+    # cumulative hover shows the % with 2 decimals and no rupee amount
+    cum_specs = [json.loads(c.proto.spec) for c in charts]
+    cum_specs = [s for s in cum_specs if s["layout"]["yaxis"]["title"]["text"].startswith("Cumulative profit %")]
+    for s in cum_specs:
+        for tr in s["data"]:
+            assert "₹" not in tr["hovertemplate"] and "₹" not in tr["name"]
+            assert all(re.fullmatch(r"[+-][\d,]+\.\d\d%", p[0]) for p in tr["customdata"])
     cumulative_axes = [json.loads(c.proto.spec)["layout"]["yaxis"] for c in charts]
     cumulative_axes = [a for a in cumulative_axes if a["title"]["text"].startswith("Cumulative profit %")]
     assert len(cumulative_axes) == len(strat.TAG_STOP_LOSSES) and all(a["ticksuffix"] == "%" for a in cumulative_axes)
