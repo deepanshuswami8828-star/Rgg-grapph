@@ -73,8 +73,8 @@ STRATEGY_REGISTRY = {
         "name": "Weekly RRG Only (Version 3) — 10% Stop-Loss",
         "tag": "Weekly Only",
         "short_desc": "Buy when Weekly is Leading/Improving; Sell when Weekly drops into Weakening/Lagging, or on ANY day's close 10% or more below your buy price (stop-loss). Daily RRG is ignored.",
-        "full_desc": "Version 1 with a protective stop-loss. Buys and sells on the Weekly RRG only, read every trading day (week so far): buys on the first day the Weekly is in Leading or Improving and sells on the first day it is in Weakening or Lagging. In addition, the price is checked at every day's close: the first close at or below 90% of the buy price sells the position that day and books the loss. After a stop-loss sale it buys again only after the Weekly has dropped into Weakening/Lagging and come back up. The Daily RRG is never used - the daily check looks only at the price. Every buy, and every sell triggered by the RRG, happens on the next trading day after the signal, at the average of that day's open and close.",
-        "entry_rule": "Buy on the first day the Weekly (as of that day) is in {Leading, Improving} (after a stop-loss: only once the Weekly has been in Weakening/Lagging and comes back up) - bought on the next trading day at the average of its open and close.",
+        "full_desc": "Version 1 with a protective stop-loss. Buys and sells on the Weekly RRG only, read every trading day (week so far): buys on the first day the Weekly is in Leading or Improving and sells on the first day it is in Weakening or Lagging. In addition, the price is checked at every day's close: the first close at or below 90% of the buy price sells the position that day and books the loss. After a stop-loss sale it buys again only after the Weekly has dropped into Weakening/Lagging and come back up. False triggers are skipped: when the Weekly dips for only 1 or 2 sessions and comes straight back to the same quadrant (Leading → Weakening → Leading, or Improving → Lagging → Improving), the sale stands but the buy right after it is not taken; the next buy waits for the Weekly to drop into Weakening/Lagging again and come back up. The Daily RRG is never used - the daily check looks only at the price. Every buy, and every sell triggered by the RRG, happens on the next trading day after the signal, at the average of that day's open and close.",
+        "entry_rule": "Buy on the first day the Weekly (as of that day) is in {Leading, Improving} (after a stop-loss: only once the Weekly has been in Weakening/Lagging and comes back up; after a 1-2 session dip Leading → Weakening → Leading or Improving → Lagging → Improving: that buy is a false trigger and is skipped) - bought on the next trading day at the average of its open and close.",
         "exit_rule": "Sell on the first day the Weekly (as of that day) is in {Weakening, Lagging} - sold on the next trading day at the average of its open and close; or at ANY day's close that is ≤ 90% of the buy price (10% stop-loss, sold at that close).",
         "best_market": "Trending stocks where the weekly RRG works well but you want a hard limit on any single loss.",
         "risk_watch": "A gap-down below the stop on one day books a loss a little bigger than 10%; a stopped-out stock that recovers is only re-bought after a weekly down-and-up cycle.",
@@ -390,7 +390,9 @@ def gen_strat_2_v3(daily: pd.DataFrame, asof: pd.DataFrame, start: pd.Timestamp,
       SELL (open position): close <= 90% of the buy price               -> stop-loss, loss booked
                             or Weekly (as of that day) in {Weakening, Lagging}
       BUY  (flat):          Weekly (as of that day) in {Leading, Improving}, provided the weekly
-                            has been in Weakening/Lagging since the last stop-loss (fresh entry).
+                            has been in Weakening/Lagging since the last stop-loss (fresh entry),
+                            and not the false-trigger buy right after a 1-2 session dip back into the
+                            same quadrant (DIP_PATTERNS; skipped, the next buy waits for a new down-and-up).
     The Daily RRG is never used - the daily check looks only at the price. Buys per `entry`; a weekly
     exit sells per `rrg_exit` (default for both: next trading day at the average of its open and close);
     the stop-loss sells at that day's close. Stop-loss and take-profit are measured from the buy price
@@ -429,15 +431,38 @@ def v3_trades(inp: Dict[str, Any], cost_pct: float = 0.12, take_profit_pct: Opti
     return trades, []
 
 
+# False-trigger re-entries skipped by Strategy 2 v3 (from 15 Nov 2026): after a weekly exit, the buy that comes right
+# back when the weekly dipped for only 1 or 2 sessions and returned to the SAME quadrant:
+#   Leading -> Weakening (1-2 sessions) -> Leading,   Improving -> Lagging (1-2 sessions) -> Improving
+# (e.g. DEVYANI: Leading 2 Nov, Weakening 3-4 Nov, Leading 5 Nov). The sell still happens; the next buy waits for the
+# weekly to drop into Weakening/Lagging again and come back up, as after a stop-loss.
+DIP_PATTERNS = {("Leading", "Weakening"), ("Improving", "Lagging")}
+
+
+def _false_dip_reentry(quads, dip, i: int) -> bool:
+    """True when today's buy (day i) follows one of the DIP_PATTERNS: the weekly exit was signalled on day e, the stock
+    was sold on day e+1, and the weekly is back in its old quadrant on day e+2 after 1 (e+1 already back) or 2 (e+1
+    still in the dip) sessions down."""
+    if dip is None:
+        return False
+    e, before, into = dip
+    return ((before, into) in DIP_PATTERNS and i == e + 2 and quads[i] == before
+            and quads[e + 1] in (before, into))
+
+
 def v3_run(inp: Dict[str, Any], cost_pct: float = 0.12, take_profit_pct: Optional[float] = None,
            stop_loss_pct: float = STOP_LOSS_V3, entry: str = DEFAULT_ENTRY,
-           rrg_exit: str = DEFAULT_RRG_EXIT) -> Tuple[List[Dict], Optional[Dict], Optional[Dict]]:
+           rrg_exit: str = DEFAULT_RRG_EXIT,
+           skip_dip_reentry: bool = True) -> Tuple[List[Dict], Optional[Dict], Optional[Dict]]:
     """Strategy 2 v3 rules on inputs from v3_inputs. Returns (trades, buy signal still to be filled, exit
-    signal still to be sold): the last two are signals from the last day, executed on the next trading day."""
+    signal still to be sold): the last two are signals from the last day, executed on the next trading day.
+    skip_dip_reentry: skip the false-trigger buy right after a 1-2 session dip (DIP_PATTERNS); False = rules before
+    15 Nov 2026."""
     dates, quads, closes, prevs = inp["dates"], inp["quads"], inp["closes"], inp["prevs"]
     use_tp = take_profit_pct is not None and inp["highs"] is not None
     day_highs, day_opens = inp["highs"], inp["opens"]
     trades, pos, armed, pending, pending_exit = [], None, True, None, None
+    dip = None                           # (day index of the last weekly exit signal, quadrant before, quadrant into)
     for i, d in enumerate(dates):
         wq, px = quads[i], closes[i]
         if pending_exit is not None:     # next-day weekly exit: sell today
@@ -446,7 +471,7 @@ def v3_run(inp: Dict[str, Any], cost_pct: float = 0.12, take_profit_pct: Optiona
             continue
         if pending is not None:          # next-day entry: fill today, exits are checked from tomorrow
             pos = dict(pending, buy=d, buy_px=_fill_px(day_opens[i], px))
-            pending = None
+            pending, dip = None, None
             continue
         if pos is not None:
             stop_px = pos["buy_px"] * (1 - stop_loss_pct / 100.0)
@@ -467,6 +492,7 @@ def v3_run(inp: Dict[str, Any], cost_pct: float = 0.12, take_profit_pct: Optiona
                 if rrg_exit != ENTRY_CLOSE:   # weekly exit: sell on the next trading day
                     pending_exit = dict(exit_signal=d, exit_into=wq, exit_reason=reason, daily_at_sell="",
                                         weekly_at_sell=wq, stop_px=stop_px)
+                    dip = (i, quads[i - 1] if i > 0 else prevs[i], wq)
                     continue
             else:
                 continue
@@ -478,7 +504,11 @@ def v3_run(inp: Dict[str, Any], cost_pct: float = 0.12, take_profit_pct: Optiona
         if wq in DOWN:
             armed = True
         elif armed and wq in UP:
+            if skip_dip_reentry and _false_dip_reentry(quads, dip, i):
+                armed, dip = False, None    # false trigger: no buy; wait for the weekly to go down and up again
+                continue
             sig = dict(signal=d, weekly=wq, frm=prevs[i], into=wq, daily_at_buy="", weekly_at_buy=wq)
+            dip = None
             if entry == ENTRY_CLOSE:
                 pos = dict(sig, buy=d, buy_px=px)
             else:

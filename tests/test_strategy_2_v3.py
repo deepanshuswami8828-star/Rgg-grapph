@@ -136,3 +136,60 @@ def test_registry_entry():
     meta = strat.STRATEGY_REGISTRY[4]
     assert meta["label"] == "Strategy 2 · Version 3" and meta["weekly_only"]
     assert strat.SIGNALS[4] is strat.gen_strat_2_v3
+    assert "False triggers are skipped" in meta["full_desc"] and "false trigger" in meta["entry_rule"]
+
+
+# ---- False-trigger re-entries (from 15 Nov 2026) --------------------------------------------------------------
+def run_next(quads, skip=True):
+    """Default rules (signal at a day's close, filled / sold the next day). quads: weekly quadrant per day, flat price.
+    Returns [(buy day, sell day)]."""
+    idx = pd.bdate_range("2024-01-01", periods=len(quads))
+    asof = pd.DataFrame({"Quadrant": quads, "RS_Momentum": 100.5}, index=idx)
+    daily = pd.DataFrame({"Quadrant": ["Lagging"] * len(idx), "Close": 100.0}, index=idx)
+    trades, _, _ = strat.v3_run(strat.v3_inputs(daily, asof, idx[0]), 0.0, skip_dip_reentry=skip)
+    pos = list(idx)
+    return [(pos.index(t["buy"]), pos.index(t["sell"]) if t["sell"] is not None else None) for t in trades]
+
+
+L, W, I, G = "Leading", "Weakening", "Improving", "Lagging"
+
+
+@pytest.mark.parametrize("dip", [[W], [W, W]], ids=["1 session", "2 sessions"])
+def test_leading_weakening_leading_rebuy_is_skipped(dip):
+    # buy signal d0 -> bought d1; weekly dips at d3 (sold d4) and is back in Leading: that buy is a false trigger.
+    # The weekly then drops again and comes back up: the next buy is taken.
+    quads = [L, L, L] + dip + [L, L, L, W, L, L, L]
+    k = 3 + len(dip)                                    # first day back in Leading
+    assert run_next(quads) == [(1, 4), (k + 5, None)]
+    assert run_next(quads, skip=False)[1][0] == (k + 1 if len(dip) == 2 else k + 2)   # old rule: bought right back
+
+
+@pytest.mark.parametrize("dip", [[G], [G, G]], ids=["1 session", "2 sessions"])
+def test_improving_lagging_improving_rebuy_is_skipped(dip):
+    quads = [I, I, I] + dip + [I, I, I, G, I, I, I]
+    k = 3 + len(dip)
+    assert run_next(quads) == [(1, 4), (k + 5, None)]
+
+
+def test_longer_dip_or_other_quadrant_is_bought_back():
+    # 3 sessions down is not a false trigger: the buy is taken
+    assert run_next([L, L, L, W, W, W, L, L, L]) == [(1, 4), (7, None)]
+    # back up in a different quadrant (Leading -> Weakening -> Improving): taken
+    assert run_next([L, L, L, W, I, I, I]) == [(1, 4), (6, None)]
+    # Leading -> Lagging -> Leading is not one of the patterns: taken
+    assert run_next([L, L, L, G, L, L, L]) == [(1, 4), (6, None)]
+
+
+def test_devyani_and_dabur_false_triggers_are_skipped(stocks):
+    # DEVYANI: Leading 2 Nov, Weakening 3-4 Nov, Leading 5 Nov 2026 -> the 5 Nov buy is skipped.
+    # DABUR: Improving 8 Nov, Lagging 9 Nov, Improving 11 Nov 2026 -> the 12 Nov buy is skipped.
+    for ticker, day in (("DEVYANI.NS", "2026-11-05"), ("DABUR.NS", "2026-11-12")):
+        name, al = stocks[ticker]
+        al = al[al.index <= "2026-11-13"]
+        daily, _ = strat.compute_rrg(al, name, "Daily")
+        asof = strat.weekly_asof(al, name)
+        inp = strat.v3_inputs(daily, asof, max(pd.Timestamp("2024-01-01"), daily.index[1], asof.index[0]),
+                              None, dp.load_open_data(ticker))
+        signals = lambda skip: {t["signal"] for t in strat.v3_run(inp, 0.0, skip_dip_reentry=skip)[0]}
+        assert pd.Timestamp(day) in signals(False), ticker          # the old rule bought
+        assert pd.Timestamp(day) not in signals(True), ticker       # the new rule skips it
