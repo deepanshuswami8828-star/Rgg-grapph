@@ -127,6 +127,8 @@ def test_thresholds_and_period_report():
     assert rep["tickers"] == 3 and rep["trades"] == 2 and rep["tickers_with_trades"] == 2
     assert rep["avg_days_held"] == (10 + 30) / 2
     assert abs(rep["avg_daily_profit"] - (1.0 + (-5 / 30)) / 2) < 1e-9
+    # total (cumulative) profit: +10% and -5% -> 5%, i.e. Rs 5,000 with Rs 1 lakh per trade; not divided by days
+    assert abs(rep["total_profit_pct"] - 5.0) < 1e-9 and abs(rep["total_profit_rs"] - 5000.0) < 1e-6
 
 
 def test_tags_page_shows_take_profit_charts():
@@ -140,6 +142,9 @@ def test_tags_page_shows_take_profit_charts():
     # the 10% chart is the base strategy's own stop-loss: its "no take-profit" row matches the period tables
     ten = numbers[strat.TAG_STOP_LOSSES.index(10.0)].iloc[0]
     assert ten["Period 1: closed trades"] == int(at.metric[1].value)
+    # the period's total profit box (Rs 1 lakh per trade) matches the chart numbers' base row
+    assert at.metric[2].label.startswith("Total profit")
+    assert ten["Period 1: total profit ₹"] == int(at.metric[2].value.replace("₹", "").replace(",", ""))
 
 
 def test_stop_loss_level_changes_exits():

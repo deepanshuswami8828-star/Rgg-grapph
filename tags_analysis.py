@@ -18,6 +18,16 @@ import strategies as strat
 PERIOD_COLORS = ["#2a78d6", "#e65100", "#2e7d32", "#7b1fa2"]
 
 
+def inr(x: float) -> str:
+    """Rupees with Indian digit grouping and a sign, e.g. +₹1,08,68,206 / -₹43,573."""
+    s = f"{abs(x):.0f}"
+    head, tail = s[:-3], s[-3:]
+    while len(head) > 2:
+        tail = head[-2:] + "," + tail
+        head = head[:-2]
+    return ("-" if x < 0 else "+") + "₹" + (head + "," + tail if head else tail)
+
+
 # ---- data (cached per data version and strategy code) ---------------------------------------
 def cache_key() -> str:
     """Data version + fingerprint of strategies.py. st.cache_data only hashes the cached function's own code,
@@ -99,10 +109,13 @@ for label, p_start, p_end in strat.TAG_PERIODS:
     avg = rep["avg_daily_profit"]
 
     st.markdown(f"#### {label}: {p_start:%b %Y} to {p_end:%b %Y}")
-    c1, c2, c3 = st.columns(3)
+    c1, c2, c3, c4 = st.columns(4)
     c1.metric("Tickers in period", rep["tickers"])
     c2.metric("Closed trades in period", rep["trades"])
-    c3.metric("Average daily profit % (simple)", f"{avg:.4f}%" if avg is not None else "—",
+    c3.metric("Total profit (₹1 lakh per trade)", inr(rep["total_profit_rs"]) if rep["trades"] else "—",
+              help="Cumulative profit of every closed trade in the period, ₹1,00,000 invested per trade "
+                   f"(sum of profit % = {rep['total_profit_pct']:.2f}%). Not divided by days.")
+    c4.metric("Average daily profit % (simple)", f"{avg:.4f}%" if avg is not None else "—",
               help="Simple average of 'Daily profit %' over the tickers that had at least one closed trade.")
     if len(rows) > strat.TAG_MAX_ROWS:
         st.caption(f"Showing {strat.TAG_MAX_ROWS} of {len(rows)} tickers.")
@@ -117,32 +130,42 @@ for label, p_start, p_end in strat.TAG_PERIODS:
                    f"so they have no daily profit % and are left out of the average.")
 
 # ---- take-profit threshold analysis, one compact chart per stop-loss level ----------------------
+def _point(rep: dict):
+    """customdata for one chart point: [total profit ₹ text, avg daily profit text, avg days held, closed trades]."""
+    a = rep["avg_daily_profit"]
+    return [inr(rep["total_profit_rs"]), f"{a:.4f}%" if a is not None else "—", rep["avg_days_held"] or 0, rep["trades"]]
+
+
+HOVER_LINES = ("Total profit %{customdata[0]}<br>Avg daily profit %{customdata[1]}<br>"
+               "Avg days held per trade %{customdata[2]:.1f}<br>Closed trades %{customdata[3]}<extra></extra>")
+
+
 def threshold_chart(stop_loss: float, base_rep: dict, curve_rep: dict, y_range: list) -> go.Figure:
-    """Take-profit threshold (x) vs simple average of daily profit % (y), one line per period;
-    dashed line per period = base strategy (no take-profit) at the same stop-loss."""
+    """Take-profit threshold (x) vs TOTAL (cumulative) profit of the period's closed trades in ₹ lakh, ₹1 lakh per
+    trade (y), one line per period; dashed line per period = base strategy (no take-profit) at the same stop-loss.
+    Hover and legend also give the simple average of daily profit %."""
     fig = go.Figure()
     for color, (label, p_start, p_end) in zip(PERIOD_COLORS, strat.TAG_PERIODS):
-        pts = [(x, curve_rep[x][label]["avg_daily_profit"], curve_rep[x][label]["avg_days_held"], curve_rep[x][label]["trades"])
-               for x in strat.TAKE_PROFIT_THRESHOLDS if curve_rep[x][label]["avg_daily_profit"] is not None]
-        fig.add_trace(go.Scatter(x=[p[0] for p in pts], y=[p[1] for p in pts], customdata=[[p[2], p[3]] for p in pts],
+        reps = [(x, curve_rep[x][label]) for x in strat.TAKE_PROFIT_THRESHOLDS if curve_rep[x][label]["trades"]]
+        fig.add_trace(go.Scatter(x=[x for x, _ in reps], y=[r["total_profit_rs"] / 1e5 for _, r in reps],
+                                 customdata=[_point(r) for _, r in reps],
                                  mode="lines+markers", name=f"{label} ({p_start:%b %y}-{p_end:%b %y})",
                                  line=dict(color=color, width=2), marker=dict(size=4),
                                  hovertemplate=f"<b>{label} · {stop_loss:g}% stop-loss</b><br>Take-profit %{{x}}%<br>"
-                                               "Avg daily profit %{y:.4f}%<br>Avg days held per trade %{customdata[0]:.1f}<br>"
-                                               "Closed trades %{customdata[1]}<extra></extra>"))
+                                               + HOVER_LINES))
         b = base_rep[label]
-        if b["avg_daily_profit"] is not None:
-            fig.add_trace(go.Scatter(x=[0, 100], y=[b["avg_daily_profit"]] * 2, mode="lines",
-                                     name=f"{label} base: {b['avg_daily_profit']:.4f}%",
+        if b["trades"]:
+            avg = f" · avg daily {b['avg_daily_profit']:.4f}%" if b["avg_daily_profit"] is not None else ""
+            fig.add_trace(go.Scatter(x=[0, 100], y=[b["total_profit_rs"] / 1e5] * 2, mode="lines",
+                                     name=f"{label} base: {inr(b['total_profit_rs'])}{avg}",
                                      line=dict(color=color, width=1.5, dash="dash"),
-                                     customdata=[[b["avg_days_held"], b["trades"]]] * 2,
+                                     customdata=[_point(b)] * 2,
                                      hovertemplate=f"<b>{label} · {stop_loss:g}% stop-loss · base (no take-profit)</b><br>"
-                                                   "Avg daily profit %{y:.4f}%<br>Avg days held per trade %{customdata[0]:.1f}<br>"
-                                                   "Closed trades %{customdata[1]}<extra></extra>"))
+                                                   + HOVER_LINES))
     fig.update_layout(title=dict(text=f"{stop_loss:g}% stop-loss", font=dict(size=15)), height=380,
                       margin=dict(l=10, r=10, t=40, b=10),
-                      xaxis_title="Take-profit threshold x (%)", yaxis_title="Avg daily profit %",
-                      xaxis=dict(range=[0, 102], dtick=10), yaxis=dict(range=y_range),
+                      xaxis_title="Take-profit threshold x (%)", yaxis_title="Total profit (₹ lakh)",
+                      xaxis=dict(range=[0, 102], dtick=10), yaxis=dict(range=y_range, ticksuffix=" L"),
                       legend=dict(orientation="h", y=-0.28, font=dict(size=10)),
                       plot_bgcolor="#fcfcfb", paper_bgcolor="#fcfcfb")
     return fig
@@ -155,7 +178,9 @@ st.caption("Modified Strategy 2 · Version 3: on any day after the buy, if the d
            "the weekly has dropped into Weakening/Lagging and come back up, as after a stop-loss. Each chart uses one "
            "stop-loss level; everything else (weekly exits, periods, ₹1,00,000 per trade) is unchanged. One colour per "
            "period: solid line = with take-profit, dashed line = base strategy without take-profit at the same stop-loss. "
-           "All charts share the same y-axis so they can be compared. Hover a point for the average days held per trade.")
+           "Y-axis = total (cumulative) profit of all closed trades in the period, ₹1 lakh per trade, not divided by days. "
+           "All charts share the same y-axis so they can be compared. Hover a point for the average daily profit %, "
+           "the average days held per trade and the number of trades.")
 
 with st.spinner(f"Testing {len(strat.TAKE_PROFIT_THRESHOLDS)} take-profit thresholds x {len(strat.TAG_STOP_LOSSES)} "
                 "stop-loss levels for every stock in the tag..."):
@@ -163,8 +188,8 @@ with st.spinner(f"Testing {len(strat.TAKE_PROFIT_THRESHOLDS)} take-profit thresh
                   {x: tag_reports(tag, m_ver, float(x), sl) for x in strat.TAKE_PROFIT_THRESHOLDS})
              for sl in strat.TAG_STOP_LOSSES}
 
-values = [r[label]["avg_daily_profit"] for b, c in by_sl.values() for r in [b] + list(c.values())
-          for label, _, _ in strat.TAG_PERIODS if r[label]["avg_daily_profit"] is not None]
+values = [r[label]["total_profit_rs"] / 1e5 for b, c in by_sl.values() for r in [b] + list(c.values())
+          for label, _, _ in strat.TAG_PERIODS if r[label]["trades"]]
 pad = (max(values) - min(values)) * 0.05 if values else 0.01
 y_range = [min(values) - pad, max(values) + pad] if values else None
 
@@ -183,6 +208,7 @@ with st.expander("Numbers behind the charts"):
             row = {"Take-profit threshold": "Base (none)" if x is None else f"{x}%"}
             for label, _, _ in strat.TAG_PERIODS:
                 a, d = reps[label]["avg_daily_profit"], reps[label]["avg_days_held"]
+                row[f"{label}: total profit ₹"] = round(reps[label]["total_profit_rs"]) if reps[label]["trades"] else None
                 row[f"{label}: avg daily profit %"] = round(a, 4) if a is not None else None
                 row[f"{label}: closed trades"] = reps[label]["trades"]
                 row[f"{label}: avg days held"] = round(d, 1) if d is not None else None
