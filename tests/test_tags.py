@@ -96,6 +96,13 @@ PRIVATE_BANK = ["AXISBANK", "BANDHANBNK", "FEDERALBNK", "HDFCBANK", "ICICIBANK",
 TATA_GROUP = ["INDHOTEL", "TATACONSUM", "TATAPOWER", "TATASTEEL", "TMCV", "TMPV", "VOLTAS"]
 # Nifty Energy stocks (Strike list of 40) that passed all 3 data checks, plus PFC, RECLTD, IREDA (added 12 Nov 2026)
 ENERGY = ["ABB", "ADANIENSOL", "ADANIGREEN", "ADANIPOWER", "ATGL", "BHEL", "BPCL", "CESC", "CGPOWER", "COALINDIA", "ENRIN", "GAIL", "GVT&D", "HINDPETRO", "IGL", "INOXWIND", "IOC", "JSWENERGY", "MGL", "NHPC", "NLCINDIA", "NTPC", "NTPCGREEN", "OIL", "PETRONET", "POWERGRID", "POWERINDIA", "RELIANCE", "RPOWER", "SIEMENS", "SUZLON", "TATAPOWER", "TORNTPOWER", "PFC", "RECLTD", "IREDA"]
+# Nifty Midcap 50 stocks that passed all 3 data checks (17 Nov 2026; GLENMARK, MFSL, UPL failed, and PHOENIXLTD,
+# HAVELLS, NATIONALUM, APLAPOLLO had failed earlier)
+NIFTY_MIDCAP_50 = ["ASHOKLEY", "AUBANK", "AUROPHARMA", "BHARATFORG", "BHEL", "DABUR", "DIXON", "FEDERALBNK",
+                   "FORTIS", "GMRAIRPORT", "GODREJPROP", "GVT&D", "HEROMOTOCO", "HINDPETRO", "ICICIGI", "IDFCFIRSTB",
+                   "INDHOTEL", "INDUSINDBK", "INDUSTOWER", "JSWENERGY", "LAURUSLABS", "LUPIN", "MANKIND", "MARICO", "MCX",
+                   "NAUKRI", "NHPC", "NMDC", "NYKAA", "OIL", "PAYTM", "PERSISTENT", "POLICYBZR", "PRESTIGE", "RECLTD",
+                   "SRF", "SUZLON", "SWIGGY", "TIINDIA", "UNITDSPR", "VMM", "WAAREEENER", "YESBANK"]
 
 
 def test_tag_membership():
@@ -127,6 +134,8 @@ def test_tag_membership():
     assert sorted(cfg.stocks_for_tag("MSMEMicrofinance")) == sorted(t + ".NS" for t in MSME_MICROFINANCE)
     assert sorted(cfg.stocks_for_tag("ConsumerFinance")) == sorted(t + ".NS" for t in CONSUMER_FINANCE)
     assert len(CONSUMER_FINANCE) == 35
+    assert sorted(cfg.stocks_for_tag("NiftyMidcap50")) == sorted(t + ".NS" for t in NIFTY_MIDCAP_50)
+    assert len(NIFTY_MIDCAP_50) == 43
 
 
 def test_every_tagged_stock_has_data():
@@ -140,8 +149,10 @@ def test_rrg_sidebar_has_no_tag_box_and_lists_every_stock():
     at.run(timeout=60)
     assert len(at.exception) == 0
     assert all(r.key != "tag" for r in at.sidebar.radio)          # tag box removed from the RRG tab
+    # every stock, symbols A to Z, shown as "SYMBOL · name (sector)" (since the search box, 12 Nov 2026)
     assert list(at.sidebar.selectbox(key="stock").options) == [
-        f"{cfg.STOCKS[t]['name']} ({cfg.STOCKS[t]['sector']})" for t in cfg.STOCKS]
+        f"{t.replace('.NS', '')} · {cfg.STOCKS[t]['name']} ({cfg.STOCKS[t]['sector']})"
+        for t in sorted(cfg.STOCKS, key=lambda t: t.replace(".NS", "").upper())]
     at.sidebar.radio(key="page").set_value("All stocks")
     at.run(timeout=300)  # 135+ stocks: a cold run of every view takes over 2 minutes
     assert len(at.exception) == 0, [e.message for e in at.exception]

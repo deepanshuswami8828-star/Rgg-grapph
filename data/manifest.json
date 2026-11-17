@@ -1,5 +1,5 @@
 {
-  "version_id": "v20261117_195334",
+  "version_id": "v20261117_205534",
   "updated_at": "2026-11-17T19:53:34.896832+05:30",
   "status": "SUCCESS",
   "provider": "Yahoo Finance (yfinance)",
@@ -5454,6 +5454,72 @@
       "fetched_at": "2026-11-17T19:53:34.896832+05:30",
       "status": "VALID",
       "benchmark_version": "ea7fef2e2ecf0b2a1ab17327cbf2d9eb94b38f32693fccf9bfca3e42c4862ea2",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "GODREJPROP.NS": {
+      "first_date": "2010-01-05",
+      "last_date": "2026-11-17",
+      "rows": 4172,
+      "sha256": "c54401b22f3cee4e9b3d5e68b132beb47b1a882e54ab6993c8dc569b945360f1",
+      "fetched_at": "2026-11-17T20:55:34.224907+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "ICICIGI.NS": {
+      "first_date": "2017-09-27",
+      "last_date": "2026-11-17",
+      "rows": 2264,
+      "sha256": "53a5b499b27d84d5f03b174f8d2475684d232cc0074f8c2adf075886dd8c005f",
+      "fetched_at": "2026-11-17T20:55:34.224907+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "LAURUSLABS.NS": {
+      "first_date": "2016-12-19",
+      "last_date": "2026-11-17",
+      "rows": 2457,
+      "sha256": "e35c70f9fcf316dfe50ff769c5f28f9000892b44b4de07d32e36f98847c3bc13",
+      "fetched_at": "2026-11-17T20:55:34.224907+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "MANKIND.NS": {
+      "first_date": "2023-05-09",
+      "last_date": "2026-11-17",
+      "rows": 878,
+      "sha256": "faa042ffd69b15467075a2f9d0ea6c8ab5183fb15c145811bac0f4ed8c4fa7ee",
+      "fetched_at": "2026-11-17T20:55:34.224907+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "PRESTIGE.NS": {
+      "first_date": "2010-10-27",
+      "last_date": "2026-11-17",
+      "rows": 3968,
+      "sha256": "53d13ad7ce82b34ca972adf9e3ddebbea823268eb867635596f190e2d43a322e",
+      "fetched_at": "2026-11-17T20:55:34.224907+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "TIINDIA.NS": {
+      "first_date": "2017-11-02",
+      "last_date": "2026-11-17",
+      "rows": 2240,
+      "sha256": "842f252b24e0da914c9bd85e98cd5a0087998908b67fa31f0c1fecfbb311d100",
+      "fetched_at": "2026-11-17T20:55:34.224907+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
       "warnings": [],
       "flagged_moves": []
     }

@@ -36,13 +36,13 @@ STOCKS = {
         "name": "Suzlon Energy",
         "sector": "Energy - wind",
         "notes": "long history",
-        "tags": ["Midselect", "Energy"],
+        "tags": ["Midselect", "Energy", "NiftyMidcap50"],
     },
     "WAAREEENER.NS": {
         "name": "Waaree Energies",
         "sector": "Energy - solar",
         "notes": "listed 28 Oct 2024; show its real first date, never invent pre-listing data",
-        "tags": [],
+        "tags": ["NiftyMidcap50"],
     },
     "BHARTIARTL.NS": {
         "name": "Bharti Airtel",
@@ -60,31 +60,31 @@ STOCKS = {
         "name": "Paytm (One 97 Communications)",
         "sector": "Fintech / Payments",
         "notes": "listed 18 Nov 2021; show its real first date, never invent pre-listing data",
-        "tags": ["Midselect"],
+        "tags": ["Midselect", "NiftyMidcap50"],
     },
     "MCX.NS": {
         "name": "Multi Commodity Exchange (MCX)",
         "sector": "Financial Services - Commodity Exchange",
         "notes": "listed 9 Mar 2012; 5-for-1 split Jan 2026 must NOT appear as a crash",
-        "tags": ["Midselect", "CapitalMarket"],
+        "tags": ["Midselect", "CapitalMarket", "NiftyMidcap50"],
     },
     "PERSISTENT.NS": {
         "name": "Persistent Systems",
         "sector": "IT Services",
         "notes": "listed 6 Apr 2010; bonus 2015 and split 2024 must NOT appear as crashes",
-        "tags": ["Midselect"],
+        "tags": ["Midselect", "NiftyMidcap50"],
     },
     "INDHOTEL.NS": {
         "name": "Indian Hotels (IHCL)",
         "sector": "Hotels & Tourism",
         "notes": "long history",
-        "tags": ["Midselect", "TataGroup", "Tourism", "NonCyclicalConsumer", "Luxury"],
+        "tags": ["Midselect", "TataGroup", "Tourism", "NonCyclicalConsumer", "Luxury", "NiftyMidcap50"],
     },
     "HEROMOTOCO.NS": {
         "name": "Hero MotoCorp",
         "sector": "Automobile - Two Wheelers",
         "notes": "long history",
-        "tags": ["Midselect", "AlphaQVLowVol"],
+        "tags": ["Midselect", "AlphaQVLowVol", "NiftyMidcap50"],
     },
     "INDIANB.NS": {
         "name": "Indian Bank",
@@ -96,61 +96,61 @@ STOCKS = {
         "name": "Ashok Leyland",
         "sector": "Automobile - Commercial Vehicles",
         "notes": "long history",
-        "tags": ["Midselect"],
+        "tags": ["Midselect", "NiftyMidcap50"],
     },
     "INDUSTOWER.NS": {
         "name": "Indus Towers",
         "sector": "Telecom - Tower Infrastructure",
         "notes": "listed 28 Dec 2012 (as Bharti Infratel)",
-        "tags": ["Midselect"],
+        "tags": ["Midselect", "NiftyMidcap50"],
     },
     "NAUKRI.NS": {
         "name": "Info Edge (Naukri)",
         "sector": "Internet - Online Classifieds",
         "notes": "listed 21 Nov 2006",
-        "tags": ["Midselect", "NonCyclicalConsumer"],
+        "tags": ["Midselect", "NonCyclicalConsumer", "NiftyMidcap50"],
     },
     "BHEL.NS": {
         "name": "Bharat Heavy Electricals (BHEL)",
         "sector": "Capital Goods - Heavy Electrical Equipment",
         "notes": "long history",
-        "tags": ["Midselect", "Energy", "Shipping"],
+        "tags": ["Midselect", "Energy", "Shipping", "NiftyMidcap50"],
     },
     "AUROPHARMA.NS": {
         "name": "Aurobindo Pharma",
         "sector": "Pharmaceuticals",
         "notes": "long history",
-        "tags": ["Midselect", "AlphaQVLowVol"],
+        "tags": ["Midselect", "AlphaQVLowVol", "NiftyMidcap50"],
     },
     "DIXON.NS": {
         "name": "Dixon Technologies",
         "sector": "Consumer Electronics - Manufacturing",
         "notes": "listed 18 Sep 2017",
-        "tags": ["Midselect", "NonCyclicalConsumer"],
+        "tags": ["Midselect", "NonCyclicalConsumer", "NiftyMidcap50"],
     },
     "FEDERALBNK.NS": {
         "name": "Federal Bank",
         "sector": "Banking - Private Bank",
         "notes": "long history",
-        "tags": ["Midselect", "AlphaQVLowVol", "PrivateBank", "GoldLending"],
+        "tags": ["Midselect", "AlphaQVLowVol", "PrivateBank", "GoldLending", "NiftyMidcap50"],
     },
     "INDUSINDBK.NS": {
         "name": "IndusInd Bank",
         "sector": "Banking - Private Bank",
         "notes": "long history",
-        "tags": ["Midselect", "PrivateBank"],
+        "tags": ["Midselect", "PrivateBank", "NiftyMidcap50"],
     },
     "AUBANK.NS": {
         "name": "AU Small Finance Bank",
         "sector": "Banking - Small Finance Bank",
         "notes": "listed 10 Jul 2017",
-        "tags": ["Midselect"],
+        "tags": ["Midselect", "NiftyMidcap50"],
     },
     "MARICO.NS": {
         "name": "Marico",
         "sector": "FMCG",
         "notes": "long history",
-        "tags": ["Midselect", "AlphaQVLowVol", "NonCyclicalConsumer"],
+        "tags": ["Midselect", "AlphaQVLowVol", "NonCyclicalConsumer", "NiftyMidcap50"],
     },
     "LICI.NS": {
         "name": "Life Insurance Corporation (LIC)",
@@ -162,43 +162,43 @@ STOCKS = {
         "name": "PB Fintech (Policybazaar)",
         "sector": "Financial Services - Insurtech",
         "notes": "listed 15 Nov 2021; show its real first date, never invent pre-listing data",
-        "tags": ["Midselect"],
+        "tags": ["Midselect", "NiftyMidcap50"],
     },
     "LUPIN.NS": {
         "name": "Lupin",
         "sector": "Pharmaceuticals",
         "notes": "long history",
-        "tags": ["Midselect", "AlphaQVLowVol"],
+        "tags": ["Midselect", "AlphaQVLowVol", "NiftyMidcap50"],
     },
     "YESBANK.NS": {
         "name": "Yes Bank",
         "sector": "Banking - Private Bank",
         "notes": "listed 12 Jul 2005",
-        "tags": ["Midselect", "PrivateBank"],
+        "tags": ["Midselect", "PrivateBank", "NiftyMidcap50"],
     },
     "BHARATFORG.NS": {
         "name": "Bharat Forge",
         "sector": "Auto Components - Forgings",
         "notes": "long history",
-        "tags": ["Midselect", "AutomationRobotics"],
+        "tags": ["Midselect", "AutomationRobotics", "NiftyMidcap50"],
     },
     "GVT&D.NS": {
         "name": "GE Vernova T&D India",
         "sector": "Capital Goods - Power Transmission Equipment",
         "notes": "continuous NSE trading from 30 Jun 2008",
-        "tags": ["Midselect", "Energy"],
+        "tags": ["Midselect", "Energy", "NiftyMidcap50"],
     },
     "SRF.NS": {
         "name": "SRF",
         "sector": "Chemicals - Specialty Chemicals",
         "notes": "long history",
-        "tags": ["Midselect"],
+        "tags": ["Midselect", "NiftyMidcap50"],
     },
     "SWIGGY.NS": {
         "name": "Swiggy",
         "sector": "Internet - Food & Quick-commerce Delivery",
         "notes": "listed 13 Nov 2024; show its real first date, never invent pre-listing data",
-        "tags": ["Midselect", "NonCyclicalConsumer"],
+        "tags": ["Midselect", "NonCyclicalConsumer", "NiftyMidcap50"],
     },
     # Nifty Smallcap 50 stocks that passed all 3 data checks (price break, repricing, missing data) on 28 Oct 2026
     "REDINGTON.NS": {
@@ -493,7 +493,7 @@ STOCKS = {
         "name": "NMDC",
         "sector": "Metals & Mining",
         "notes": "long history",
-        "tags": ["AlphaQVLowVol", "Metal"],
+        "tags": ["AlphaQVLowVol", "Metal", "NiftyMidcap50"],
     },
     "PFC.NS": {
         "name": "Power Finance Corporation",
@@ -535,7 +535,7 @@ STOCKS = {
         "name": "Fortis Healthcare",
         "sector": "Healthcare",
         "notes": "listed 9 May 2007",
-        "tags": ["Hospitals"],
+        "tags": ["Hospitals", "NiftyMidcap50"],
     },
     "RAINBOW.NS": {
         "name": "Rainbow Children's Medicare",
@@ -637,7 +637,7 @@ STOCKS = {
         "name": "Oil India",
         "sector": "Energy",
         "notes": "listed 30 Sep 2009",
-        "tags": ["Energy", "OilGas"],
+        "tags": ["Energy", "OilGas", "NiftyMidcap50"],
     },
     "POWERGRID.NS": {
         "name": "Power Grid Corporation of India",
@@ -667,7 +667,7 @@ STOCKS = {
         "name": "NHPC",
         "sector": "Utilities",
         "notes": "listed 1 Sep 2009",
-        "tags": ["Energy"],
+        "tags": ["Energy", "NiftyMidcap50"],
     },
     "SIEMENS.NS": {
         "name": "Siemens",
@@ -763,13 +763,13 @@ STOCKS = {
         "name": "JSW Energy",
         "sector": "Utilities",
         "notes": "listed 4 Jan 2010",
-        "tags": ["Energy"],
+        "tags": ["Energy", "NiftyMidcap50"],
     },
     "HINDPETRO.NS": {
         "name": "Hindustan Petroleum Corporation",
         "sector": "Energy",
         "notes": "long history",
-        "tags": ["Energy", "OilGas"],
+        "tags": ["Energy", "OilGas", "NiftyMidcap50"],
     },
     "MGL.NS": {
         "name": "Mahanagar Gas",
@@ -817,7 +817,7 @@ STOCKS = {
         "name": "IDFC First Bank",
         "sector": "Financial Services",
         "notes": "long history",
-        "tags": ["PrivateBank"],
+        "tags": ["PrivateBank", "NiftyMidcap50"],
     },
     "HDFCBANK.NS": {
         "name": "HDFC Bank",
@@ -877,7 +877,7 @@ STOCKS = {
         "name": "GMR Airports",
         "sector": "Industrials",
         "notes": "listed 21 Aug 2006",
-        "tags": ["Tourism", "Infra"],
+        "tags": ["Tourism", "Infra", "NiftyMidcap50"],
     },
     "JUNIPER.NS": {
         "name": "Juniper Hotels",
@@ -1123,7 +1123,7 @@ STOCKS = {
         "name": "FSN E-Commerce Ventures (Nykaa)",
         "sector": "Consumer Cyclical",
         "notes": "listed 10 Nov 2021",
-        "tags": ["NonCyclicalConsumer", "LifestyleFashion"],
+        "tags": ["NonCyclicalConsumer", "LifestyleFashion", "NiftyMidcap50"],
     },
     "ASIANPAINT.NS": {
         "name": "Asian Paints",
@@ -1141,19 +1141,19 @@ STOCKS = {
         "name": "Vishal Mega Mart",
         "sector": "Consumer Cyclical",
         "notes": "listed 18 Dec 2024; show its real first date, never invent pre-listing data",
-        "tags": ["NonCyclicalConsumer"],
+        "tags": ["NonCyclicalConsumer", "NiftyMidcap50"],
     },
     "UNITDSPR.NS": {
         "name": "United Spirits",
         "sector": "Consumer Defensive",
         "notes": "long history (former NSE symbol MCDOWELL-N)",
-        "tags": ["NonCyclicalConsumer", "Spirits", "Luxury"],
+        "tags": ["NonCyclicalConsumer", "Spirits", "Luxury", "NiftyMidcap50"],
     },
     "DABUR.NS": {
         "name": "Dabur India",
         "sector": "Consumer Defensive",
         "notes": "long history",
-        "tags": ["NonCyclicalConsumer"],
+        "tags": ["NonCyclicalConsumer", "NiftyMidcap50"],
     },
     "TATACOMM.NS": {
         "name": "Tata Communications",
@@ -1921,7 +1921,7 @@ STOCKS = {
         "name": "REC",
         "sector": "Financial Services",
         "notes": "listed 12 Mar 2008",
-        "tags": ["Energy"],
+        "tags": ["Energy", "NiftyMidcap50"],
     },
     "IREDA.NS": {
         "name": "Indian Renewable Energy Development Agency",
@@ -1953,13 +1953,49 @@ STOCKS = {
         "notes": "long history",
         "tags": ["Infra"],
     },
+    "GODREJPROP.NS": {
+        "name": "Godrej Properties",
+        "sector": "Real Estate",
+        "notes": "listed 5 Jan 2010",
+        "tags": ["NiftyMidcap50"],
+    },
+    "PRESTIGE.NS": {
+        "name": "Prestige Estates Projects",
+        "sector": "Real Estate",
+        "notes": "listed 27 Oct 2010",
+        "tags": ["NiftyMidcap50"],
+    },
+    "TIINDIA.NS": {
+        "name": "Tube Investments of India",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 2 Nov 2017",
+        "tags": ["NiftyMidcap50"],
+    },
+    "LAURUSLABS.NS": {
+        "name": "Laurus Labs",
+        "sector": "Healthcare",
+        "notes": "listed 19 Dec 2016",
+        "tags": ["NiftyMidcap50"],
+    },
+    "ICICIGI.NS": {
+        "name": "ICICI Lombard General Insurance",
+        "sector": "Financial Services",
+        "notes": "listed 27 Sep 2017",
+        "tags": ["NiftyMidcap50"],
+    },
+    "MANKIND.NS": {
+        "name": "Mankind Pharma",
+        "sector": "Healthcare",
+        "notes": "listed 9 May 2023; show its real first date, never invent pre-listing data",
+        "tags": ["NiftyMidcap50"],
+    },
 }
 
 
 # Stock tags: the sidebar Tag option shows "ALL" (every stock above) or one tag's stocks.
 # A stock belongs to a tag when the tag's name is in its "tags" list.
 TAG_ALL = "ALL"
-TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer", "OilGas", "CapitalMarket", "Shipping", "Infra", "Cement", "Spirits", "Luxury", "LifestyleFashion", "AutomationRobotics", "GoldLending", "ConsumerLoans", "HousingLargeTicketFinance", "MSMEMicrofinance", "ConsumerFinance"]
+TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer", "OilGas", "CapitalMarket", "Shipping", "Infra", "Cement", "Spirits", "Luxury", "LifestyleFashion", "AutomationRobotics", "GoldLending", "ConsumerLoans", "HousingLargeTicketFinance", "MSMEMicrofinance", "ConsumerFinance", "NiftyMidcap50"]
 
 
 def stocks_for_tag(tag: str) -> list:
