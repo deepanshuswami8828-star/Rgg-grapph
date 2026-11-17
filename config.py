@@ -2151,6 +2151,12 @@ STOCKS = {
         "notes": "listed 14 Oct 2025; show its real first date, never invent pre-listing data",
         "tags": ["NiftyHousing"],
     },
+    "ZEEL.NS": {
+        "name": "Zee Entertainment Enterprises",
+        "sector": "Communication Services",
+        "notes": "long history (former NSE symbol ZEETELE)",
+        "tags": ["NiftyMedia"],
+    },
 }
 
 

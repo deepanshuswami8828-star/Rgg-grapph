@@ -1,5 +1,5 @@
 {
-  "version_id": "v20261117_215050",
+  "version_id": "v20261117_220515",
   "updated_at": "2026-11-17T19:53:34.896832+05:30",
   "status": "SUCCESS",
   "provider": "Yahoo Finance (yfinance)",
@@ -6021,6 +6021,55 @@
       "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
       "warnings": [],
       "flagged_moves": []
+    },
+    "ZEEL.NS": {
+      "first_date": "2002-07-01",
+      "last_date": "2026-11-17",
+      "rows": 6059,
+      "sha256": "9e1b529a1b6ad4a2544bbb44268bb96a59855a2a1cb2787495da3658964acbb9",
+      "fetched_at": "2026-11-17T22:05:15.432647+05:30",
+      "status": "VALID",
+      "benchmark_version": "ea7fef2e2ecf0b2a1ab17327cbf2d9eb94b38f32693fccf9bfca3e42c4862ea2",
+      "warnings": [
+        "Flagged move of +63.7% on 2005-07-28",
+        "Flagged move of -37.1% on 2005-07-29",
+        "Flagged move of -26.6% on 2019-01-25",
+        "Flagged move of +40.0% on 2021-09-14",
+        "Flagged move of +31.7% on 2021-09-22",
+        "Flagged move of -32.6% on 2024-01-23"
+      ],
+      "flagged_moves": [
+        {
+          "date": "2005-07-28",
+          "pct_change": 63.72,
+          "close": 74.81
+        },
+        {
+          "date": "2005-07-29",
+          "pct_change": -37.11,
+          "close": 47.05
+        },
+        {
+          "date": "2019-01-25",
+          "pct_change": -26.61,
+          "close": 291.25
+        },
+        {
+          "date": "2021-09-14",
+          "pct_change": 39.98,
+          "close": 245.52
+        },
+        {
+          "date": "2021-09-22",
+          "pct_change": 31.72,
+          "close": 316.16
+        },
+        {
+          "date": "2024-01-23",
+          "pct_change": -32.61,
+          "close": 147.99
+        }
+      ]
     }
   },
   "last_attempt": {
