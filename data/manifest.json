@@ -1,5 +1,5 @@
 {
-  "version_id": "v20261117_220515",
+  "version_id": "v20261117_221948",
   "updated_at": "2026-11-17T19:53:34.896832+05:30",
   "status": "SUCCESS",
   "provider": "Yahoo Finance (yfinance)",
@@ -6068,6 +6068,42 @@
           "date": "2024-01-23",
           "pct_change": -32.61,
           "close": 147.99
+        }
+      ]
+    },
+    "SJVN.NS": {
+      "first_date": "2010-05-20",
+      "last_date": "2026-11-17",
+      "rows": 4081,
+      "sha256": "12dc41f4b60d752d4b189fb716e379c2468978e381dc160851b8d32a19e99720",
+      "fetched_at": "2026-11-17T22:19:48.663918+05:30",
+      "status": "VALID",
+      "benchmark_version": "ea7fef2e2ecf0b2a1ab17327cbf2d9eb94b38f32693fccf9bfca3e42c4862ea2",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "CONCOR.NS": {
+      "first_date": "2002-07-01",
+      "last_date": "2026-11-17",
+      "rows": 6059,
+      "sha256": "bbc94fbd4e740bafd57281e59391003537d18391f03e1b34d8d55caadeaa8fc9",
+      "fetched_at": "2026-11-17T22:19:48.663918+05:30",
+      "status": "VALID",
+      "benchmark_version": "ea7fef2e2ecf0b2a1ab17327cbf2d9eb94b38f32693fccf9bfca3e42c4862ea2",
+      "warnings": [
+        "Flagged move of +212.5% on 2005-07-28",
+        "Flagged move of -67.8% on 2005-07-29"
+      ],
+      "flagged_moves": [
+        {
+          "date": "2005-07-28",
+          "pct_change": 212.5,
+          "close": 273.32
+        },
+        {
+          "date": "2005-07-29",
+          "pct_change": -67.82,
+          "close": 87.95
         }
       ]
     }

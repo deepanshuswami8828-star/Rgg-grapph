@@ -30,7 +30,7 @@ STOCKS = {
         "name": "Bharat Electronics (BEL)",
         "sector": "Defence",
         "notes": "long history",
-        "tags": ["Shipping"],
+        "tags": ["Shipping", "NiftyPSEandCPSE"],
     },
     "SUZLON.NS": {
         "name": "Suzlon Energy",
@@ -114,7 +114,7 @@ STOCKS = {
         "name": "Bharat Heavy Electricals (BHEL)",
         "sector": "Capital Goods - Heavy Electrical Equipment",
         "notes": "long history",
-        "tags": ["Midselect", "Energy", "Shipping", "NiftyMidcap50"],
+        "tags": ["Midselect", "Energy", "Shipping", "NiftyMidcap50", "NiftyPSEandCPSE"],
     },
     "AUROPHARMA.NS": {
         "name": "Aurobindo Pharma",
@@ -373,7 +373,7 @@ STOCKS = {
         "name": "NBCC (India)",
         "sector": "Construction",
         "notes": "listed 12 Apr 2012",
-        "tags": ["Smallcap", "Infra"],
+        "tags": ["Smallcap", "Infra", "NiftyPSEandCPSE"],
     },
     "NAVINFLUOR.NS": {
         "name": "Navin Fluorine International",
@@ -433,13 +433,13 @@ STOCKS = {
         "name": "Coal India",
         "sector": "Oil Gas & Consumable Fuels",
         "notes": "listed 4 Nov 2010",
-        "tags": ["AlphaQVLowVol", "Energy"],
+        "tags": ["AlphaQVLowVol", "Energy", "NiftyPSEandCPSE"],
     },
     "NTPC.NS": {
         "name": "NTPC",
         "sector": "Power",
         "notes": "listed 5 Nov 2004",
-        "tags": ["AlphaQVLowVol", "Energy"],
+        "tags": ["AlphaQVLowVol", "Energy", "NiftyPSEandCPSE"],
     },
     "ICICIBANK.NS": {
         "name": "ICICI Bank",
@@ -493,13 +493,13 @@ STOCKS = {
         "name": "NMDC",
         "sector": "Metals & Mining",
         "notes": "long history",
-        "tags": ["AlphaQVLowVol", "Metal", "NiftyMidcap50"],
+        "tags": ["AlphaQVLowVol", "Metal", "NiftyMidcap50", "NiftyPSEandCPSE"],
     },
     "PFC.NS": {
         "name": "Power Finance Corporation",
         "sector": "Financial Services",
         "notes": "listed 23 Feb 2007",
-        "tags": ["AlphaQVLowVol", "NiftyNext50", "Energy"],
+        "tags": ["AlphaQVLowVol", "NiftyNext50", "Energy", "NiftyPSEandCPSE"],
     },
     "SBIN.NS": {
         "name": "State Bank of India",
@@ -637,13 +637,13 @@ STOCKS = {
         "name": "Oil India",
         "sector": "Energy",
         "notes": "listed 30 Sep 2009",
-        "tags": ["Energy", "OilGas", "NiftyMidcap50"],
+        "tags": ["Energy", "OilGas", "NiftyMidcap50", "NiftyPSEandCPSE"],
     },
     "POWERGRID.NS": {
         "name": "Power Grid Corporation of India",
         "sector": "Utilities",
         "notes": "listed 5 Oct 2007",
-        "tags": ["Energy"],
+        "tags": ["Energy", "NiftyPSEandCPSE"],
     },
     "TATAPOWER.NS": {
         "name": "Tata Power Company",
@@ -661,13 +661,13 @@ STOCKS = {
         "name": "Indian Oil Corporation",
         "sector": "Energy",
         "notes": "long history",
-        "tags": ["Energy", "NiftyNext50", "OilGas"],
+        "tags": ["Energy", "NiftyNext50", "OilGas", "NiftyPSEandCPSE"],
     },
     "NHPC.NS": {
         "name": "NHPC",
         "sector": "Utilities",
         "notes": "listed 1 Sep 2009",
-        "tags": ["Energy", "NiftyMidcap50"],
+        "tags": ["Energy", "NiftyMidcap50", "NiftyPSEandCPSE"],
     },
     "SIEMENS.NS": {
         "name": "Siemens",
@@ -679,7 +679,7 @@ STOCKS = {
         "name": "GAIL (India)",
         "sector": "Utilities",
         "notes": "long history",
-        "tags": ["Energy", "NiftyNext50", "OilGas"],
+        "tags": ["Energy", "NiftyNext50", "OilGas", "NiftyPSEandCPSE"],
     },
     "ABB.NS": {
         "name": "ABB India",
@@ -697,7 +697,7 @@ STOCKS = {
         "name": "Bharat Petroleum Corporation",
         "sector": "Energy",
         "notes": "long history",
-        "tags": ["Energy", "NiftyNext50", "OilGas"],
+        "tags": ["Energy", "NiftyNext50", "OilGas", "NiftyPSEandCPSE"],
     },
     "RPOWER.NS": {
         "name": "Reliance Power",
@@ -715,7 +715,7 @@ STOCKS = {
         "name": "NLC India",
         "sector": "Utilities",
         "notes": "long history",
-        "tags": ["Energy"],
+        "tags": ["Energy", "NiftyPSEandCPSE"],
     },
     "ADANIENSOL.NS": {
         "name": "Adani Energy Solutions",
@@ -769,7 +769,7 @@ STOCKS = {
         "name": "Hindustan Petroleum Corporation",
         "sector": "Energy",
         "notes": "long history",
-        "tags": ["Energy", "OilGas", "NiftyMidcap50"],
+        "tags": ["Energy", "OilGas", "NiftyMidcap50", "NiftyPSEandCPSE"],
     },
     "MGL.NS": {
         "name": "Mahanagar Gas",
@@ -1033,7 +1033,7 @@ STOCKS = {
         "name": "Hindustan Aeronautics",
         "sector": "Industrials",
         "notes": "listed 28 Mar 2018",
-        "tags": ["NiftyNext50"],
+        "tags": ["NiftyNext50", "NiftyPSEandCPSE"],
     },
     "BANKBARODA.NS": {
         "name": "Bank of Baroda",
@@ -1111,7 +1111,7 @@ STOCKS = {
         "name": "Indian Railway Finance Corporation",
         "sector": "Financial Services",
         "notes": "listed 29 Jan 2021",
-        "tags": ["NiftyNext50", "Infra"],
+        "tags": ["NiftyNext50", "Infra", "NiftyPSEandCPSE"],
     },
     "ETERNAL.NS": {
         "name": "Eternal (Zomato)",
@@ -1267,7 +1267,7 @@ STOCKS = {
         "name": "Cochin Shipyard",
         "sector": "Industrials",
         "notes": "listed 11 Aug 2017",
-        "tags": ["Shipping"],
+        "tags": ["Shipping", "NiftyPSEandCPSE"],
     },
     "GRSE.NS": {
         "name": "Garden Reach Shipbuilders & Engineers",
@@ -1921,7 +1921,7 @@ STOCKS = {
         "name": "REC",
         "sector": "Financial Services",
         "notes": "listed 12 Mar 2008",
-        "tags": ["Energy", "NiftyMidcap50"],
+        "tags": ["Energy", "NiftyMidcap50", "NiftyPSEandCPSE"],
     },
     "IREDA.NS": {
         "name": "Indian Renewable Energy Development Agency",
@@ -2157,13 +2157,25 @@ STOCKS = {
         "notes": "long history (former NSE symbol ZEETELE)",
         "tags": ["NiftyMedia"],
     },
+    "CONCOR.NS": {
+        "name": "Container Corporation of India",
+        "sector": "Industrials",
+        "notes": "long history",
+        "tags": ["NiftyPSEandCPSE"],
+    },
+    "SJVN.NS": {
+        "name": "SJVN",
+        "sector": "Utilities",
+        "notes": "listed 20 May 2010",
+        "tags": ["NiftyPSEandCPSE"],
+    },
 }
 
 
 # Stock tags: the sidebar Tag option shows "ALL" (every stock above) or one tag's stocks.
 # A stock belongs to a tag when the tag's name is in its "tags" list.
 TAG_ALL = "ALL"
-TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer", "OilGas", "CapitalMarket", "Shipping", "Infra", "Cement", "Spirits", "Luxury", "LifestyleFashion", "AutomationRobotics", "GoldLending", "ConsumerLoans", "HousingLargeTicketFinance", "MSMEMicrofinance", "ConsumerFinance", "NiftyMidcap50", "NiftyFMCG", "NiftyMedia", "NiftyEVAutomotive", "NiftyHousing"]
+TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer", "OilGas", "CapitalMarket", "Shipping", "Infra", "Cement", "Spirits", "Luxury", "LifestyleFashion", "AutomationRobotics", "GoldLending", "ConsumerLoans", "HousingLargeTicketFinance", "MSMEMicrofinance", "ConsumerFinance", "NiftyMidcap50", "NiftyFMCG", "NiftyMedia", "NiftyEVAutomotive", "NiftyHousing", "NiftyPSEandCPSE"]
 
 
 def stocks_for_tag(tag: str) -> list:
