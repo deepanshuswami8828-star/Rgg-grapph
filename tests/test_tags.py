@@ -104,6 +104,21 @@ NIFTY_MIDCAP_50 = ["ASHOKLEY", "AUBANK", "AUROPHARMA", "BHARATFORG", "BHEL", "DA
                    "NAUKRI", "NHPC", "NMDC", "NYKAA", "OIL", "PAYTM", "PERSISTENT", "POLICYBZR", "PRESTIGE", "RECLTD",
                    "SRF", "SUZLON", "SWIGGY", "TIINDIA", "UNITDSPR", "VMM", "WAAREEENER", "YESBANK"]
 
+# Nifty FMCG / Media / EV and New Age Automotive / Housing lists (17 Nov 2026): stocks that passed all 3 data checks
+NIFTY_FMCG = ["COLPAL", "DABUR", "GODFRYPHLP", "GODREJCP", "HINDUNILVR", "MARICO", "TATACONSUM", "UNITDSPR", "VBL"]
+NIFTY_MEDIA = ["BALAJITELE", "DBCORP", "DEN", "DISHTV", "GTPL", "HATHWAY", "NDTV", "PVRINOX", "SHEMAROO", "TVTODAY",
+               "UFO"]
+NIFTY_EV_AUTOMOTIVE = ["ASHOKLEY", "ATHERENERG", "BHARATFORG", "BOSCHLTD", "CGPOWER", "EICHERMOT", "FLUOROCHEM",
+                       "HEROMOTOCO", "HYUNDAI", "JWL", "KPITTECH", "M&M", "MARUTI", "MSUMI", "OLAELEC", "RELIANCE",
+                       "SANSERA", "SONACOMS", "TATACHEM", "TATAELXSI", "TATATECH", "TIINDIA", "TMCV", "TMPV",
+                       "TVSMOTOR"]
+NIFTY_HOUSING = ["AADHARHFC", "AAVAS", "ACC", "AMBER", "APOLLOPIPE", "APTUS", "ASIANPAINT", "BAJAJHFL", "BIRLACORPN",
+                 "BLUESTARCO", "CANFINHOME", "CROMPTON", "DIXON", "FINCABLES", "GRASIM", "GREENLAM", "GREENPANEL",
+                 "HEIDELBERG", "HINDWAREAP", "HOMEFIRST", "HUDCO", "INDIASHLTR", "INDIGOPNTS", "JKCEMENT",
+                 "JKLAKSHMI", "KAJARIACER", "LGEINDIA", "LICHSGFIN", "NUVOCO", "ORIENTELEC", "PIDILITIND",
+                 "PNBHOUSING", "POLYCAB", "PRINCEPIPE", "REPCOHOME", "RRKABEL", "SAMMAANCAP", "SHREECEM",
+                 "STARCEMENT", "STYLAMIND", "VOLTAS"]
+
 
 def test_tag_membership():
     assert cfg.stocks_for_tag(cfg.TAG_ALL) == list(cfg.STOCKS)
@@ -136,6 +151,11 @@ def test_tag_membership():
     assert len(CONSUMER_FINANCE) == 35
     assert sorted(cfg.stocks_for_tag("NiftyMidcap50")) == sorted(t + ".NS" for t in NIFTY_MIDCAP_50)
     assert len(NIFTY_MIDCAP_50) == 43
+    assert sorted(cfg.stocks_for_tag("NiftyFMCG")) == sorted(t + ".NS" for t in NIFTY_FMCG)
+    assert sorted(cfg.stocks_for_tag("NiftyMedia")) == sorted(t + ".NS" for t in NIFTY_MEDIA)
+    assert sorted(cfg.stocks_for_tag("NiftyEVAutomotive")) == sorted(t + ".NS" for t in NIFTY_EV_AUTOMOTIVE)
+    assert sorted(cfg.stocks_for_tag("NiftyHousing")) == sorted(t + ".NS" for t in NIFTY_HOUSING)
+    assert [len(NIFTY_FMCG), len(NIFTY_MEDIA), len(NIFTY_EV_AUTOMOTIVE), len(NIFTY_HOUSING)] == [9, 11, 25, 41]
 
 
 def test_every_tagged_stock_has_data():

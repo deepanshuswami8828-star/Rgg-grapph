@@ -24,7 +24,7 @@ STOCKS = {
         "name": "PVR INOX",
         "sector": "Media & entertainment",
         "notes": "long history",
-        "tags": ["LifestyleFashion"],
+        "tags": ["LifestyleFashion", "NiftyMedia"],
     },
     "BEL.NS": {
         "name": "Bharat Electronics (BEL)",
@@ -54,7 +54,7 @@ STOCKS = {
         "name": "Reliance Industries",
         "sector": "Energy / conglomerate",
         "notes": "1:1 bonus Oct 2024 must NOT appear as a crash",
-        "tags": ["Energy", "OilGas"],
+        "tags": ["Energy", "OilGas", "NiftyEVAutomotive"],
     },
     "PAYTM.NS": {
         "name": "Paytm (One 97 Communications)",
@@ -84,7 +84,7 @@ STOCKS = {
         "name": "Hero MotoCorp",
         "sector": "Automobile - Two Wheelers",
         "notes": "long history",
-        "tags": ["Midselect", "AlphaQVLowVol", "NiftyMidcap50"],
+        "tags": ["Midselect", "AlphaQVLowVol", "NiftyMidcap50", "NiftyEVAutomotive"],
     },
     "INDIANB.NS": {
         "name": "Indian Bank",
@@ -96,7 +96,7 @@ STOCKS = {
         "name": "Ashok Leyland",
         "sector": "Automobile - Commercial Vehicles",
         "notes": "long history",
-        "tags": ["Midselect", "NiftyMidcap50"],
+        "tags": ["Midselect", "NiftyMidcap50", "NiftyEVAutomotive"],
     },
     "INDUSTOWER.NS": {
         "name": "Indus Towers",
@@ -126,7 +126,7 @@ STOCKS = {
         "name": "Dixon Technologies",
         "sector": "Consumer Electronics - Manufacturing",
         "notes": "listed 18 Sep 2017",
-        "tags": ["Midselect", "NonCyclicalConsumer", "NiftyMidcap50"],
+        "tags": ["Midselect", "NonCyclicalConsumer", "NiftyMidcap50", "NiftyHousing"],
     },
     "FEDERALBNK.NS": {
         "name": "Federal Bank",
@@ -150,7 +150,7 @@ STOCKS = {
         "name": "Marico",
         "sector": "FMCG",
         "notes": "long history",
-        "tags": ["Midselect", "AlphaQVLowVol", "NonCyclicalConsumer", "NiftyMidcap50"],
+        "tags": ["Midselect", "AlphaQVLowVol", "NonCyclicalConsumer", "NiftyMidcap50", "NiftyFMCG"],
     },
     "LICI.NS": {
         "name": "Life Insurance Corporation (LIC)",
@@ -180,7 +180,7 @@ STOCKS = {
         "name": "Bharat Forge",
         "sector": "Auto Components - Forgings",
         "notes": "long history",
-        "tags": ["Midselect", "AutomationRobotics", "NiftyMidcap50"],
+        "tags": ["Midselect", "AutomationRobotics", "NiftyMidcap50", "NiftyEVAutomotive"],
     },
     "GVT&D.NS": {
         "name": "GE Vernova T&D India",
@@ -217,13 +217,13 @@ STOCKS = {
         "name": "KPIT Technologies",
         "sector": "IT - automotive software",
         "notes": "listed 22 Apr 2019",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "NiftyEVAutomotive"],
     },
     "TATAELXSI.NS": {
         "name": "Tata Elxsi",
         "sector": "IT - design & technology services",
         "notes": "long history",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "NiftyEVAutomotive"],
     },
     "IGL.NS": {
         "name": "Indraprastha Gas (IGL)",
@@ -235,7 +235,7 @@ STOCKS = {
         "name": "Ather Energy",
         "sector": "Automobile - electric two-wheelers",
         "notes": "listed 6 May 2025; show its real first date, never invent pre-listing data",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "NiftyEVAutomotive"],
     },
     "GLAND.NS": {
         "name": "Gland Pharma",
@@ -253,7 +253,7 @@ STOCKS = {
         "name": "Sona BLW Precision Forgings",
         "sector": "Auto components",
         "notes": "listed 24 Jun 2021",
-        "tags": ["Smallcap", "AutomationRobotics"],
+        "tags": ["Smallcap", "AutomationRobotics", "NiftyEVAutomotive"],
     },
     "ACUTAAS.NS": {
         "name": "Acutaas Chemicals",
@@ -271,7 +271,7 @@ STOCKS = {
         "name": "Amber Enterprises India",
         "sector": "Consumer Durables",
         "notes": "listed 30 Jan 2018",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "NiftyHousing"],
     },
     "ANANDRATHI.NS": {
         "name": "Anand Rathi Wealth",
@@ -313,7 +313,7 @@ STOCKS = {
         "name": "Crompton Greaves Consumer Electricals",
         "sector": "Consumer Durables",
         "notes": "listed 13 May 2016",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "NiftyHousing"],
     },
     "DELHIVERY.NS": {
         "name": "Delhivery",
@@ -391,7 +391,7 @@ STOCKS = {
         "name": "PNB Housing Finance",
         "sector": "Financial Services",
         "notes": "listed 7 Nov 2016",
-        "tags": ["Smallcap", "HousingLargeTicketFinance", "ConsumerFinance"],
+        "tags": ["Smallcap", "HousingLargeTicketFinance", "ConsumerFinance", "NiftyHousing"],
     },
     "PPLPHARMA.NS": {
         "name": "Piramal Pharma",
@@ -415,13 +415,13 @@ STOCKS = {
         "name": "Tata Chemicals",
         "sector": "Chemicals",
         "notes": "long history",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "NiftyEVAutomotive"],
     },
     "TATATECH.NS": {
         "name": "Tata Technologies",
         "sector": "Information Technology",
         "notes": "listed 30 Nov 2023; show its real first date, never invent pre-listing data",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "NiftyEVAutomotive"],
     },
     "WOCKPHARMA.NS": {
         "name": "Wockhardt",
@@ -469,25 +469,25 @@ STOCKS = {
         "name": "Eicher Motors",
         "sector": "Automobile and Auto Components",
         "notes": "long history",
-        "tags": ["AlphaQVLowVol", "LifestyleFashion"],
+        "tags": ["AlphaQVLowVol", "LifestyleFashion", "NiftyEVAutomotive"],
     },
     "GRASIM.NS": {
         "name": "Grasim Industries",
         "sector": "Construction Materials",
         "notes": "long history",
-        "tags": ["AlphaQVLowVol"],
+        "tags": ["AlphaQVLowVol", "NiftyHousing"],
     },
     "HINDUNILVR.NS": {
         "name": "Hindustan Unilever",
         "sector": "Fast Moving Consumer Goods",
         "notes": "long history; former NSE symbol HINDLEVER",
-        "tags": ["AlphaQVLowVol", "NonCyclicalConsumer"],
+        "tags": ["AlphaQVLowVol", "NonCyclicalConsumer", "NiftyFMCG"],
     },
     "MARUTI.NS": {
         "name": "Maruti Suzuki India",
         "sector": "Automobile and Auto Components",
         "notes": "listed 9 Jul 2003",
-        "tags": ["AlphaQVLowVol"],
+        "tags": ["AlphaQVLowVol", "NiftyEVAutomotive"],
     },
     "NMDC.NS": {
         "name": "NMDC",
@@ -523,7 +523,7 @@ STOCKS = {
         "name": "Colgate Palmolive (India)",
         "sector": "Fast Moving Consumer Goods",
         "notes": "long history; former NSE symbol COLGATE",
-        "tags": ["AlphaQVLowVol", "NonCyclicalConsumer"],
+        "tags": ["AlphaQVLowVol", "NonCyclicalConsumer", "NiftyFMCG"],
     },
     "SHALBY.NS": {
         "name": "Shalby",
@@ -691,7 +691,7 @@ STOCKS = {
         "name": "CG Power and Industrial Solutions",
         "sector": "Industrials",
         "notes": "long history",
-        "tags": ["Energy", "NiftyNext50"],
+        "tags": ["Energy", "NiftyNext50", "NiftyEVAutomotive"],
     },
     "BPCL.NS": {
         "name": "Bharat Petroleum Corporation",
@@ -787,25 +787,25 @@ STOCKS = {
         "name": "Tata Motors (Commercial Vehicles)",
         "sector": "Automobile and Auto Components",
         "notes": "listed 12 Nov 2025; show its real first date, never invent pre-listing data",
-        "tags": ["TataGroup", "NiftyNext50"],
+        "tags": ["TataGroup", "NiftyNext50", "NiftyEVAutomotive"],
     },
     "TMPV.NS": {
         "name": "Tata Motors Passenger Vehicles",
         "sector": "Consumer Cyclical",
         "notes": "long history",
-        "tags": ["TataGroup", "Luxury"],
+        "tags": ["TataGroup", "Luxury", "NiftyEVAutomotive"],
     },
     "VOLTAS.NS": {
         "name": "Voltas",
         "sector": "Consumer Cyclical",
         "notes": "long history",
-        "tags": ["TataGroup", "NonCyclicalConsumer"],
+        "tags": ["TataGroup", "NonCyclicalConsumer", "NiftyHousing"],
     },
     "TATACONSUM.NS": {
         "name": "Tata Consumer Products",
         "sector": "Consumer Defensive",
         "notes": "long history",
-        "tags": ["TataGroup", "NonCyclicalConsumer"],
+        "tags": ["TataGroup", "NonCyclicalConsumer", "NiftyFMCG"],
     },
     "KOTAKBANK.NS": {
         "name": "Kotak Mahindra Bank",
@@ -967,7 +967,7 @@ STOCKS = {
         "name": "TVS Motor Company",
         "sector": "Consumer Cyclical",
         "notes": "long history",
-        "tags": ["NiftyNext50"],
+        "tags": ["NiftyNext50", "NiftyEVAutomotive"],
     },
     "DIVISLAB.NS": {
         "name": "Divi's Laboratories",
@@ -1003,7 +1003,7 @@ STOCKS = {
         "name": "Hyundai Motor India",
         "sector": "Consumer Cyclical",
         "notes": "listed 22 Oct 2024; show its real first date, never invent pre-listing data",
-        "tags": ["NiftyNext50"],
+        "tags": ["NiftyNext50", "NiftyEVAutomotive"],
     },
     "HDFCAMC.NS": {
         "name": "HDFC Asset Management",
@@ -1051,19 +1051,19 @@ STOCKS = {
         "name": "Varun Beverages",
         "sector": "Consumer Defensive",
         "notes": "listed 8 Nov 2016",
-        "tags": ["NiftyNext50", "NonCyclicalConsumer"],
+        "tags": ["NiftyNext50", "NonCyclicalConsumer", "NiftyFMCG"],
     },
     "POLYCAB.NS": {
         "name": "Polycab India",
         "sector": "Industrials",
         "notes": "listed 16 Apr 2019",
-        "tags": ["NiftyNext50"],
+        "tags": ["NiftyNext50", "NiftyHousing"],
     },
     "GODREJCP.NS": {
         "name": "Godrej Consumer Products",
         "sector": "Consumer Defensive",
         "notes": "long history",
-        "tags": ["NiftyNext50", "NonCyclicalConsumer"],
+        "tags": ["NiftyNext50", "NonCyclicalConsumer", "NiftyFMCG"],
     },
     "CANBK.NS": {
         "name": "Canara Bank",
@@ -1075,13 +1075,13 @@ STOCKS = {
         "name": "Pidilite Industries",
         "sector": "Basic Materials",
         "notes": "long history",
-        "tags": ["NiftyNext50"],
+        "tags": ["NiftyNext50", "NiftyHousing"],
     },
     "BOSCHLTD.NS": {
         "name": "Bosch",
         "sector": "Consumer Cyclical",
         "notes": "long history (former NSE symbol MICO)",
-        "tags": ["NiftyNext50"],
+        "tags": ["NiftyNext50", "NiftyEVAutomotive"],
     },
     "CUMMINSIND.NS": {
         "name": "Cummins India",
@@ -1129,7 +1129,7 @@ STOCKS = {
         "name": "Asian Paints",
         "sector": "Basic Materials",
         "notes": "long history",
-        "tags": ["NonCyclicalConsumer"],
+        "tags": ["NonCyclicalConsumer", "NiftyHousing"],
     },
     "LENSKART.NS": {
         "name": "Lenskart Solutions",
@@ -1147,13 +1147,13 @@ STOCKS = {
         "name": "United Spirits",
         "sector": "Consumer Defensive",
         "notes": "long history (former NSE symbol MCDOWELL-N)",
-        "tags": ["NonCyclicalConsumer", "Spirits", "Luxury", "NiftyMidcap50"],
+        "tags": ["NonCyclicalConsumer", "Spirits", "Luxury", "NiftyMidcap50", "NiftyFMCG"],
     },
     "DABUR.NS": {
         "name": "Dabur India",
         "sector": "Consumer Defensive",
         "notes": "long history",
-        "tags": ["NonCyclicalConsumer", "NiftyMidcap50"],
+        "tags": ["NonCyclicalConsumer", "NiftyMidcap50", "NiftyFMCG"],
     },
     "TATACOMM.NS": {
         "name": "Tata Communications",
@@ -1357,19 +1357,19 @@ STOCKS = {
         "name": "Shree Cement",
         "sector": "Basic Materials",
         "notes": "long history",
-        "tags": ["Cement"],
+        "tags": ["Cement", "NiftyHousing"],
     },
     "ACC.NS": {
         "name": "ACC",
         "sector": "Basic Materials",
         "notes": "long history",
-        "tags": ["Cement"],
+        "tags": ["Cement", "NiftyHousing"],
     },
     "JKCEMENT.NS": {
         "name": "J.K. Cement",
         "sector": "Basic Materials",
         "notes": "listed 14 Mar 2006",
-        "tags": ["Cement"],
+        "tags": ["Cement", "NiftyHousing"],
     },
     "JSWCEMENT.NS": {
         "name": "JSW Cement",
@@ -1381,7 +1381,7 @@ STOCKS = {
         "name": "Nuvoco Vistas",
         "sector": "Basic Materials",
         "notes": "listed 23 Aug 2021",
-        "tags": ["Cement"],
+        "tags": ["Cement", "NiftyHousing"],
     },
     "INDIACEM.NS": {
         "name": "The India Cements",
@@ -1393,13 +1393,13 @@ STOCKS = {
         "name": "Birla Corporation",
         "sector": "Basic Materials",
         "notes": "long history (former NSE symbol BIRLAJUTE)",
-        "tags": ["Cement"],
+        "tags": ["Cement", "NiftyHousing"],
     },
     "JKLAKSHMI.NS": {
         "name": "JK Lakshmi Cement",
         "sector": "Basic Materials",
         "notes": "listed 19 Jun 2006",
-        "tags": ["Cement"],
+        "tags": ["Cement", "NiftyHousing"],
     },
     "PRSMJOHNSN.NS": {
         "name": "Prism Johnson",
@@ -1417,13 +1417,13 @@ STOCKS = {
         "name": "Star Cement",
         "sector": "Basic Materials",
         "notes": "listed 16 Jun 2017",
-        "tags": ["Cement"],
+        "tags": ["Cement", "NiftyHousing"],
     },
     "HEIDELBERG.NS": {
         "name": "HeidelbergCement India",
         "sector": "Basic Materials",
         "notes": "long history (former NSE symbol MYSORECEM)",
-        "tags": ["Cement"],
+        "tags": ["Cement", "NiftyHousing"],
     },
     "ABDL.NS": {
         "name": "Allied Blenders and Distillers",
@@ -1627,13 +1627,13 @@ STOCKS = {
         "name": "Greenlam Industries",
         "sector": "Consumer Cyclical",
         "notes": "listed 2 Mar 2015",
-        "tags": ["LifestyleFashion"],
+        "tags": ["LifestyleFashion", "NiftyHousing"],
     },
     "KAJARIACER.NS": {
         "name": "Kajaria Ceramics",
         "sector": "Industrials",
         "notes": "long history",
-        "tags": ["LifestyleFashion"],
+        "tags": ["LifestyleFashion", "NiftyHousing"],
     },
     "WELSPUNLIV.NS": {
         "name": "Welspun Living",
@@ -1657,7 +1657,7 @@ STOCKS = {
         "name": "Hindware Home Innovation",
         "sector": "Consumer Cyclical",
         "notes": "listed 26 Dec 2019 (former NSE symbol SHIL)",
-        "tags": ["LifestyleFashion"],
+        "tags": ["LifestyleFashion", "NiftyHousing"],
     },
     "BBL.NS": {
         "name": "Bharat Bijlee",
@@ -1759,61 +1759,61 @@ STOCKS = {
         "name": "LIC Housing Finance",
         "sector": "Financial Services",
         "notes": "long history",
-        "tags": ["HousingLargeTicketFinance", "ConsumerFinance"],
+        "tags": ["HousingLargeTicketFinance", "ConsumerFinance", "NiftyHousing"],
     },
     "CANFINHOME.NS": {
         "name": "Can Fin Homes",
         "sector": "Financial Services",
         "notes": "long history",
-        "tags": ["HousingLargeTicketFinance", "ConsumerFinance"],
+        "tags": ["HousingLargeTicketFinance", "ConsumerFinance", "NiftyHousing"],
     },
     "REPCOHOME.NS": {
         "name": "Repco Home Finance",
         "sector": "Financial Services",
         "notes": "listed 1 Apr 2013",
-        "tags": ["HousingLargeTicketFinance", "ConsumerFinance"],
+        "tags": ["HousingLargeTicketFinance", "ConsumerFinance", "NiftyHousing"],
     },
     "AAVAS.NS": {
         "name": "Aavas Financiers",
         "sector": "Financial Services",
         "notes": "listed 8 Oct 2018",
-        "tags": ["HousingLargeTicketFinance", "ConsumerFinance"],
+        "tags": ["HousingLargeTicketFinance", "ConsumerFinance", "NiftyHousing"],
     },
     "APTUS.NS": {
         "name": "Aptus Value Housing Finance India",
         "sector": "Financial Services",
         "notes": "listed 24 Aug 2021",
-        "tags": ["HousingLargeTicketFinance", "ConsumerFinance"],
+        "tags": ["HousingLargeTicketFinance", "ConsumerFinance", "NiftyHousing"],
     },
     "HOMEFIRST.NS": {
         "name": "Home First Finance Company India",
         "sector": "Financial Services",
         "notes": "listed 3 Feb 2021",
-        "tags": ["HousingLargeTicketFinance", "ConsumerFinance"],
+        "tags": ["HousingLargeTicketFinance", "ConsumerFinance", "NiftyHousing"],
     },
     "AADHARHFC.NS": {
         "name": "Aadhar Housing Finance",
         "sector": "Financial Services",
         "notes": "listed 15 May 2024; show its real first date, never invent pre-listing data",
-        "tags": ["HousingLargeTicketFinance", "ConsumerFinance"],
+        "tags": ["HousingLargeTicketFinance", "ConsumerFinance", "NiftyHousing"],
     },
     "INDIASHLTR.NS": {
         "name": "India Shelter Finance Corporation",
         "sector": "Financial Services",
         "notes": "listed 20 Dec 2023; show its real first date, never invent pre-listing data",
-        "tags": ["HousingLargeTicketFinance", "ConsumerFinance"],
+        "tags": ["HousingLargeTicketFinance", "ConsumerFinance", "NiftyHousing"],
     },
     "BAJAJHFL.NS": {
         "name": "Bajaj Housing Finance",
         "sector": "Financial Services",
         "notes": "listed 16 Sep 2024; show its real first date, never invent pre-listing data",
-        "tags": ["HousingLargeTicketFinance", "ConsumerFinance"],
+        "tags": ["HousingLargeTicketFinance", "ConsumerFinance", "NiftyHousing"],
     },
     "SAMMAANCAP.NS": {
         "name": "Sammaan Capital",
         "sector": "Financial Services",
         "notes": "listed 23 Jul 2013 (former NSE symbol IBULHSGFIN)",
-        "tags": ["HousingLargeTicketFinance", "ConsumerFinance"],
+        "tags": ["HousingLargeTicketFinance", "ConsumerFinance", "NiftyHousing"],
     },
     "PIRAMALFIN.NS": {
         "name": "Piramal Finance",
@@ -1933,7 +1933,7 @@ STOCKS = {
         "name": "Housing and Urban Development Corporation",
         "sector": "Financial Services",
         "notes": "listed 19 May 2017",
-        "tags": ["Infra"],
+        "tags": ["Infra", "NiftyHousing"],
     },
     "PFS.NS": {
         "name": "PTC India Financial Services",
@@ -1969,7 +1969,7 @@ STOCKS = {
         "name": "Tube Investments of India",
         "sector": "Consumer Cyclical",
         "notes": "listed 2 Nov 2017",
-        "tags": ["NiftyMidcap50"],
+        "tags": ["NiftyMidcap50", "NiftyEVAutomotive"],
     },
     "LAURUSLABS.NS": {
         "name": "Laurus Labs",
@@ -1989,13 +1989,175 @@ STOCKS = {
         "notes": "listed 9 May 2023; show its real first date, never invent pre-listing data",
         "tags": ["NiftyMidcap50"],
     },
+    "GODFRYPHLP.NS": {
+        "name": "Godfrey Phillips India",
+        "sector": "Consumer Defensive",
+        "notes": "long history",
+        "tags": ["NiftyFMCG"],
+    },
+    "DBCORP.NS": {
+        "name": "D.B.Corp",
+        "sector": "Communication Services",
+        "notes": "listed 6 Jan 2010",
+        "tags": ["NiftyMedia"],
+    },
+    "NDTV.NS": {
+        "name": "New Delhi Television",
+        "sector": "Communication Services",
+        "notes": "listed 19 May 2004",
+        "tags": ["NiftyMedia"],
+    },
+    "TVTODAY.NS": {
+        "name": "TV Today Network",
+        "sector": "Communication Services",
+        "notes": "listed 16 Jan 2004",
+        "tags": ["NiftyMedia"],
+    },
+    "HATHWAY.NS": {
+        "name": "Hathway Cable and Datacom",
+        "sector": "Communication Services",
+        "notes": "listed 25 Feb 2010",
+        "tags": ["NiftyMedia"],
+    },
+    "DEN.NS": {
+        "name": "Den Networks",
+        "sector": "Communication Services",
+        "notes": "listed 24 Nov 2009",
+        "tags": ["NiftyMedia"],
+    },
+    "GTPL.NS": {
+        "name": "GTPL Hathway",
+        "sector": "Communication Services",
+        "notes": "listed 4 Jul 2017",
+        "tags": ["NiftyMedia"],
+    },
+    "DISHTV.NS": {
+        "name": "Dish TV India",
+        "sector": "Communication Services",
+        "notes": "listed 18 Apr 2007",
+        "tags": ["NiftyMedia"],
+    },
+    "BALAJITELE.NS": {
+        "name": "Balaji Telefilms",
+        "sector": "Communication Services",
+        "notes": "long history",
+        "tags": ["NiftyMedia"],
+    },
+    "SHEMAROO.NS": {
+        "name": "Shemaroo Entertainment",
+        "sector": "Communication Services",
+        "notes": "listed 1 Oct 2014",
+        "tags": ["NiftyMedia"],
+    },
+    "UFO.NS": {
+        "name": "UFO Moviez India",
+        "sector": "Communication Services",
+        "notes": "listed 14 May 2015",
+        "tags": ["NiftyMedia"],
+    },
+    "SANSERA.NS": {
+        "name": "Sansera Engineering",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 24 Sep 2021",
+        "tags": ["NiftyEVAutomotive"],
+    },
+    "FLUOROCHEM.NS": {
+        "name": "Gujarat Fluorochemicals",
+        "sector": "Basic Materials",
+        "notes": "listed 16 Oct 2019",
+        "tags": ["NiftyEVAutomotive"],
+    },
+    "JWL.NS": {
+        "name": "Jupiter Wagons",
+        "sector": "Industrials",
+        "notes": "listed 18 Oct 2010 (former NSE symbol CEBBCO)",
+        "tags": ["NiftyEVAutomotive"],
+    },
+    "OLAELEC.NS": {
+        "name": "Ola Electric Mobility",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 9 Aug 2024; show its real first date, never invent pre-listing data",
+        "tags": ["NiftyEVAutomotive"],
+    },
+    "MSUMI.NS": {
+        "name": "Motherson Sumi Wiring India",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 28 Mar 2022; show its real first date, never invent pre-listing data",
+        "tags": ["NiftyEVAutomotive"],
+    },
+    "M&M.NS": {
+        "name": "Mahindra & Mahindra",
+        "sector": "Consumer Cyclical",
+        "notes": "long history",
+        "tags": ["NiftyEVAutomotive"],
+    },
+    "PRINCEPIPE.NS": {
+        "name": "Prince Pipes And Fittings",
+        "sector": "Industrials",
+        "notes": "listed 30 Dec 2019",
+        "tags": ["NiftyHousing"],
+    },
+    "APOLLOPIPE.NS": {
+        "name": "Apollo Pipes",
+        "sector": "Industrials",
+        "notes": "listed 11 Nov 2019",
+        "tags": ["NiftyHousing"],
+    },
+    "GREENPANEL.NS": {
+        "name": "Greenpanel Industries",
+        "sector": "Basic Materials",
+        "notes": "listed 23 Oct 2019",
+        "tags": ["NiftyHousing"],
+    },
+    "STYLAMIND.NS": {
+        "name": "Stylam Industries",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 2 Aug 2021",
+        "tags": ["NiftyHousing"],
+    },
+    "INDIGOPNTS.NS": {
+        "name": "Indigo Paints",
+        "sector": "Basic Materials",
+        "notes": "listed 2 Feb 2021",
+        "tags": ["NiftyHousing"],
+    },
+    "RRKABEL.NS": {
+        "name": "R R Kabel",
+        "sector": "Industrials",
+        "notes": "listed 20 Sep 2023; show its real first date, never invent pre-listing data",
+        "tags": ["NiftyHousing"],
+    },
+    "FINCABLES.NS": {
+        "name": "Finolex Cables",
+        "sector": "Industrials",
+        "notes": "long history",
+        "tags": ["NiftyHousing"],
+    },
+    "ORIENTELEC.NS": {
+        "name": "Orient Electric",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 14 May 2018",
+        "tags": ["NiftyHousing"],
+    },
+    "BLUESTARCO.NS": {
+        "name": "Blue Star",
+        "sector": "Industrials",
+        "notes": "long history",
+        "tags": ["NiftyHousing"],
+    },
+    "LGEINDIA.NS": {
+        "name": "LG Electronics India",
+        "sector": "Consumer Cyclical",
+        "notes": "listed 14 Oct 2025; show its real first date, never invent pre-listing data",
+        "tags": ["NiftyHousing"],
+    },
 }
 
 
 # Stock tags: the sidebar Tag option shows "ALL" (every stock above) or one tag's stocks.
 # A stock belongs to a tag when the tag's name is in its "tags" list.
 TAG_ALL = "ALL"
-TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer", "OilGas", "CapitalMarket", "Shipping", "Infra", "Cement", "Spirits", "Luxury", "LifestyleFashion", "AutomationRobotics", "GoldLending", "ConsumerLoans", "HousingLargeTicketFinance", "MSMEMicrofinance", "ConsumerFinance", "NiftyMidcap50"]
+TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer", "OilGas", "CapitalMarket", "Shipping", "Infra", "Cement", "Spirits", "Luxury", "LifestyleFashion", "AutomationRobotics", "GoldLending", "ConsumerLoans", "HousingLargeTicketFinance", "MSMEMicrofinance", "ConsumerFinance", "NiftyMidcap50", "NiftyFMCG", "NiftyMedia", "NiftyEVAutomotive", "NiftyHousing"]
 
 
 def stocks_for_tag(tag: str) -> list:

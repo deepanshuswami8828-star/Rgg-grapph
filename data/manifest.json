@@ -1,5 +1,5 @@
 {
-  "version_id": "v20261117_205534",
+  "version_id": "v20261117_215050",
   "updated_at": "2026-11-17T19:53:34.896832+05:30",
   "status": "SUCCESS",
   "provider": "Yahoo Finance (yfinance)",
@@ -5518,6 +5518,505 @@
       "rows": 2240,
       "sha256": "842f252b24e0da914c9bd85e98cd5a0087998908b67fa31f0c1fecfbb311d100",
       "fetched_at": "2026-11-17T20:55:34.224907+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "GODFRYPHLP.NS": {
+      "first_date": "1999-01-04",
+      "last_date": "2026-11-17",
+      "rows": 6969,
+      "sha256": "e1968962980fdd49eaa4c3763ed7a079389fc1cbcea0172d558e9434922ceba5",
+      "fetched_at": "2026-11-17T21:50:50.236797+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [
+        "Flagged move of +200.0% on 2005-07-28",
+        "Flagged move of -66.6% on 2005-07-29"
+      ],
+      "flagged_moves": [
+        {
+          "date": "2005-07-28",
+          "pct_change": 200.0,
+          "close": 108.65
+        },
+        {
+          "date": "2005-07-29",
+          "pct_change": -66.61,
+          "close": 36.28
+        }
+      ]
+    },
+    "DBCORP.NS": {
+      "first_date": "2010-01-06",
+      "last_date": "2026-11-17",
+      "rows": 4171,
+      "sha256": "56cebfe40ee6d08ad0395c15b87e0a6fc3475169ea58c15c5d913818d2cc73b6",
+      "fetched_at": "2026-11-17T21:50:50.236797+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "NDTV.NS": {
+      "first_date": "2004-05-19",
+      "last_date": "2026-11-17",
+      "rows": 5569,
+      "sha256": "f8b2467624279af1397684b22dafb32ad8cd8c99c6753fa780728c0be187786a",
+      "fetched_at": "2026-11-17T21:50:50.236797+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [
+        "Flagged move of +32.3% on 2008-12-04"
+      ],
+      "flagged_moves": [
+        {
+          "date": "2008-12-04",
+          "pct_change": 32.33,
+          "close": 97.0
+        }
+      ]
+    },
+    "TVTODAY.NS": {
+      "first_date": "2004-01-16",
+      "last_date": "2026-11-17",
+      "rows": 5655,
+      "sha256": "1e8e785bfe287c7a9e6ec25a4f2f6c4b3f8353597313f23f1f28bb1e0b9d7a7a",
+      "fetched_at": "2026-11-17T21:50:50.236797+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "HATHWAY.NS": {
+      "first_date": "2010-02-25",
+      "last_date": "2026-11-17",
+      "rows": 4137,
+      "sha256": "8369b852d8e2a8488c853a27c86b1ad1d992d77b57f7e243946bb9b607442d8e",
+      "fetched_at": "2026-11-17T21:50:50.236797+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "DEN.NS": {
+      "first_date": "2009-11-24",
+      "last_date": "2026-11-17",
+      "rows": 4198,
+      "sha256": "ba968059449da1551301747412ed2fb7c5b564a4678c069a871fa37599470c49",
+      "fetched_at": "2026-11-17T21:50:50.236797+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "GTPL.NS": {
+      "first_date": "2017-07-04",
+      "last_date": "2026-11-17",
+      "rows": 2323,
+      "sha256": "21bab320a18ee9e65948a00824eae75269038a72f728b6af98d08065cb42c2c9",
+      "fetched_at": "2026-11-17T21:50:50.236797+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "DISHTV.NS": {
+      "first_date": "2007-04-18",
+      "last_date": "2026-11-17",
+      "rows": 4839,
+      "sha256": "3bf51def706c8796b44b20a290adefd00006a844a7f3e94019ad4384ad8eba45",
+      "fetched_at": "2026-11-17T21:50:50.236797+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [
+        "Flagged move of -33.2% on 2019-01-25",
+        "Flagged move of +29.6% on 2019-11-01"
+      ],
+      "flagged_moves": [
+        {
+          "date": "2019-01-25",
+          "pct_change": -33.23,
+          "close": 22.4
+        },
+        {
+          "date": "2019-11-01",
+          "pct_change": 29.6,
+          "close": 16.2
+        }
+      ]
+    },
+    "BALAJITELE.NS": {
+      "first_date": "2002-07-01",
+      "last_date": "2026-11-17",
+      "rows": 6061,
+      "sha256": "b9e8faa8812961594587a639c2d2c8fd3c7741e09a74eb44877523048a29554c",
+      "fetched_at": "2026-11-17T21:50:50.236797+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "SHEMAROO.NS": {
+      "first_date": "2014-10-01",
+      "last_date": "2026-11-17",
+      "rows": 2997,
+      "sha256": "9c98a29bf9ed178951dc67823c29bf15ab0ec1f32ce6cf50cbb0bcbf1ca426d2",
+      "fetched_at": "2026-11-17T21:50:50.236797+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "UFO.NS": {
+      "first_date": "2015-05-14",
+      "last_date": "2026-11-17",
+      "rows": 2851,
+      "sha256": "510a270fa0956be9563e540d05e48b970355b19a0e70906146ce5fac0e9c53f9",
+      "fetched_at": "2026-11-17T21:50:50.236797+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "SANSERA.NS": {
+      "first_date": "2021-09-24",
+      "last_date": "2026-11-17",
+      "rows": 1278,
+      "sha256": "12ec399be5761ded722f954f2ec5c435ab805376557443efae34a6d50365616e",
+      "fetched_at": "2026-11-17T21:50:50.236797+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "FLUOROCHEM.NS": {
+      "first_date": "2019-10-16",
+      "last_date": "2026-11-17",
+      "rows": 1762,
+      "sha256": "54aace9a2942ea2d9795ee3b83bff978e2ab8b685d6bb87b8ac899d8b7967e5e",
+      "fetched_at": "2026-11-17T21:50:50.236797+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "JWL.NS": {
+      "first_date": "2010-10-18",
+      "last_date": "2026-11-17",
+      "rows": 3971,
+      "sha256": "c75316e9c7490ce7745a32ed3935febb680f811931045dfefc96c2941c81a0d8",
+      "fetched_at": "2026-11-17T21:50:50.236797+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "OLAELEC.NS": {
+      "first_date": "2024-08-09",
+      "last_date": "2026-11-17",
+      "rows": 565,
+      "sha256": "c1dc2f77883b39f520e8ba9561bb4e6da4655c93598362a8cefc77608de063c5",
+      "fetched_at": "2026-11-17T21:50:50.236797+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "MSUMI.NS": {
+      "first_date": "2022-03-28",
+      "last_date": "2026-11-17",
+      "rows": 1153,
+      "sha256": "1f24be60af24be84ceb637a8d9444f307dfe2b55f4e071f7cd1d1307f1c81642",
+      "fetched_at": "2026-11-17T21:50:50.236797+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "M&M.NS": {
+      "first_date": "1996-01-01",
+      "last_date": "2026-11-17",
+      "rows": 7755,
+      "sha256": "dec62e4d3772356521713e231c4cf89ed4c55c255f2ad4a3c307352b8deebef5",
+      "fetched_at": "2026-11-17T21:50:50.236797+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [
+        "Flagged move of -36.2% on 1996-01-03",
+        "Flagged move of +100.0% on 1996-11-12",
+        "Flagged move of -50.7% on 1996-11-13",
+        "Flagged move of +100.0% on 1997-03-07",
+        "Flagged move of -51.8% on 1997-03-10",
+        "Flagged move of +100.0% on 1997-04-14",
+        "Flagged move of -49.6% on 1997-04-15",
+        "Flagged move of +100.0% on 1998-11-04",
+        "Flagged move of -48.0% on 1998-11-05",
+        "Flagged move of +100.0% on 1998-11-25",
+        "Flagged move of -52.4% on 1998-11-26",
+        "Flagged move of +100.0% on 1998-12-25",
+        "Flagged move of -48.3% on 1998-12-28",
+        "Flagged move of +100.0% on 1999-03-02",
+        "Flagged move of -48.6% on 1999-03-03",
+        "Flagged move of +100.0% on 1999-03-29",
+        "Flagged move of -50.9% on 1999-03-30",
+        "Flagged move of +100.0% on 1999-04-27",
+        "Flagged move of -49.5% on 1999-04-28",
+        "Flagged move of +100.0% on 1999-11-08",
+        "Flagged move of -50.7% on 1999-11-09",
+        "Flagged move of +100.0% on 1999-11-23",
+        "Flagged move of -51.6% on 1999-11-24",
+        "Flagged move of +101.4% on 2005-07-28",
+        "Flagged move of -48.3% on 2005-07-29"
+      ],
+      "flagged_moves": [
+        {
+          "date": "1996-01-03",
+          "pct_change": -36.22,
+          "close": 15.41
+        },
+        {
+          "date": "1996-11-12",
+          "pct_change": 100.0,
+          "close": 49.6
+        },
+        {
+          "date": "1996-11-13",
+          "pct_change": -50.71,
+          "close": 24.45
+        },
+        {
+          "date": "1997-03-07",
+          "pct_change": 100.0,
+          "close": 56.66
+        },
+        {
+          "date": "1997-03-10",
+          "pct_change": -51.78,
+          "close": 27.32
+        },
+        {
+          "date": "1997-04-14",
+          "pct_change": 100.0,
+          "close": 47.65
+        },
+        {
+          "date": "1997-04-15",
+          "pct_change": -49.57,
+          "close": 24.03
+        },
+        {
+          "date": "1998-11-04",
+          "pct_change": 100.0,
+          "close": 22.93
+        },
+        {
+          "date": "1998-11-05",
+          "pct_change": -47.98,
+          "close": 11.93
+        },
+        {
+          "date": "1998-11-25",
+          "pct_change": 100.0,
+          "close": 25.55
+        },
+        {
+          "date": "1998-11-26",
+          "pct_change": -52.44,
+          "close": 12.15
+        },
+        {
+          "date": "1998-12-25",
+          "pct_change": 100.0,
+          "close": 25.07
+        },
+        {
+          "date": "1998-12-28",
+          "pct_change": -48.31,
+          "close": 12.96
+        },
+        {
+          "date": "1999-03-02",
+          "pct_change": 100.0,
+          "close": 38.4
+        },
+        {
+          "date": "1999-03-03",
+          "pct_change": -48.57,
+          "close": 19.75
+        },
+        {
+          "date": "1999-03-29",
+          "pct_change": 100.0,
+          "close": 35.43
+        },
+        {
+          "date": "1999-03-30",
+          "pct_change": -50.9,
+          "close": 17.4
+        },
+        {
+          "date": "1999-04-27",
+          "pct_change": 100.0,
+          "close": 34.46
+        },
+        {
+          "date": "1999-04-28",
+          "pct_change": -49.5,
+          "close": 17.4
+        },
+        {
+          "date": "1999-11-08",
+          "pct_change": 100.0,
+          "close": 55.73
+        },
+        {
+          "date": "1999-11-09",
+          "pct_change": -50.65,
+          "close": 27.5
+        },
+        {
+          "date": "1999-11-23",
+          "pct_change": 100.0,
+          "close": 70.12
+        },
+        {
+          "date": "1999-11-24",
+          "pct_change": -51.64,
+          "close": 33.91
+        },
+        {
+          "date": "2005-07-28",
+          "pct_change": 101.41,
+          "close": 127.47
+        },
+        {
+          "date": "2005-07-29",
+          "pct_change": -48.3,
+          "close": 65.9
+        }
+      ]
+    },
+    "PRINCEPIPE.NS": {
+      "first_date": "2019-12-30",
+      "last_date": "2026-11-17",
+      "rows": 1712,
+      "sha256": "7a726d709850b8670dd14c35a911e1ccc53ef96e0870ad1ff739ce34d14ebd29",
+      "fetched_at": "2026-11-17T21:50:50.236797+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "APOLLOPIPE.NS": {
+      "first_date": "2019-11-11",
+      "last_date": "2026-11-17",
+      "rows": 1745,
+      "sha256": "5a1aedff38a58f02bcfc3329f92b18919e7f51a4acbbed20331a5b958b8b976a",
+      "fetched_at": "2026-11-17T21:50:50.236797+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "GREENPANEL.NS": {
+      "first_date": "2019-10-23",
+      "last_date": "2026-11-17",
+      "rows": 1758,
+      "sha256": "0a99e328bb4cdfe1ff6295f309d036b13393f6738e7a04744852d7950f4bde7e",
+      "fetched_at": "2026-11-17T21:50:50.236797+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "STYLAMIND.NS": {
+      "first_date": "2021-08-02",
+      "last_date": "2026-11-17",
+      "rows": 1315,
+      "sha256": "3e769a7d2e0100244fd0c32c61d7958f25f5d1ac7ce0f05aef888a0df727ea62",
+      "fetched_at": "2026-11-17T21:50:50.236797+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "INDIGOPNTS.NS": {
+      "first_date": "2021-02-02",
+      "last_date": "2026-11-17",
+      "rows": 1437,
+      "sha256": "aac9a117657a769d77c900e4b948045a3f17a215ba947661fa837ee3ee6c2353",
+      "fetched_at": "2026-11-17T21:50:50.236797+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "RRKABEL.NS": {
+      "first_date": "2023-09-20",
+      "last_date": "2026-11-17",
+      "rows": 784,
+      "sha256": "83ca386c9683680d2a1bcb78ef2f115da3ac82bb8c63ba7fe33f99a0fa295574",
+      "fetched_at": "2026-11-17T21:50:50.236797+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "FINCABLES.NS": {
+      "first_date": "2002-07-01",
+      "last_date": "2026-11-17",
+      "rows": 6062,
+      "sha256": "c602ddb0fa8a066156a01881ee90a20465e53395df3363ef3c628ab2eb18a95f",
+      "fetched_at": "2026-11-17T21:50:50.236797+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "ORIENTELEC.NS": {
+      "first_date": "2018-05-14",
+      "last_date": "2026-11-17",
+      "rows": 2110,
+      "sha256": "8c8beac47311c5c6936c69d962430caba954f1494b4578a662280e787f0caf4d",
+      "fetched_at": "2026-11-17T21:50:50.236797+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "BLUESTARCO.NS": {
+      "first_date": "2002-07-01",
+      "last_date": "2026-11-17",
+      "rows": 6059,
+      "sha256": "87fd4a9df6d066234659dfcb97c35d25b0a18a43a8331e7af6b5ec2d1ad4f37c",
+      "fetched_at": "2026-11-17T21:50:50.236797+05:30",
+      "status": "VALID",
+      "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
+      "warnings": [
+        "Flagged move of +100.0% on 2005-07-28",
+        "Flagged move of -50.1% on 2005-07-29"
+      ],
+      "flagged_moves": [
+        {
+          "date": "2005-07-28",
+          "pct_change": 100.0,
+          "close": 51.6
+        },
+        {
+          "date": "2005-07-29",
+          "pct_change": -50.1,
+          "close": 25.75
+        }
+      ]
+    },
+    "LGEINDIA.NS": {
+      "first_date": "2025-10-14",
+      "last_date": "2026-11-17",
+      "rows": 272,
+      "sha256": "fd421fcc4b05ee64b68e1a098a84a6cd69e7ec5903c41f434c409b1746a68c8d",
+      "fetched_at": "2026-11-17T21:50:50.236797+05:30",
       "status": "VALID",
       "benchmark_version": "7e33414c08d75880d7bdf90d1d9b50b03317a8c7e79daaf745c4e9a262899266",
       "warnings": [],
