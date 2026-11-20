@@ -120,7 +120,7 @@ STOCKS = {
         "name": "Aurobindo Pharma",
         "sector": "Pharmaceuticals",
         "notes": "long history",
-        "tags": ["Midselect", "AlphaQVLowVol", "NiftyMidcap50"],
+        "tags": ["Midselect", "AlphaQVLowVol", "NiftyMidcap50", "Pharma"],
     },
     "DIXON.NS": {
         "name": "Dixon Technologies",
@@ -168,7 +168,7 @@ STOCKS = {
         "name": "Lupin",
         "sector": "Pharmaceuticals",
         "notes": "long history",
-        "tags": ["Midselect", "AlphaQVLowVol", "NiftyMidcap50"],
+        "tags": ["Midselect", "AlphaQVLowVol", "NiftyMidcap50", "Pharma"],
     },
     "YESBANK.NS": {
         "name": "Yes Bank",
@@ -241,13 +241,13 @@ STOCKS = {
         "name": "Gland Pharma",
         "sector": "Pharmaceuticals - injectables",
         "notes": "listed 20 Nov 2020",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "Pharma"],
     },
     "SAILIFE.NS": {
         "name": "Sai Life Sciences",
         "sector": "Pharmaceuticals - CRDMO",
         "notes": "listed 18 Dec 2024; show its real first date, never invent pre-listing data",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "Pharma"],
     },
     "SONACOMS.NS": {
         "name": "Sona BLW Precision Forgings",
@@ -367,7 +367,7 @@ STOCKS = {
         "name": "NATCO Pharma",
         "sector": "Healthcare",
         "notes": "long history",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "Pharma"],
     },
     "NBCC.NS": {
         "name": "NBCC (India)",
@@ -385,7 +385,7 @@ STOCKS = {
         "name": "Onesource Specialty Pharma",
         "sector": "Healthcare",
         "notes": "listed 24 Jan 2025; show its real first date, never invent pre-listing data",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "Pharma"],
     },
     "PNBHOUSING.NS": {
         "name": "PNB Housing Finance",
@@ -397,7 +397,7 @@ STOCKS = {
         "name": "Piramal Pharma",
         "sector": "Healthcare",
         "notes": "listed 19 Oct 2022; show its real first date, never invent pre-listing data",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "Pharma"],
     },
     "RBLBANK.NS": {
         "name": "RBL Bank",
@@ -409,7 +409,7 @@ STOCKS = {
         "name": "Syngene International",
         "sector": "Healthcare",
         "notes": "listed 11 Aug 2015",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "Pharma"],
     },
     "TATACHEM.NS": {
         "name": "Tata Chemicals",
@@ -427,7 +427,7 @@ STOCKS = {
         "name": "Wockhardt",
         "sector": "Healthcare",
         "notes": "long history",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "Pharma"],
     },
     "COALINDIA.NS": {
         "name": "Coal India",
@@ -451,19 +451,19 @@ STOCKS = {
         "name": "Alkem Laboratories",
         "sector": "Healthcare",
         "notes": "listed 23 Dec 2015",
-        "tags": ["AlphaQVLowVol"],
+        "tags": ["AlphaQVLowVol", "Pharma"],
     },
     "CIPLA.NS": {
         "name": "Cipla",
         "sector": "Healthcare",
         "notes": "long history",
-        "tags": ["AlphaQVLowVol"],
+        "tags": ["AlphaQVLowVol", "Pharma"],
     },
     "DRREDDY.NS": {
         "name": "Dr. Reddy's Laboratories",
         "sector": "Healthcare",
         "notes": "long history",
-        "tags": ["AlphaQVLowVol"],
+        "tags": ["AlphaQVLowVol", "Pharma"],
     },
     "EICHERMOT.NS": {
         "name": "Eicher Motors",
@@ -511,7 +511,7 @@ STOCKS = {
         "name": "Sun Pharmaceutical Industries",
         "sector": "Healthcare",
         "notes": "long history",
-        "tags": ["AlphaQVLowVol"],
+        "tags": ["AlphaQVLowVol", "Pharma"],
     },
     "HINDALCO.NS": {
         "name": "Hindalco Industries",
@@ -973,7 +973,7 @@ STOCKS = {
         "name": "Divi's Laboratories",
         "sector": "Healthcare",
         "notes": "NSE from 12 Mar 2003",
-        "tags": ["NiftyNext50"],
+        "tags": ["NiftyNext50", "Pharma"],
     },
     "DLF.NS": {
         "name": "DLF",
@@ -1975,7 +1975,7 @@ STOCKS = {
         "name": "Laurus Labs",
         "sector": "Healthcare",
         "notes": "listed 19 Dec 2016",
-        "tags": ["NiftyMidcap50"],
+        "tags": ["NiftyMidcap50", "Pharma"],
     },
     "ICICIGI.NS": {
         "name": "ICICI Lombard General Insurance",
@@ -1987,7 +1987,7 @@ STOCKS = {
         "name": "Mankind Pharma",
         "sector": "Healthcare",
         "notes": "listed 9 May 2023; show its real first date, never invent pre-listing data",
-        "tags": ["NiftyMidcap50"],
+        "tags": ["NiftyMidcap50", "Pharma"],
     },
     "GODFRYPHLP.NS": {
         "name": "Godfrey Phillips India",
@@ -2337,13 +2337,139 @@ STOCKS = {
         "notes": "listed 19 Feb 2008",
         "tags": ["MidSmallITTelecom"],
     },
+    "AJANTPHARM.NS": {
+        "name": "Ajanta Pharma",
+        "sector": "Healthcare",
+        "notes": "long history",
+        "tags": ["Pharma"],
+    },
+    "BIOCON.NS": {
+        "name": "Biocon",
+        "sector": "Healthcare",
+        "notes": "listed 7 Apr 2004",
+        "tags": ["Pharma"],
+    },
+    "GRANULES.NS": {
+        "name": "Granules India",
+        "sector": "Healthcare",
+        "notes": "listed 20 Jun 2005",
+        "tags": ["Pharma"],
+    },
+    "APLLTD.NS": {
+        "name": "Alembic Pharmaceuticals",
+        "sector": "Healthcare",
+        "notes": "listed 20 Sep 2011",
+        "tags": ["Pharma"],
+    },
+    "CAPLIPOINT.NS": {
+        "name": "Caplin Point Laboratories",
+        "sector": "Healthcare",
+        "notes": "listed 23 Jun 2014",
+        "tags": ["Pharma"],
+    },
+    "ERIS.NS": {
+        "name": "Eris Lifesciences",
+        "sector": "Healthcare",
+        "notes": "listed 29 Jun 2017",
+        "tags": ["Pharma"],
+    },
+    "JUBLPHARMA.NS": {
+        "name": "Jubilant Pharmova",
+        "sector": "Healthcare",
+        "notes": "long history (former NSE symbols JUBILANT, VAMORGANIC)",
+        "tags": ["Pharma"],
+    },
+    "SHILPAMED.NS": {
+        "name": "Shilpa Medicare",
+        "sector": "Healthcare",
+        "notes": "listed 3 Dec 2009",
+        "tags": ["Pharma"],
+    },
+    "COHANCE.NS": {
+        "name": "Cohance Lifesciences",
+        "sector": "Healthcare",
+        "notes": "listed 9 Mar 2020 (former NSE symbol SUVENPHAR)",
+        "tags": ["Pharma"],
+    },
+    "CONCORDBIO.NS": {
+        "name": "Concord Biotech",
+        "sector": "Healthcare",
+        "notes": "listed 18 Aug 2023; show its real first date, never invent pre-listing data",
+        "tags": ["Pharma"],
+    },
+    "BLUEJET.NS": {
+        "name": "Blue Jet Healthcare",
+        "sector": "Healthcare",
+        "notes": "listed 1 Nov 2023; show its real first date, never invent pre-listing data",
+        "tags": ["Pharma"],
+    },
+    "AARTIPHARM.NS": {
+        "name": "Aarti Pharmalabs",
+        "sector": "Healthcare",
+        "notes": "listed 30 Jan 2023; show its real first date, never invent pre-listing data",
+        "tags": ["Pharma"],
+    },
+    "ALIVUS.NS": {
+        "name": "Alivus Life Sciences",
+        "sector": "Healthcare",
+        "notes": "listed 6 Aug 2021 (former NSE symbol GLS)",
+        "tags": ["Pharma"],
+    },
+    "ANTHEM.NS": {
+        "name": "Anthem Biosciences",
+        "sector": "Healthcare",
+        "notes": "listed 21 Jul 2025; show its real first date, never invent pre-listing data",
+        "tags": ["Pharma"],
+    },
+    "GLAXO.NS": {
+        "name": "GlaxoSmithKline Pharmaceuticals",
+        "sector": "Healthcare",
+        "notes": "long history",
+        "tags": ["Pharma"],
+    },
+    "PFIZER.NS": {
+        "name": "Pfizer",
+        "sector": "Healthcare",
+        "notes": "long history",
+        "tags": ["Pharma"],
+    },
+    "EMCURE.NS": {
+        "name": "Emcure Pharmaceuticals",
+        "sector": "Healthcare",
+        "notes": "listed 10 Jul 2024; show its real first date, never invent pre-listing data",
+        "tags": ["Pharma"],
+    },
+    "AKUMS.NS": {
+        "name": "Akums Drugs and Pharmaceuticals",
+        "sector": "Healthcare",
+        "notes": "listed 6 Aug 2024; show its real first date, never invent pre-listing data",
+        "tags": ["Pharma"],
+    },
+    "RUBICON.NS": {
+        "name": "Rubicon Research",
+        "sector": "Healthcare",
+        "notes": "listed 16 Oct 2025; show its real first date, never invent pre-listing data",
+        "tags": ["Pharma"],
+    },
+    "CORONA.NS": {
+        "name": "Corona Remedies",
+        "sector": "Healthcare",
+        "notes": "listed 15 Dec 2025; show its real first date, never invent pre-listing data",
+        "tags": ["Pharma"],
+    },
+    "VIYASH.NS": {
+        "name": "Viyash Scientific",
+        "sector": "Healthcare",
+        "notes": "listed 10 Mar 2016 (former NSE symbol SEQUENT)",
+        "tags": ["Pharma"],
+    },
 }
 
 
 # Stock tags: the sidebar Tag option shows "ALL" (every stock above) or one tag's stocks.
 # A stock belongs to a tag when the tag's name is in its "tags" list.
 TAG_ALL = "ALL"
-TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer", "OilGas", "CapitalMarket", "Shipping", "Infra", "Cement", "Spirits", "Luxury", "LifestyleFashion", "AutomationRobotics", "GoldLending", "ConsumerLoans", "HousingLargeTicketFinance", "MSMEMicrofinance", "ConsumerFinance", "NiftyMidcap50", "NiftyFMCG", "NiftyMedia", "NiftyEVAutomotive", "NiftyHousing", "NiftyPSEandCPSE", "MidSmallITTelecom"]
+TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer", "OilGas", "CapitalMarket", "Shipping", "Infra", "Cement", "Spirits", "Luxury", "LifestyleFashion", "AutomationRobotics", "GoldLending", "ConsumerLoans", "HousingLargeTicketFinance", "MSMEMicrofinance", "ConsumerFinance", "NiftyMidcap50", "NiftyFMCG", "NiftyMedia", "NiftyEVAutomotive", "NiftyHousing", "NiftyPSEandCPSE", "MidSmallITTelecom", "Pharma"]
 
 
 def stocks_for_tag(tag: str) -> list:

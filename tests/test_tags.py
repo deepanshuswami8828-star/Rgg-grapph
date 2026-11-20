@@ -124,6 +124,9 @@ NIFTY_PSE_CPSE = ["BEL", "BHEL", "BPCL", "COALINDIA", "COCHINSHIP", "CONCOR", "G
 # MidSmall IT and Telecom list (20 Nov 2026): stocks that passed all 3 data checks
 MIDSMALL_IT_TELECOM = ["AFFLE", "BHARTIHEXA", "BSOFT", "COFORGE", "E2E", "FSL", "HAPPSTMNDS", "HATHWAY", "HEXT", "IDEA", "IKS", "INDUSTOWER", "INTELLECT", "ITI", "KPITTECH", "LATENTVIEW", "LTTS", "MAPMYINDIA", "MPHASIS", "NETWEB", "NEWGEN", "NUCLEUS", "OFSS", "ONMOBILE", "OPTIEMUS", "PERSISTENT", "QUICKHEAL", "RAILTEL", "RATEGAIN", "ROUTE", "SAGILITY", "SONATSOFTW", "TATACOMM", "TATAELXSI", "TATATECH", "TEJASNET", "ZAGGLE"]
 
+# Pharma list (21 Nov 2026): stocks that passed all 3 data checks
+PHARMA = ["AARTIPHARM", "AJANTPHARM", "AKUMS", "ALIVUS", "ALKEM", "ANTHEM", "APLLTD", "AUROPHARMA", "BIOCON", "BLUEJET", "CAPLIPOINT", "CIPLA", "COHANCE", "CONCORDBIO", "CORONA", "DIVISLAB", "DRREDDY", "EMCURE", "ERIS", "GLAND", "GLAXO", "GRANULES", "JUBLPHARMA", "LAURUSLABS", "LUPIN", "MANKIND", "NATCOPHARM", "ONESOURCE", "PFIZER", "PPLPHARMA", "RUBICON", "SAILIFE", "SHILPAMED", "SUNPHARMA", "SYNGENE", "VIYASH", "WOCKPHARMA"]
+
 
 def test_tag_membership():
     assert cfg.stocks_for_tag(cfg.TAG_ALL) == list(cfg.STOCKS)
@@ -165,6 +168,8 @@ def test_tag_membership():
     assert len(NIFTY_PSE_CPSE) == 21
     assert sorted(cfg.stocks_for_tag("MidSmallITTelecom")) == sorted(t + ".NS" for t in MIDSMALL_IT_TELECOM)
     assert len(MIDSMALL_IT_TELECOM) == 37
+    assert sorted(cfg.stocks_for_tag("Pharma")) == sorted(t + ".NS" for t in PHARMA)
+    assert len(PHARMA) == 37
 
 
 def test_every_tagged_stock_has_data():

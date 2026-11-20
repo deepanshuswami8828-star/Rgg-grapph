@@ -1,5 +1,5 @@
 {
-  "version_id": "v20261120_215059",
+  "version_id": "v20261120_223454",
   "updated_at": "2026-11-20T21:50:59.149582+05:30",
   "status": "SUCCESS",
   "provider": "Yahoo Finance (yfinance)",
@@ -6489,6 +6489,287 @@
       "rows": 4715,
       "sha256": "a61c97b10e287ea33b1b7e7e2e15dc8cde067220147d3f26dc4015c7b8e87a92",
       "fetched_at": "2026-11-20T21:50:59.149582+05:30",
+      "status": "VALID",
+      "benchmark_version": "a61c97b10e287ea33b1b7e7e2e15dc8cde067220147d3f26dc4015c7b8e87a92",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "AJANTPHARM.NS": {
+      "first_date": "2002-07-01",
+      "last_date": "2026-11-20",
+      "rows": 6061,
+      "sha256": "894665cf583ed885989dd5441622f14472db4f6a209ddc675587561a1b06a729",
+      "fetched_at": "2026-11-20T22:34:54.588786+05:30",
+      "status": "VALID",
+      "benchmark_version": "a61c97b10e287ea33b1b7e7e2e15dc8cde067220147d3f26dc4015c7b8e87a92",
+      "warnings": [
+        "Flagged move of +50.0% on 2005-07-28",
+        "Flagged move of -34.5% on 2005-07-29"
+      ],
+      "flagged_moves": [
+        {
+          "date": "2005-07-28",
+          "pct_change": 50.0,
+          "close": 9.27
+        },
+        {
+          "date": "2005-07-29",
+          "pct_change": -34.55,
+          "close": 6.07
+        }
+      ]
+    },
+    "BIOCON.NS": {
+      "first_date": "2004-04-07",
+      "last_date": "2026-11-20",
+      "rows": 5601,
+      "sha256": "1c3c3e6ecc4c458057950f68f7399c32ba299dbe21e40a29f7e75cc568f5f91f",
+      "fetched_at": "2026-11-20T22:34:54.588786+05:30",
+      "status": "VALID",
+      "benchmark_version": "a61c97b10e287ea33b1b7e7e2e15dc8cde067220147d3f26dc4015c7b8e87a92",
+      "warnings": [
+        "Flagged move of +500.0% on 2005-07-28",
+        "Flagged move of -83.1% on 2005-07-29"
+      ],
+      "flagged_moves": [
+        {
+          "date": "2005-07-28",
+          "pct_change": 500.0,
+          "close": 188.92
+        },
+        {
+          "date": "2005-07-29",
+          "pct_change": -83.12,
+          "close": 31.89
+        }
+      ]
+    },
+    "GRANULES.NS": {
+      "first_date": "2005-06-20",
+      "last_date": "2026-11-20",
+      "rows": 5293,
+      "sha256": "aa553915f2a75cb5eae93dc5a000be3655680d52856714a936ff0bfae1110661",
+      "fetched_at": "2026-11-20T22:34:54.588786+05:30",
+      "status": "VALID",
+      "benchmark_version": "a61c97b10e287ea33b1b7e7e2e15dc8cde067220147d3f26dc4015c7b8e87a92",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "APLLTD.NS": {
+      "first_date": "2011-09-20",
+      "last_date": "2026-11-20",
+      "rows": 3748,
+      "sha256": "7cfe473eab529b06348bd86cd0530eab32f8891e69130e5b9f4386f818faddf7",
+      "fetched_at": "2026-11-20T22:34:54.588786+05:30",
+      "status": "VALID",
+      "benchmark_version": "a61c97b10e287ea33b1b7e7e2e15dc8cde067220147d3f26dc4015c7b8e87a92",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "CAPLIPOINT.NS": {
+      "first_date": "2014-06-23",
+      "last_date": "2026-11-20",
+      "rows": 3070,
+      "sha256": "01e3565a485033e94c1634b6517b7f67b5628bf5b7234e74e79eb89348fc3c80",
+      "fetched_at": "2026-11-20T22:34:54.588786+05:30",
+      "status": "VALID",
+      "benchmark_version": "a61c97b10e287ea33b1b7e7e2e15dc8cde067220147d3f26dc4015c7b8e87a92",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "ERIS.NS": {
+      "first_date": "2017-06-30",
+      "last_date": "2026-11-20",
+      "rows": 2327,
+      "sha256": "14e426f9fd4483f47120767314c7afdebad8671e077b63b3bb85f8672bd35bd0",
+      "fetched_at": "2026-11-20T22:34:54.588786+05:30",
+      "status": "VALID",
+      "benchmark_version": "a61c97b10e287ea33b1b7e7e2e15dc8cde067220147d3f26dc4015c7b8e87a92",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "JUBLPHARMA.NS": {
+      "first_date": "2002-07-01",
+      "last_date": "2026-11-20",
+      "rows": 6061,
+      "sha256": "8d63706069cae2b9969c062f5c1d9c5f18c7052f192aa742f5c613ff46ee8ea4",
+      "fetched_at": "2026-11-20T22:34:54.588786+05:30",
+      "status": "VALID",
+      "benchmark_version": "a61c97b10e287ea33b1b7e7e2e15dc8cde067220147d3f26dc4015c7b8e87a92",
+      "warnings": [
+        "Flagged move of +419.7% on 2006-03-17"
+      ],
+      "flagged_moves": [
+        {
+          "date": "2006-03-17",
+          "pct_change": 419.74,
+          "close": 132.64
+        }
+      ]
+    },
+    "SHILPAMED.NS": {
+      "first_date": "2009-12-03",
+      "last_date": "2026-11-20",
+      "rows": 4195,
+      "sha256": "0c0b6b84389eebcfa036b8a14754d932cbb12064d7f02a40aceb80b9b5bfa693",
+      "fetched_at": "2026-11-20T22:34:54.588786+05:30",
+      "status": "VALID",
+      "benchmark_version": "a61c97b10e287ea33b1b7e7e2e15dc8cde067220147d3f26dc4015c7b8e87a92",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "COHANCE.NS": {
+      "first_date": "2020-03-09",
+      "last_date": "2026-11-20",
+      "rows": 1659,
+      "sha256": "ed45ed572bae5862dd0a645a64d327290f94c5bdfc8f4c0dc6817152376b44e6",
+      "fetched_at": "2026-11-20T22:34:54.588786+05:30",
+      "status": "VALID",
+      "benchmark_version": "a61c97b10e287ea33b1b7e7e2e15dc8cde067220147d3f26dc4015c7b8e87a92",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "CONCORDBIO.NS": {
+      "first_date": "2023-08-18",
+      "last_date": "2026-11-20",
+      "rows": 810,
+      "sha256": "9d02ca65bedbe9a591591f6fa76f970547d281cc6a767712d49b965dc0a1f9ce",
+      "fetched_at": "2026-11-20T22:34:54.588786+05:30",
+      "status": "VALID",
+      "benchmark_version": "a61c97b10e287ea33b1b7e7e2e15dc8cde067220147d3f26dc4015c7b8e87a92",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "BLUEJET.NS": {
+      "first_date": "2023-11-01",
+      "last_date": "2026-11-20",
+      "rows": 760,
+      "sha256": "b4ef3c6bbf4a849edab7cd9326745f55b85cd5ce0b435930f241a7e78559523d",
+      "fetched_at": "2026-11-20T22:34:54.588786+05:30",
+      "status": "VALID",
+      "benchmark_version": "a61c97b10e287ea33b1b7e7e2e15dc8cde067220147d3f26dc4015c7b8e87a92",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "AARTIPHARM.NS": {
+      "first_date": "2023-01-30",
+      "last_date": "2026-11-20",
+      "rows": 946,
+      "sha256": "774ab72b63484bec4f3bd94b2a423ae3ada43beb17fbf408780650bb701d2129",
+      "fetched_at": "2026-11-20T22:34:54.588786+05:30",
+      "status": "VALID",
+      "benchmark_version": "a61c97b10e287ea33b1b7e7e2e15dc8cde067220147d3f26dc4015c7b8e87a92",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "ALIVUS.NS": {
+      "first_date": "2021-08-06",
+      "last_date": "2026-11-20",
+      "rows": 1309,
+      "sha256": "c7f002b6e6067564920e1469f3c6cf462aed06cff13989f5fbade62b13b6b9c8",
+      "fetched_at": "2026-11-20T22:34:54.588786+05:30",
+      "status": "VALID",
+      "benchmark_version": "a61c97b10e287ea33b1b7e7e2e15dc8cde067220147d3f26dc4015c7b8e87a92",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "ANTHEM.NS": {
+      "first_date": "2025-07-21",
+      "last_date": "2026-11-20",
+      "rows": 333,
+      "sha256": "f1f9a61a13b5326b59d1860f2c46941c55f667d01baf3bcd8668a73163e5b3ad",
+      "fetched_at": "2026-11-20T22:34:54.588786+05:30",
+      "status": "VALID",
+      "benchmark_version": "a61c97b10e287ea33b1b7e7e2e15dc8cde067220147d3f26dc4015c7b8e87a92",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "GLAXO.NS": {
+      "first_date": "2002-07-01",
+      "last_date": "2026-11-20",
+      "rows": 6062,
+      "sha256": "a47d30f0ddabf832c4076c9fbc23af6e43f7f3e6be82f39aa80b0d7fc4d90410",
+      "fetched_at": "2026-11-20T22:34:54.588786+05:30",
+      "status": "VALID",
+      "benchmark_version": "a61c97b10e287ea33b1b7e7e2e15dc8cde067220147d3f26dc4015c7b8e87a92",
+      "warnings": [
+        "Flagged move of +100.0% on 2004-10-13",
+        "Flagged move of -49.9% on 2004-10-14"
+      ],
+      "flagged_moves": [
+        {
+          "date": "2004-10-13",
+          "pct_change": 100.0,
+          "close": 373.17
+        },
+        {
+          "date": "2004-10-14",
+          "pct_change": -49.87,
+          "close": 187.08
+        }
+      ]
+    },
+    "PFIZER.NS": {
+      "first_date": "2002-07-01",
+      "last_date": "2026-11-20",
+      "rows": 6062,
+      "sha256": "8d21b5177df136427b51099e61a3c6838bf7d97f9dfe6cb941c673b9d7444fcc",
+      "fetched_at": "2026-11-20T22:34:54.588786+05:30",
+      "status": "VALID",
+      "benchmark_version": "a61c97b10e287ea33b1b7e7e2e15dc8cde067220147d3f26dc4015c7b8e87a92",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "EMCURE.NS": {
+      "first_date": "2024-07-10",
+      "last_date": "2026-11-20",
+      "rows": 589,
+      "sha256": "adf9ed572f1aa53584a423af9e44cfab313d5e6c5245fad62bd7807898fe5f44",
+      "fetched_at": "2026-11-20T22:34:54.588786+05:30",
+      "status": "VALID",
+      "benchmark_version": "a61c97b10e287ea33b1b7e7e2e15dc8cde067220147d3f26dc4015c7b8e87a92",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "AKUMS.NS": {
+      "first_date": "2024-08-06",
+      "last_date": "2026-11-20",
+      "rows": 570,
+      "sha256": "5a7ca7d841aacd53a2d54bccff196b4c071f55b576b5e64bdeae9006fbd2b325",
+      "fetched_at": "2026-11-20T22:34:54.588786+05:30",
+      "status": "VALID",
+      "benchmark_version": "a61c97b10e287ea33b1b7e7e2e15dc8cde067220147d3f26dc4015c7b8e87a92",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "RUBICON.NS": {
+      "first_date": "2025-10-16",
+      "last_date": "2026-11-20",
+      "rows": 272,
+      "sha256": "d9cfedbd69e58450d3df2ce5933ce9e3e845b39f049c66ff4f23cf44f39b07f2",
+      "fetched_at": "2026-11-20T22:34:54.588786+05:30",
+      "status": "VALID",
+      "benchmark_version": "a61c97b10e287ea33b1b7e7e2e15dc8cde067220147d3f26dc4015c7b8e87a92",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "CORONA.NS": {
+      "first_date": "2025-12-15",
+      "last_date": "2026-11-20",
+      "rows": 233,
+      "sha256": "bb88d7f1b1901e2a42469e048c541635a4815c3ba1acc42235cf2b0648b204ed",
+      "fetched_at": "2026-11-20T22:34:54.588786+05:30",
+      "status": "VALID",
+      "benchmark_version": "a61c97b10e287ea33b1b7e7e2e15dc8cde067220147d3f26dc4015c7b8e87a92",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "VIYASH.NS": {
+      "first_date": "2016-03-10",
+      "last_date": "2026-11-20",
+      "rows": 2641,
+      "sha256": "3aa55c16522e76d60fec517b5e7f59d98b2905900454a153d94b752e525b5e21",
+      "fetched_at": "2026-11-20T22:34:54.588786+05:30",
       "status": "VALID",
       "benchmark_version": "a61c97b10e287ea33b1b7e7e2e15dc8cde067220147d3f26dc4015c7b8e87a92",
       "warnings": [],
