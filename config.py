@@ -72,7 +72,7 @@ STOCKS = {
         "name": "Persistent Systems",
         "sector": "IT Services",
         "notes": "listed 6 Apr 2010; bonus 2015 and split 2024 must NOT appear as crashes",
-        "tags": ["Midselect", "NiftyMidcap50"],
+        "tags": ["Midselect", "NiftyMidcap50", "MidSmallITTelecom"],
     },
     "INDHOTEL.NS": {
         "name": "Indian Hotels (IHCL)",
@@ -102,7 +102,7 @@ STOCKS = {
         "name": "Indus Towers",
         "sector": "Telecom - Tower Infrastructure",
         "notes": "listed 28 Dec 2012 (as Bharti Infratel)",
-        "tags": ["Midselect", "NiftyMidcap50"],
+        "tags": ["Midselect", "NiftyMidcap50", "MidSmallITTelecom"],
     },
     "NAUKRI.NS": {
         "name": "Info Edge (Naukri)",
@@ -217,13 +217,13 @@ STOCKS = {
         "name": "KPIT Technologies",
         "sector": "IT - automotive software",
         "notes": "listed 22 Apr 2019",
-        "tags": ["Smallcap", "NiftyEVAutomotive"],
+        "tags": ["Smallcap", "NiftyEVAutomotive", "MidSmallITTelecom"],
     },
     "TATAELXSI.NS": {
         "name": "Tata Elxsi",
         "sector": "IT - design & technology services",
         "notes": "long history",
-        "tags": ["Smallcap", "NiftyEVAutomotive"],
+        "tags": ["Smallcap", "NiftyEVAutomotive", "MidSmallITTelecom"],
     },
     "IGL.NS": {
         "name": "Indraprastha Gas (IGL)",
@@ -265,7 +265,7 @@ STOCKS = {
         "name": "Affle 3i",
         "sector": "Information Technology",
         "notes": "listed 8 Aug 2019",
-        "tags": ["Smallcap"],
+        "tags": ["Smallcap", "MidSmallITTelecom"],
     },
     "AMBER.NS": {
         "name": "Amber Enterprises India",
@@ -421,7 +421,7 @@ STOCKS = {
         "name": "Tata Technologies",
         "sector": "Information Technology",
         "notes": "listed 30 Nov 2023; show its real first date, never invent pre-listing data",
-        "tags": ["Smallcap", "NiftyEVAutomotive"],
+        "tags": ["Smallcap", "NiftyEVAutomotive", "MidSmallITTelecom"],
     },
     "WOCKPHARMA.NS": {
         "name": "Wockhardt",
@@ -991,7 +991,7 @@ STOCKS = {
         "name": "Vodafone Idea",
         "sector": "Communication Services",
         "notes": "listed 9 Mar 2007",
-        "tags": ["NiftyNext50", "NonCyclicalConsumer"],
+        "tags": ["NiftyNext50", "NonCyclicalConsumer", "MidSmallITTelecom"],
     },
     "MUTHOOTFIN.NS": {
         "name": "Muthoot Finance",
@@ -1159,7 +1159,7 @@ STOCKS = {
         "name": "Tata Communications",
         "sector": "Communication Services",
         "notes": "long history (former NSE symbol VSNL)",
-        "tags": ["NonCyclicalConsumer"],
+        "tags": ["NonCyclicalConsumer", "MidSmallITTelecom"],
     },
     "CHENNPETRO.NS": {
         "name": "Chennai Petroleum Corporation",
@@ -2017,7 +2017,7 @@ STOCKS = {
         "name": "Hathway Cable and Datacom",
         "sector": "Communication Services",
         "notes": "listed 25 Feb 2010",
-        "tags": ["NiftyMedia"],
+        "tags": ["NiftyMedia", "MidSmallITTelecom"],
     },
     "DEN.NS": {
         "name": "Den Networks",
@@ -2169,13 +2169,181 @@ STOCKS = {
         "notes": "listed 20 May 2010",
         "tags": ["NiftyPSEandCPSE"],
     },
+    "BHARTIHEXA.NS": {
+        "name": "Bharti Hexacom",
+        "sector": "Communication Services",
+        "notes": "listed 12 Apr 2024; show its real first date, never invent pre-listing data",
+        "tags": ["MidSmallITTelecom"],
+    },
+    "COFORGE.NS": {
+        "name": "Coforge",
+        "sector": "Technology",
+        "notes": "listed 30 Aug 2004 (former NSE symbol NIITTECH)",
+        "tags": ["MidSmallITTelecom"],
+    },
+    "HEXT.NS": {
+        "name": "Hexaware Technologies",
+        "sector": "Technology",
+        "notes": "listed 19 Feb 2025; show its real first date, never invent pre-listing data",
+        "tags": ["MidSmallITTelecom"],
+    },
+    "INTELLECT.NS": {
+        "name": "Intellect Design Arena",
+        "sector": "Technology",
+        "notes": "listed 18 Dec 2014",
+        "tags": ["MidSmallITTelecom"],
+    },
+    "IKS.NS": {
+        "name": "Inventurus Knowledge Solutions",
+        "sector": "Healthcare",
+        "notes": "listed 19 Dec 2024; show its real first date, never invent pre-listing data",
+        "tags": ["MidSmallITTelecom"],
+    },
+    "LTTS.NS": {
+        "name": "L&T Technology Services",
+        "sector": "Technology",
+        "notes": "listed 23 Sep 2016",
+        "tags": ["MidSmallITTelecom"],
+    },
+    "MPHASIS.NS": {
+        "name": "Mphasis",
+        "sector": "Technology",
+        "notes": "long history (former NSE symbols MPHASISBFL, BFLSOFTWAR)",
+        "tags": ["MidSmallITTelecom"],
+    },
+    "NETWEB.NS": {
+        "name": "Netweb Technologies India",
+        "sector": "Technology",
+        "notes": "listed 27 Jul 2023; show its real first date, never invent pre-listing data",
+        "tags": ["MidSmallITTelecom"],
+    },
+    "OFSS.NS": {
+        "name": "Oracle Financial Services Software",
+        "sector": "Technology",
+        "notes": "long history (former NSE symbol I-FLEX)",
+        "tags": ["MidSmallITTelecom"],
+    },
+    "SAGILITY.NS": {
+        "name": "Sagility",
+        "sector": "Healthcare",
+        "notes": "listed 12 Nov 2024; show its real first date, never invent pre-listing data",
+        "tags": ["MidSmallITTelecom"],
+    },
+    "BSOFT.NS": {
+        "name": "Birlasoft",
+        "sector": "Technology",
+        "notes": "long history (former NSE symbol KPIT)",
+        "tags": ["MidSmallITTelecom"],
+    },
+    "SONATSOFTW.NS": {
+        "name": "Sonata Software",
+        "sector": "Technology",
+        "notes": "long history",
+        "tags": ["MidSmallITTelecom"],
+    },
+    "NEWGEN.NS": {
+        "name": "Newgen Software Technologies",
+        "sector": "Technology",
+        "notes": "listed 29 Jan 2018",
+        "tags": ["MidSmallITTelecom"],
+    },
+    "HAPPSTMNDS.NS": {
+        "name": "Happiest Minds Technologies",
+        "sector": "Technology",
+        "notes": "listed 17 Sep 2020",
+        "tags": ["MidSmallITTelecom"],
+    },
+    "FSL.NS": {
+        "name": "Firstsource Solutions",
+        "sector": "Technology",
+        "notes": "listed 22 Feb 2007",
+        "tags": ["MidSmallITTelecom"],
+    },
+    "LATENTVIEW.NS": {
+        "name": "Latent View Analytics",
+        "sector": "Industrials",
+        "notes": "listed 23 Nov 2021",
+        "tags": ["MidSmallITTelecom"],
+    },
+    "RATEGAIN.NS": {
+        "name": "RateGain Travel Technologies",
+        "sector": "Technology",
+        "notes": "listed 17 Dec 2021",
+        "tags": ["MidSmallITTelecom"],
+    },
+    "MAPMYINDIA.NS": {
+        "name": "C.E. Info Systems (MapmyIndia)",
+        "sector": "Technology",
+        "notes": "listed 21 Dec 2021",
+        "tags": ["MidSmallITTelecom"],
+    },
+    "ZAGGLE.NS": {
+        "name": "Zaggle Prepaid Ocean Services",
+        "sector": "Technology",
+        "notes": "listed 22 Sep 2023; show its real first date, never invent pre-listing data",
+        "tags": ["MidSmallITTelecom"],
+    },
+    "QUICKHEAL.NS": {
+        "name": "Quick Heal Technologies",
+        "sector": "Technology",
+        "notes": "listed 18 Feb 2016",
+        "tags": ["MidSmallITTelecom"],
+    },
+    "NUCLEUS.NS": {
+        "name": "Nucleus Software Exports",
+        "sector": "Technology",
+        "notes": "listed 19 Dec 2002",
+        "tags": ["MidSmallITTelecom"],
+    },
+    "E2E.NS": {
+        "name": "E2E Networks",
+        "sector": "Technology",
+        "notes": "listed 15 May 2018",
+        "tags": ["MidSmallITTelecom"],
+    },
+    "RAILTEL.NS": {
+        "name": "RailTel Corporation of India",
+        "sector": "Communication Services",
+        "notes": "listed 26 Feb 2021",
+        "tags": ["MidSmallITTelecom"],
+    },
+    "ROUTE.NS": {
+        "name": "Route Mobile",
+        "sector": "Communication Services",
+        "notes": "listed 21 Sep 2020",
+        "tags": ["MidSmallITTelecom"],
+    },
+    "TEJASNET.NS": {
+        "name": "Tejas Networks",
+        "sector": "Technology",
+        "notes": "listed 27 Jun 2017",
+        "tags": ["MidSmallITTelecom"],
+    },
+    "ITI.NS": {
+        "name": "ITI",
+        "sector": "Technology",
+        "notes": "long history",
+        "tags": ["MidSmallITTelecom"],
+    },
+    "OPTIEMUS.NS": {
+        "name": "Optiemus Infracom",
+        "sector": "Technology",
+        "notes": "listed 8 Aug 2017",
+        "tags": ["MidSmallITTelecom"],
+    },
+    "ONMOBILE.NS": {
+        "name": "OnMobile Global",
+        "sector": "Communication Services",
+        "notes": "listed 19 Feb 2008",
+        "tags": ["MidSmallITTelecom"],
+    },
 }
 
 
 # Stock tags: the sidebar Tag option shows "ALL" (every stock above) or one tag's stocks.
 # A stock belongs to a tag when the tag's name is in its "tags" list.
 TAG_ALL = "ALL"
-TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer", "OilGas", "CapitalMarket", "Shipping", "Infra", "Cement", "Spirits", "Luxury", "LifestyleFashion", "AutomationRobotics", "GoldLending", "ConsumerLoans", "HousingLargeTicketFinance", "MSMEMicrofinance", "ConsumerFinance", "NiftyMidcap50", "NiftyFMCG", "NiftyMedia", "NiftyEVAutomotive", "NiftyHousing", "NiftyPSEandCPSE"]
+TAGS = [TAG_ALL, "Midselect", "Smallcap", "AlphaQVLowVol", "Hospitals", "Energy", "TataGroup", "PrivateBank", "Tourism", "Hotels", "Metal", "NiftyNext50", "NonCyclicalConsumer", "OilGas", "CapitalMarket", "Shipping", "Infra", "Cement", "Spirits", "Luxury", "LifestyleFashion", "AutomationRobotics", "GoldLending", "ConsumerLoans", "HousingLargeTicketFinance", "MSMEMicrofinance", "ConsumerFinance", "NiftyMidcap50", "NiftyFMCG", "NiftyMedia", "NiftyEVAutomotive", "NiftyHousing", "NiftyPSEandCPSE", "MidSmallITTelecom"]
 
 
 def stocks_for_tag(tag: str) -> list:

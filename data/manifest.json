@@ -1,5 +1,5 @@
 {
-  "version_id": "v20261119_203310",
+  "version_id": "v20261120_214659",
   "updated_at": "2026-11-19T20:33:10.022807+05:30",
   "status": "SUCCESS",
   "provider": "Yahoo Finance (yfinance)",
@@ -6102,6 +6102,386 @@
       "rows": 4714,
       "sha256": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
       "fetched_at": "2026-11-19T20:33:10.022807+05:30",
+      "status": "VALID",
+      "benchmark_version": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "BHARTIHEXA.NS": {
+      "first_date": "2024-04-12",
+      "last_date": "2026-11-19",
+      "rows": 648,
+      "sha256": "76e087c9110ab93617f68d6287ddd4e65759302277e7a749a4d0c90ff4a5dd17",
+      "fetched_at": "2026-11-20T21:46:59.162946+05:30",
+      "status": "VALID",
+      "benchmark_version": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "COFORGE.NS": {
+      "first_date": "2004-08-30",
+      "last_date": "2026-11-19",
+      "rows": 5496,
+      "sha256": "ccfbcb9baa9f88a960dd703fe3e44bb1b29f0731ca972fea57e0cb506256a372",
+      "fetched_at": "2026-11-20T21:46:59.162946+05:30",
+      "status": "VALID",
+      "benchmark_version": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "HEXT.NS": {
+      "first_date": "2025-02-19",
+      "last_date": "2026-11-19",
+      "rows": 432,
+      "sha256": "c932578d11d1e155ca421130d143432fc3048adfe5c6eedff14fc59bf76b28ea",
+      "fetched_at": "2026-11-20T21:46:59.162946+05:30",
+      "status": "VALID",
+      "benchmark_version": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "INTELLECT.NS": {
+      "first_date": "2014-12-18",
+      "last_date": "2026-11-19",
+      "rows": 2951,
+      "sha256": "e09f50db3b8b656f56f39ba669fb357b9467038c76ee8cdc0542c6c2311bd731",
+      "fetched_at": "2026-11-20T21:46:59.162946+05:30",
+      "status": "VALID",
+      "benchmark_version": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "IKS.NS": {
+      "first_date": "2024-12-19",
+      "last_date": "2026-11-19",
+      "rows": 476,
+      "sha256": "9338d34b6411e4cbc94225cfbaee0bc7d2b4997f175629ad6af4559923f55ba4",
+      "fetched_at": "2026-11-20T21:46:59.162946+05:30",
+      "status": "VALID",
+      "benchmark_version": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "LTTS.NS": {
+      "first_date": "2016-09-23",
+      "last_date": "2026-11-19",
+      "rows": 2517,
+      "sha256": "beef75554d7dca86e2a9ecec7ca3380561cf57eb43635357209203bae647f713",
+      "fetched_at": "2026-11-20T21:46:59.162946+05:30",
+      "status": "VALID",
+      "benchmark_version": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "MPHASIS.NS": {
+      "first_date": "2002-07-01",
+      "last_date": "2026-11-19",
+      "rows": 6061,
+      "sha256": "c0a2ac6c78a81660ba54a36b73197609cc024316441d725dc9f7fa2905e05cf3",
+      "fetched_at": "2026-11-20T21:46:59.162946+05:30",
+      "status": "VALID",
+      "benchmark_version": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
+      "warnings": [
+        "Flagged move of -28.1% on 2011-02-25"
+      ],
+      "flagged_moves": [
+        {
+          "date": "2011-02-25",
+          "pct_change": -28.08,
+          "close": 282.42
+        }
+      ]
+    },
+    "NETWEB.NS": {
+      "first_date": "2023-07-27",
+      "last_date": "2026-11-19",
+      "rows": 824,
+      "sha256": "90d5ca1ac18ded006b990245dd40f221f0d2b54d740aa434579689d7d09db77a",
+      "fetched_at": "2026-11-20T21:46:59.162946+05:30",
+      "status": "VALID",
+      "benchmark_version": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "OFSS.NS": {
+      "first_date": "2002-06-28",
+      "last_date": "2026-11-19",
+      "rows": 6063,
+      "sha256": "8f38fa0bfe1c1c0e6dd283a8d714d8dc05c39806730280571b4bd260b7121974",
+      "fetched_at": "2026-11-20T21:46:59.162946+05:30",
+      "status": "VALID",
+      "benchmark_version": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
+      "warnings": [
+        "Flagged move of +28.7% on 2024-01-18"
+      ],
+      "flagged_moves": [
+        {
+          "date": "2024-01-18",
+          "pct_change": 28.69,
+          "close": 5886.05
+        }
+      ]
+    },
+    "SAGILITY.NS": {
+      "first_date": "2024-11-12",
+      "last_date": "2026-11-19",
+      "rows": 502,
+      "sha256": "d1d2d34ee5a03bb10ccece36eb0c01070191878e512b998463c8150327954a69",
+      "fetched_at": "2026-11-20T21:46:59.162946+05:30",
+      "status": "VALID",
+      "benchmark_version": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "BSOFT.NS": {
+      "first_date": "2002-07-01",
+      "last_date": "2026-11-19",
+      "rows": 6063,
+      "sha256": "ae5ababbe1918e6772ba54d0712311ff30eefce448f10dcc7d06eae12eb465d0",
+      "fetched_at": "2026-11-20T21:46:59.162946+05:30",
+      "status": "VALID",
+      "benchmark_version": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "SONATSOFTW.NS": {
+      "first_date": "2002-07-01",
+      "last_date": "2026-11-19",
+      "rows": 6061,
+      "sha256": "9f837ec68311957fc3b3102e5525c4064a512a8f7331e676b5039380f1a8eed7",
+      "fetched_at": "2026-11-20T21:46:59.162946+05:30",
+      "status": "VALID",
+      "benchmark_version": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
+      "warnings": [
+        "Flagged move of +166.7% on 2005-07-28",
+        "Flagged move of -63.8% on 2005-07-29"
+      ],
+      "flagged_moves": [
+        {
+          "date": "2005-07-28",
+          "pct_change": 166.67,
+          "close": 13.24
+        },
+        {
+          "date": "2005-07-29",
+          "pct_change": -63.82,
+          "close": 4.79
+        }
+      ]
+    },
+    "NEWGEN.NS": {
+      "first_date": "2018-01-29",
+      "last_date": "2026-11-19",
+      "rows": 2182,
+      "sha256": "91f3b773c4739b91c7ce525e036fbc10469e959febd73413fe8ad8841e4f6b81",
+      "fetched_at": "2026-11-20T21:46:59.162946+05:30",
+      "status": "VALID",
+      "benchmark_version": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "HAPPSTMNDS.NS": {
+      "first_date": "2020-09-17",
+      "last_date": "2026-11-19",
+      "rows": 1533,
+      "sha256": "32d5f0115049225d7583f369df9fd4db55a3cab43f884a5dd51b9e5b6f59aa57",
+      "fetched_at": "2026-11-20T21:46:59.162946+05:30",
+      "status": "VALID",
+      "benchmark_version": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "FSL.NS": {
+      "first_date": "2007-02-22",
+      "last_date": "2026-11-19",
+      "rows": 4878,
+      "sha256": "65f2e03d5a73288cb7ecd14ca6709905933ce20220ca9199eef69d437cfad761",
+      "fetched_at": "2026-11-20T21:46:59.162946+05:30",
+      "status": "VALID",
+      "benchmark_version": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
+      "warnings": [
+        "Flagged move of +25.5% on 2017-02-27"
+      ],
+      "flagged_moves": [
+        {
+          "date": "2017-02-27",
+          "pct_change": 25.47,
+          "close": 33.79
+        }
+      ]
+    },
+    "LATENTVIEW.NS": {
+      "first_date": "2021-11-23",
+      "last_date": "2026-11-19",
+      "rows": 1241,
+      "sha256": "706e0c1d56aa778f78a8531f5d85ee462d2cf7972a6a5def3ab18b36fbab552b",
+      "fetched_at": "2026-11-20T21:46:59.162946+05:30",
+      "status": "VALID",
+      "benchmark_version": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "RATEGAIN.NS": {
+      "first_date": "2021-12-17",
+      "last_date": "2026-11-19",
+      "rows": 1222,
+      "sha256": "16cd4ba8dd535cd13d5bbc4bd36703254ccd7decbc36bbc00ec43e73a8bb9c81",
+      "fetched_at": "2026-11-20T21:46:59.162946+05:30",
+      "status": "VALID",
+      "benchmark_version": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "MAPMYINDIA.NS": {
+      "first_date": "2021-12-21",
+      "last_date": "2026-11-19",
+      "rows": 1221,
+      "sha256": "808af5f65834513b30fa4d5b77ebd575a9b76565fccafdc2fd2b70eb0db28f76",
+      "fetched_at": "2026-11-20T21:46:59.162946+05:30",
+      "status": "VALID",
+      "benchmark_version": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "ZAGGLE.NS": {
+      "first_date": "2023-09-22",
+      "last_date": "2026-11-19",
+      "rows": 785,
+      "sha256": "c9add402817ea8d06225b674e18b934e3be2c7f0d8e92ca7c147378270eab4e1",
+      "fetched_at": "2026-11-20T21:46:59.162946+05:30",
+      "status": "VALID",
+      "benchmark_version": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "QUICKHEAL.NS": {
+      "first_date": "2016-02-18",
+      "last_date": "2026-11-19",
+      "rows": 2663,
+      "sha256": "ee64cb72d5b37c44cc1f6bc5dc93feb9f5935ac7040fa960eb5d0749c2ced416",
+      "fetched_at": "2026-11-20T21:46:59.162946+05:30",
+      "status": "VALID",
+      "benchmark_version": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "NUCLEUS.NS": {
+      "first_date": "2002-12-19",
+      "last_date": "2026-11-19",
+      "rows": 5937,
+      "sha256": "9a73bf2d96b424c58bfb3c272ba346867d4f08cd1a8595e8a1d270b4254b72ef",
+      "fetched_at": "2026-11-20T21:46:59.162946+05:30",
+      "status": "VALID",
+      "benchmark_version": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
+      "warnings": [
+        "Flagged move of -75.0% on 2003-11-26",
+        "Flagged move of +301.9% on 2003-11-27",
+        "Flagged move of -75.0% on 2003-12-25",
+        "Flagged move of +296.9% on 2003-12-26"
+      ],
+      "flagged_moves": [
+        {
+          "date": "2003-11-26",
+          "pct_change": -75.0,
+          "close": 3.36
+        },
+        {
+          "date": "2003-11-27",
+          "pct_change": 301.87,
+          "close": 13.51
+        },
+        {
+          "date": "2003-12-25",
+          "pct_change": -75.0,
+          "close": 6.11
+        },
+        {
+          "date": "2003-12-26",
+          "pct_change": 296.91,
+          "close": 24.25
+        }
+      ]
+    },
+    "E2E.NS": {
+      "first_date": "2018-05-29",
+      "last_date": "2026-11-19",
+      "rows": 2100,
+      "sha256": "74b5fd45471bbdc35290afd3a0d3c783976ff7309238765375595d5a9fe22505",
+      "fetched_at": "2026-11-20T21:46:59.162946+05:30",
+      "status": "VALID",
+      "benchmark_version": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "RAILTEL.NS": {
+      "first_date": "2021-02-26",
+      "last_date": "2026-11-19",
+      "rows": 1421,
+      "sha256": "82f5d834619a7f32d346bfa260125dc83cba0f592073b4acbc45c688e57acc0f",
+      "fetched_at": "2026-11-20T21:46:59.162946+05:30",
+      "status": "VALID",
+      "benchmark_version": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "ROUTE.NS": {
+      "first_date": "2020-09-21",
+      "last_date": "2026-11-19",
+      "rows": 1531,
+      "sha256": "c00f68123ed4da5c222ec3fec6c526a3da92414116df208f08c45ee9601b556d",
+      "fetched_at": "2026-11-20T21:46:59.162946+05:30",
+      "status": "VALID",
+      "benchmark_version": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "TEJASNET.NS": {
+      "first_date": "2017-06-27",
+      "last_date": "2026-11-19",
+      "rows": 2330,
+      "sha256": "9bfc4bcb6865e1f3801bc28c029b286576f1955f11c55a2ed0e1f8eee5e28bd9",
+      "fetched_at": "2026-11-20T21:46:59.162946+05:30",
+      "status": "VALID",
+      "benchmark_version": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "ITI.NS": {
+      "first_date": "2002-07-01",
+      "last_date": "2026-11-19",
+      "rows": 6061,
+      "sha256": "393bc3660d3e896b7ab5f8991018da60d4befd2ec05ecdbc00b0eb4a352d01cd",
+      "fetched_at": "2026-11-20T21:46:59.162946+05:30",
+      "status": "VALID",
+      "benchmark_version": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
+      "warnings": [
+        "Flagged move of +29.8% on 2005-07-18"
+      ],
+      "flagged_moves": [
+        {
+          "date": "2005-07-18",
+          "pct_change": 29.83,
+          "close": 81.6
+        }
+      ]
+    },
+    "OPTIEMUS.NS": {
+      "first_date": "2017-08-08",
+      "last_date": "2026-11-19",
+      "rows": 2299,
+      "sha256": "574ee4e9077b9cbd4d34e46248001916bf3a36baf96b7400ba23740f0a670dcd",
+      "fetched_at": "2026-11-20T21:46:59.162946+05:30",
+      "status": "VALID",
+      "benchmark_version": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
+      "warnings": [],
+      "flagged_moves": []
+    },
+    "ONMOBILE.NS": {
+      "first_date": "2008-02-19",
+      "last_date": "2026-11-19",
+      "rows": 4629,
+      "sha256": "fa74c09e5d25caf55fdfb165c880c78e2adf187be83d3d5a6fa3ad66fa9e60fd",
+      "fetched_at": "2026-11-20T21:46:59.162946+05:30",
       "status": "VALID",
       "benchmark_version": "240224a33683d2c761a93a340d53c42e314ab58dae6aa0f2d5ac5c529f0178e3",
       "warnings": [],

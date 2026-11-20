@@ -121,6 +121,9 @@ NIFTY_HOUSING = ["AADHARHFC", "AAVAS", "ACC", "AMBER", "APOLLOPIPE", "APTUS", "A
 # Nifty PSE and Nifty CPSE (one tag, 17 Nov 2026): stocks that passed all 3 data checks (ONGC, SAIL, NATIONALUM failed)
 NIFTY_PSE_CPSE = ["BEL", "BHEL", "BPCL", "COALINDIA", "COCHINSHIP", "CONCOR", "GAIL", "HAL", "HINDPETRO", "IOC", "IRFC", "NBCC", "NHPC", "NLCINDIA", "NMDC", "NTPC", "OIL", "PFC", "POWERGRID", "RECLTD", "SJVN"]
 
+# MidSmall IT and Telecom list (20 Nov 2026): stocks that passed all 3 data checks
+MIDSMALL_IT_TELECOM = ["AFFLE", "BHARTIHEXA", "BSOFT", "COFORGE", "E2E", "FSL", "HAPPSTMNDS", "HATHWAY", "HEXT", "IDEA", "IKS", "INDUSTOWER", "INTELLECT", "ITI", "KPITTECH", "LATENTVIEW", "LTTS", "MAPMYINDIA", "MPHASIS", "NETWEB", "NEWGEN", "NUCLEUS", "OFSS", "ONMOBILE", "OPTIEMUS", "PERSISTENT", "QUICKHEAL", "RAILTEL", "RATEGAIN", "ROUTE", "SAGILITY", "SONATSOFTW", "TATACOMM", "TATAELXSI", "TATATECH", "TEJASNET", "ZAGGLE"]
+
 
 def test_tag_membership():
     assert cfg.stocks_for_tag(cfg.TAG_ALL) == list(cfg.STOCKS)
@@ -160,6 +163,8 @@ def test_tag_membership():
     assert [len(NIFTY_FMCG), len(NIFTY_MEDIA), len(NIFTY_EV_AUTOMOTIVE), len(NIFTY_HOUSING)] == [9, 12, 25, 41]
     assert sorted(cfg.stocks_for_tag("NiftyPSEandCPSE")) == sorted(t + ".NS" for t in NIFTY_PSE_CPSE)
     assert len(NIFTY_PSE_CPSE) == 21
+    assert sorted(cfg.stocks_for_tag("MidSmallITTelecom")) == sorted(t + ".NS" for t in MIDSMALL_IT_TELECOM)
+    assert len(MIDSMALL_IT_TELECOM) == 37
 
 
 def test_every_tagged_stock_has_data():
